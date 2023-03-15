@@ -14,7 +14,7 @@
             https://nuget.bepinex.dev/v3/index.json
         </RestoreAdditionalProjectSources>
         <RootNamespace>KSP2UITK</RootNamespace>
-        <ModId Condition="'$(ModId)'==''">com.github.jan-bures.KSP2UITK</ModId>
+        <ModId Condition="'$(ModId)'==''">ksp2_uitk</ModId>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
