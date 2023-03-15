@@ -1,0 +1,13 @@
+{
+  "mod_id": "ksp2_uitk",
+  "author": "munix",
+  "name": "KSP 2 UITK",
+  "description": "Unity UI Toolkit support for KSP 2",
+  "source": "https://github.com/jab-bures/KSP2UITK",
+  "version": "0.0.1",
+  "dependencies": [],
+  "ksp2_version": {
+    "min": "0.1.0",
+    "max": "*"
+  }
+}
