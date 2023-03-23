@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace KSP2UITK;
 
@@ -13,43 +14,41 @@ public class KSP2UITKPlugin : BaseUnityPlugin
     public const string ModName = MyPluginInfo.PLUGIN_NAME;
     public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
 
+    public static PanelSettings PanelSettings;
     internal static readonly Dictionary<string, Shader> Shaders = new();
-    internal new static ManualLogSource Logger;
 
-    private static readonly string BundlePath = Path.Combine(
-        Paths.PluginPath, ModFolder, "assets/bundles/shaders"
+    private static readonly string PanelSettingsPath = Path.Combine(
+        Paths.PluginPath, ModFolder, "assets/bundles/panelsettings"
     );
-
-    protected KSP2UITKPlugin()
-    {
-        Logger = base.Logger;
-    }
 
     private void Awake()
     {
-        LoadShaders();
+        LoadPanelSettings();
         
-        Harmony.CreateAndPatchAll(typeof(UIElementsPatches));
+        Harmony.CreateAndPatchAll(typeof(ShaderPatch));
         
         Logger.LogInfo($"Plugin {ModName} loaded");
     }
 
-    private void LoadShaders()
+    private void LoadPanelSettings()
     {
-        var bundle = AssetBundle.LoadFromFile(BundlePath);
+        var bundle = AssetBundle.LoadFromFile(PanelSettingsPath);
         if (!bundle)
         {
-            Logger.LogError("Failed to load shaders bundle!");
+            Logger.LogError("Failed to load PanelSettings bundle!");
             return;
         }
 
-        Logger.LogInfo($"Loaded shaders bundle successfully from \"{BundlePath}\".");
+        Logger.LogInfo($"Loaded PanelSettings bundle successfully from \"{PanelSettingsPath}\".");
+        
+        PanelSettings = bundle.LoadAllAssets<PanelSettings>()[0];
+        Logger.LogInfo($"PanelSettings loaded: {PanelSettings}");
 
-        var shaders = bundle.LoadAllAssets<Shader>();
-        foreach (var shader in shaders)
-        {
-            Shaders[shader.name] = shader;
-            Logger.LogInfo($"Shader loaded: {shader.name}");
-        }
+        Shaders["Hidden/UIE-Runtime"] = PanelSettings.m_RuntimeShader;
+        Logger.LogInfo($"Shader loaded: {PanelSettings.m_RuntimeShader}");
+        Shaders["Hidden/UIE-RuntimeWorld"] = PanelSettings.m_RuntimeWorldShader;
+        Logger.LogInfo($"Shader loaded: {PanelSettings.m_RuntimeWorldShader}");
+        Shaders["Hidden/UIE-AtlasBlit"] = PanelSettings.m_AtlasBlitShader;
+        Logger.LogInfo($"Shader loaded: {PanelSettings.m_AtlasBlitShader}");
     }
 }
