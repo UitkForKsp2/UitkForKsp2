@@ -11,8 +11,8 @@ mono_crash.*
 dist/
 ksp2_uitk/LICENSE
 ksp2_uitk/README.txt
-ksp2_uitk/assets/bundles/*
-!ksp2_uitk/assets/bundles/PUT_SHADERS_BUNDLES_HERE
+external_dlls/*
+!external_dlls/COPY_GAME_DLLS_HERE
 KSP2UITKProject/[Dd]ebug/
 KSP2UITKProject/[Dd]ebugPublic/
 KSP2UITKProject/[Rr]elease/

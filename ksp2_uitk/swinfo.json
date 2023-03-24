@@ -1,10 +1,10 @@
 {
   "mod_id": "ksp2_uitk",
   "author": "munix",
-  "name": "KSP 2 UITK",
-  "description": "Unity UI Toolkit support for KSP 2",
+  "name": "UITK for KSP 2",
+  "description": "Unity UI Toolkit library for Kerbal Space Program 2",
   "source": "https://github.com/jab-bures/KSP2UITK",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "dependencies": [],
   "ksp2_version": {
     "min": "0.1.0",

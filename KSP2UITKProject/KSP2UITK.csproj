@@ -6,9 +6,9 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>true</ImplicitUsings>
         <AssemblyName>com.github.jan-bures.KSP2UITK</AssemblyName>
-        <Product>KSP 2 UITK</Product>
+        <Product>UITK for KSP 2</Product>
         <Description>Unity UI Toolkit support for KSP 2</Description>
-        <Version>0.0.1</Version>
+        <Version>0.1.0</Version>
         <RestoreAdditionalProjectSources>
             https://api.nuget.org/v3/index.json;
             https://nuget.bepinex.dev/v3/index.json
