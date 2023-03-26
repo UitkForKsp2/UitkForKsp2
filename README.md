@@ -1,4 +1,4 @@
-# KSP 2 UITK
+# UITK for KSP 2
 
 *(experimental)* This mod brings Unity UI Toolkit support to Kerbal Space Program 2.
 
