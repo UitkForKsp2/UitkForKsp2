@@ -3,10 +3,10 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace KSP2UITK;
+namespace Ksp2Uitk;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-public class KSP2UITKPlugin : BaseUnityPlugin
+public class Ksp2UitkPlugin : BaseUnityPlugin
 {
     public const string ModFolder = "ksp2_uitk";
     public const string ModGuid = MyPluginInfo.PLUGIN_GUID;

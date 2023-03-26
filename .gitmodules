@@ -1,0 +1,3 @@
+[submodule "KerbalUI"]
+	path = KerbalUI
+	url = https://github.com/jan-bures/KerbalUI

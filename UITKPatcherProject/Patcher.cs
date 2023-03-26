@@ -1,11 +1,11 @@
-﻿using KSP2UITK;
+﻿using Ksp2Uitk;
 using Mono.Cecil;
 
 namespace UITKPatcher;
 
 public static class Patcher
 {
-    private static readonly string BasePath = Path.Combine("BepInEx", "plugins", KSP2UITKPlugin.ModFolder, "lib");
+    private static readonly string BasePath = Path.Combine("BepInEx", "plugins", Ksp2UitkPlugin.ModFolder, "lib");
     
     public static IEnumerable<string> TargetDLLs { get; } = new[]
     {

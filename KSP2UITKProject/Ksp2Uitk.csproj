@@ -5,7 +5,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>true</ImplicitUsings>
-        <AssemblyName>com.github.jan-bures.KSP2UITK</AssemblyName>
+        <AssemblyName>com.github.jan-bures.ksp2uitk</AssemblyName>
         <Product>UITK for KSP 2</Product>
         <Description>Unity UI Toolkit support for KSP 2</Description>
         <Version>0.1.0</Version>
@@ -13,7 +13,7 @@
             https://api.nuget.org/v3/index.json;
             https://nuget.bepinex.dev/v3/index.json
         </RestoreAdditionalProjectSources>
-        <RootNamespace>KSP2UITK</RootNamespace>
+        <RootNamespace>Ksp2Uitk</RootNamespace>
         <ModId Condition="'$(ModId)'==''">ksp2_uitk</ModId>
     </PropertyGroup>
     <ItemGroup>
