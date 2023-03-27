@@ -7,8 +7,10 @@
 *.DotSettings
 mono_crash.*
 *.dll
+!ksp2_uitk/lib/*.dll
 .idea/
-dist/
+Debug/
+Release/
 ksp2_uitk/LICENSE
 ksp2_uitk/README.txt
 ksp2_uitk/assets/bundles/panelsettings
