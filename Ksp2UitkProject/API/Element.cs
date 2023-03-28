@@ -149,6 +149,24 @@ public static class Element
     }
 
     /// <summary>
+    /// Creates a new Button element.
+    /// </summary>
+    /// <param name="name">Element name.</param>
+    /// <param name="text">Button label text.</param>
+    /// <param name="classes">Element classes separated by spaces.</param>
+    /// <param name="children">Children elements.</param>
+    /// <returns>New Button element.</returns>
+    public static Button Button(
+        string name = null,
+        string text = null,
+        string classes = null,
+        IEnumerable<VisualElement> children = null
+    )
+    {
+        return CreateText<Button>(name, text, classes, children);
+    }
+
+    /// <summary>
     /// Creates a new Toggle element.
     /// </summary>
     /// <param name="name">Element name.</param>
