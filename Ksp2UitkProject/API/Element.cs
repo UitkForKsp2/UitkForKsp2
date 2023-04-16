@@ -29,7 +29,7 @@ public static class Element
         {
             foreach (var className in classes.Split(' '))
             {
-                element.classList.Add(className);
+                element.AddToClassList(className);
             }
         }
 
@@ -184,7 +184,7 @@ public static class Element
     )
     {
         var element = Create<Toggle>(name, classes, children);
-        element.classList.Add("toggle");
+        element.AddToClassList("toggle");
         element.value = isActive;
         if (label != null)
         {
@@ -392,12 +392,21 @@ public static class Element
     /// <param name="name">Element name.</param>
     /// <param name="classes">Element classes separated by spaces.</param>
     /// <param name="children">Children elements.</param>
+    /// <param name="isDraggable">Can the element be moved by dragging?</param>
     /// <returns>New root VisualElement with default styling.</returns>
-    public static VisualElement Root(string name = null, string classes = null,
-        IEnumerable<VisualElement> children = null)
+    public static VisualElement Root(
+        string name = null,
+        string classes = null,
+        IEnumerable<VisualElement> children = null,
+        bool isDraggable = true
+    )
     {
         var element = VisualElement(name, classes, children);
-        element.classList.Add("root");
+        element.AddToClassList("root");
+        if (isDraggable)
+        {
+            element.AddManipulator(new DragManipulator());
+        }
         return element;
     }
 }

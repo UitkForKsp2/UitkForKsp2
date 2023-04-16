@@ -12,7 +12,7 @@ public static class Extensions
         element.SetProperty(name, value);
         return element;
     }
-    
+
     public static T Text<T>(this T element, string text) where T : TextElement
     {
         element.text = text;
@@ -25,12 +25,12 @@ public static class Extensions
         {
             return element;
         }
-        
+
         foreach (var child in children)
         {
             element.Add(child);
         }
-        
+
         return element;
     }
 }
