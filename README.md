@@ -12,10 +12,10 @@ For examples of how to use this in a SpaceWarp mod, see the [UitkTestMod project
 
 ## Building
 1. Copy all the `.dll` files from `<KSP 2 Folder>/KSP2_x64_Data/Managed` into `external_dlls`.
-2. Get a copy of the `panelsettings` bundle. You have two options:
+2. Get a copy of the `kerbalui` bundle. You have two options:
    - Download it from the [latest release of Kerbal UI](https://github.com/jan-bures/KerbalUI/releases/latest)
    - Build it yourself from the included `KerbalUI` project. All you need to do is open it in Unity, and in the toolbar
-     choose `Assets` -> `Build AssetBundles`. You will find the built bundle in `KerbalUI/Assets/AssetBundles/panelsettings`.
-3. Copy the `panelassets` file into `ksp2_uitk/assets/bundles`.
+     choose `Assets` -> `Build AssetBundles`. You will find the built bundle in `KerbalUI/Assets/AssetBundles/kerbalui`.
+3. Copy the `kerbalui` file into `ksp2_uitk/assets/bundles`.
 4. Open the `Ksp2Uitk.sln` solution and build it.
 5. Depending on the chosen build configuration, the full plugin can be found in one of the `Debug` or `Release` folders.

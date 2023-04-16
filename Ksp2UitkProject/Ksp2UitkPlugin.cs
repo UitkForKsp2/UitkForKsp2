@@ -26,7 +26,7 @@ public class Ksp2UitkPlugin : BaseUnityPlugin
     internal static readonly Dictionary<string, Shader> Shaders = new();
 
     private static readonly string PanelSettingsPath = Path.Combine(
-        Paths.PluginPath, ModFolder, "assets/bundles/panelsettings"
+        Paths.PluginPath, ModFolder, "assets/bundles/kerbalui"
     );
 
     public Ksp2UitkPlugin()
