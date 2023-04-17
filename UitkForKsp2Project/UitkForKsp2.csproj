@@ -5,11 +5,9 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>true</ImplicitUsings>
-        <AssemblyName>Ksp2Uitk</AssemblyName>
         <Product>UITK for KSP 2</Product>
         <Description>Unity UI Toolkit support for KSP 2</Description>
         <Version>0.3.0</Version>
-        <RootNamespace>Ksp2Uitk</RootNamespace>
         <ModId Condition="'$(ModId)'==''">ksp2_uitk</ModId>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>UITK for KSP2</Title>
@@ -21,6 +19,8 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>unity uitk ui ksp ksp2 mod</PackageTags>
         <PackageOutputPath>..\nuget</PackageOutputPath>
+        <PackageId>UitkForKsp2</PackageId>
+        <RootNamespace>UitkForKsp2</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
         <None Include="..\LICENSE" Pack="true" PackagePath="" />
@@ -43,6 +43,6 @@
         <PackageReference Include="UnityEngine.UITK" Version="2020.3.33" />
     </ItemGroup>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="rm -rf &quot;$(ProjectDir)..\$(ConfigurationName)\&quot;&#xA;echo d | xcopy /y /s &quot;$(ProjectDir)..\$(ModId)\&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).dll&quot;&#xA;if $(ConfigurationName) == Debug echo f | xcopy /y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\$(ModId).pdb&quot;&#xA;xcopy /y &quot;$(ProjectDir)..\LICENSE&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\&quot;&#xA;echo f | xcopy /y &quot;$(ProjectDir)..\README.md&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ModId)\README.txt&quot;" />
+      <Exec Command="rm -rf &quot;$(ProjectDir)..\$(ConfigurationName)\&quot;&#xA;echo d | xcopy /y /s &quot;$(ProjectDir)..\plugin_folder\&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\&quot;&#xA;echo f | xcopy /y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\$(ProjectName).dll&quot;&#xA;if $(ConfigurationName) == Debug echo f | xcopy /y &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\$(ProjectName).pdb&quot;&#xA;xcopy /y &quot;$(ProjectDir)..\LICENSE&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\&quot;&#xA;echo f | xcopy /y &quot;$(ProjectDir)..\README.md&quot; &quot;$(ProjectDir)..\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\README.txt&quot;" />
     </Target>
 </Project>

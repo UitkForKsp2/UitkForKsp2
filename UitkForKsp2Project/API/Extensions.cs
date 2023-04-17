@@ -3,7 +3,7 @@
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Global
 
-namespace Ksp2Uitk.API;
+namespace UitkForKsp2.API;
 
 public static class Extensions
 {
@@ -31,6 +31,12 @@ public static class Extensions
             element.Add(child);
         }
 
+        return element;
+    }
+
+    public static T MakeDraggable<T>(this T element) where T : VisualElement
+    {
+        element.AddManipulator(new DragManipulator());
         return element;
     }
 }

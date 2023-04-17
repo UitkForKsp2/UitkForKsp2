@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-namespace Ksp2Uitk.Patch;
+namespace UitkForKsp2.Patch;
 
 public static class ShaderPatch
 {
@@ -9,12 +9,12 @@ public static class ShaderPatch
     [HarmonyPrefix]
     public static bool ShaderFind(string name, ref Shader __result)
     {
-        if (!Ksp2UitkPlugin.Shaders.TryGetValue(name, out var injected))
+        if (!UitkForKsp2Plugin.Shaders.TryGetValue(name, out var injected))
         {
             return true;
         }
 
-        Ksp2UitkPlugin.Logger.LogInfo($"Injected shader {name}");
+        UitkForKsp2Plugin.Logger.LogInfo($"Injected shader {name}");
         __result = injected;
         return false;
     }

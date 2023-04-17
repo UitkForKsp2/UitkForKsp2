@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ksp2Uitk", "Ksp2UitkProject\Ksp2Uitk.csproj", "{BB44D692-69E9-44A2-99C6-582CC583EEB0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UitkForKsp2", "UitkForKsp2Project\UitkForKsp2.csproj", "{BB44D692-69E9-44A2-99C6-582CC583EEB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UitkPatcher", "UitkPatcherProject\UitkPatcher.csproj", "{2A4E3816-C865-42CA-8389-BEE88DEDC3FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UitkForKsp2Patcher", "UitkForKsp2PatcherProject\UitkForKsp2Patcher.csproj", "{2A4E3816-C865-42CA-8389-BEE88DEDC3FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

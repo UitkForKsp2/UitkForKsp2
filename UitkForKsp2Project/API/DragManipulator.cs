@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Ksp2Uitk.API;
+namespace UitkForKsp2.API;
 
 public class DragManipulator: IManipulator
 {

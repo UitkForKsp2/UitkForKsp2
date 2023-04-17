@@ -3,7 +3,7 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Ksp2Uitk.API;
+namespace UitkForKsp2.API;
 
 public static class Element
 {
@@ -392,21 +392,15 @@ public static class Element
     /// <param name="name">Element name.</param>
     /// <param name="classes">Element classes separated by spaces.</param>
     /// <param name="children">Children elements.</param>
-    /// <param name="isDraggable">Can the element be moved by dragging?</param>
     /// <returns>New root VisualElement with default styling.</returns>
     public static VisualElement Root(
         string name = null,
         string classes = null,
-        IEnumerable<VisualElement> children = null,
-        bool isDraggable = true
+        IEnumerable<VisualElement> children = null
     )
     {
         var element = VisualElement(name, classes, children);
         element.AddToClassList("root");
-        if (isDraggable)
-        {
-            element.AddManipulator(new DragManipulator());
-        }
         return element;
     }
 }

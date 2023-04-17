@@ -1,14 +1,14 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using Ksp2Uitk.Patch;
+using UitkForKsp2.Patch;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Ksp2Uitk;
+namespace UitkForKsp2;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-public class Ksp2UitkPlugin : BaseUnityPlugin
+public class UitkForKsp2Plugin : BaseUnityPlugin
 {
     // ReSharper disable UnusedMember.Global
     // ReSharper disable MemberCanBePrivate.Global
@@ -29,7 +29,7 @@ public class Ksp2UitkPlugin : BaseUnityPlugin
         Paths.PluginPath, ModFolder, "assets/bundles/kerbalui"
     );
 
-    public Ksp2UitkPlugin()
+    public UitkForKsp2Plugin()
     {
         Logger = base.Logger;
     }
