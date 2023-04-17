@@ -12,10 +12,8 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
 {
     // ReSharper disable UnusedMember.Global
     // ReSharper disable MemberCanBePrivate.Global
-    public const string ModFolder = "ksp2_uitk";
     public const string ModGuid = MyPluginInfo.PLUGIN_GUID;
     public const string ModName = MyPluginInfo.PLUGIN_NAME;
-
     public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
     // ReSharper restore UnusedMember.Global
     // ReSharper restore MemberCanBePrivate.Global
@@ -26,7 +24,7 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
     internal static readonly Dictionary<string, Shader> Shaders = new();
 
     private static readonly string PanelSettingsPath = Path.Combine(
-        Paths.PluginPath, ModFolder, "assets/bundles/kerbalui"
+        Paths.PluginPath, ModGuid, "assets/bundles/kerbalui"
     );
 
     public UitkForKsp2Plugin()

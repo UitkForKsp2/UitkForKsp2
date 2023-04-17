@@ -5,7 +5,7 @@ namespace UitkForKsp2Patcher;
 
 public static class Patcher
 {
-    private static readonly string BasePath = Path.Combine("BepInEx", "plugins", UitkForKsp2Plugin.ModFolder, "lib");
+    private static readonly string BasePath = Path.Combine("BepInEx", "plugins", UitkForKsp2Plugin.ModGuid, "lib");
 
     public static IEnumerable<string> TargetDLLs { get; } = new[]
     {
