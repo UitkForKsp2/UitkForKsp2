@@ -39,4 +39,15 @@ public static class Extensions
         element.AddManipulator(new DragManipulator());
         return element;
     }
+
+    /// <summary>
+    /// Automatically localize elements in a document. Only elements with a string property "text" whose value is a
+    /// localization key starting with '#' will be localized.
+    /// </summary>
+    /// <param name="document">The document in which to localize all localizable elements.</param>
+    /// <returns>The DocumentLocalization component which was added to the document.</returns>
+    public static DocumentLocalization EnableLocalization(this UIDocument document)
+    {
+        return document.gameObject.AddComponent<DocumentLocalization>();
+    }
 }
