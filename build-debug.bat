@@ -1,2 +1,2 @@
 @echo off
-dotnet build KSP2UITK.sln -c Debug
+dotnet build UitkForKsp2.sln -c Debug
