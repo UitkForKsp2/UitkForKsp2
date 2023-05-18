@@ -3,14 +3,23 @@ using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
 
+/// <summary>
+/// A simple drag manipulator for UIElements.
+/// </summary>
 public class DragManipulator: IManipulator
 {
     private VisualElement _target;
     private Vector3 _offset;
     private PickingMode _mode;
 
+    /// <summary>
+    /// Is the target currently being dragged?
+    /// </summary>
     public bool Dragging { get; set; }
 
+    /// <summary>
+    /// The target element to drag.
+    /// </summary>
     public VisualElement target
     {
         get => _target;
