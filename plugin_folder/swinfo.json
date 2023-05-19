@@ -4,7 +4,7 @@
   "name": "UITK for KSP 2",
   "description": "Unity UI Toolkit library for Kerbal Space Program 2",
   "source": "https://github.com/jan-bures/Ksp2Uitk",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "dependencies": [],
   "ksp2_version": {
     "min": "0.1.0",

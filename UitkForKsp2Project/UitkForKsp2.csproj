@@ -7,7 +7,7 @@
         <ImplicitUsings>true</ImplicitUsings>
         <Product>UITK for KSP 2</Product>
         <Description>Unity UI Toolkit support for KSP 2</Description>
-        <Version>0.4.0</Version>
+        <Version>0.5.0</Version>
         <ModId Condition="'$(ModId)'==''">ksp2_uitk</ModId>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>UITK for KSP2</Title>
