@@ -5,6 +5,9 @@
 
 namespace UitkForKsp2.API;
 
+/// <summary>
+/// Contains methods for creating UI elements.
+/// </summary>
 public static class Element
 {
     /// <summary>

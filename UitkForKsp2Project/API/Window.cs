@@ -7,6 +7,9 @@ using UnityObject = UnityEngine.Object;
 
 namespace UitkForKsp2.API;
 
+/// <summary>
+/// Contains methods for creating UIDocument windows.
+/// </summary>
 public static class Window
 {
     private const string UIMainCanvasPath = "GameManager/Default Game Instance(Clone)/UI Manager(Clone)/Main Canvas";

@@ -5,6 +5,9 @@
 
 namespace UitkForKsp2.API;
 
+/// <summary>
+/// Contains extension methods for UI Toolkit documents and elements.
+/// </summary>
 public static class Extensions
 {
     /// <summary>

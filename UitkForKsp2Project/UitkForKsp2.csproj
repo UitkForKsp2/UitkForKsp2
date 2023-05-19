@@ -9,6 +9,7 @@
         <Description>Unity UI Toolkit support for KSP 2</Description>
         <Version>0.5.0</Version>
         <ModId Condition="'$(ModId)'==''">ksp2_uitk</ModId>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>UITK for KSP2</Title>
         <Authors>Jan Bureš (munix)</Authors>
