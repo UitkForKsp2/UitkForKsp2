@@ -60,9 +60,9 @@ public static class Window
         document.sourceAsset = uxml;
         document.RecreateUI();
 
-        if (makeDraggable)
+        if (makeDraggable && document.rootVisualElement.hierarchy.childCount > 0)
         {
-            document.m_RootVisualElement.MakeDraggable();
+            document.rootVisualElement.hierarchy.ElementAt(0).MakeDraggable();
         }
 
         return document;
