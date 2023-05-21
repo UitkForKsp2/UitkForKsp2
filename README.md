@@ -17,6 +17,6 @@ For examples of how to use this in a SpaceWarp mod, see the [UitkTestMod project
    - Build it yourself from the included `SpaceWarpUI` project. All you need to do is open it in Unity, and in the
      toolbar choose `Assets` -> `Build AssetBundles`. You will find the built bundle in
      `SpaceWarpUI/Assets/AssetBundles/kerbalui`.
-3. Copy the `kerbalui` file into `ksp2_uitk/assets/bundles`.
-4. Open the `Ksp2Uitk.sln` solution and build it.
-5. Depending on the chosen build configuration, the full plugin can be found in one of the `Debug` or `Release` folders.
+3. Copy the `kerbalui` file into `plugin_template/assets/bundles`.
+4. Open the `UitkForKsp2.sln` solution and build it.
+5. Depending on the chosen build configuration, the full plugin can be found in one of the folders inside `dist`.
