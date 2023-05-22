@@ -1,8 +1,10 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using TMPro;
 using UitkForKsp2.Patch;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2;
@@ -54,7 +56,7 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
     {
         LoadPanelSettings();
 
-        Harmony.CreateAndPatchAll(typeof(ShaderPatch));
+        Harmony.CreateAndPatchAll(typeof(UitkForKsp2Plugin).Assembly);
 
         Logger.LogInfo($"Plugin {ModName} loaded");
     }

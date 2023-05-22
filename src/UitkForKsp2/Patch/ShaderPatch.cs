@@ -4,6 +4,8 @@ using UnityEngine;
 namespace UitkForKsp2.Patch;
 
 #pragma warning disable CS1591
+
+[HarmonyPatch]
 public static class ShaderPatch
 {
     [HarmonyPatch(typeof(Shader), nameof(Shader.Find))]
