@@ -1,5 +1,6 @@
 ﻿using BepInEx.Bootstrap;
 using HarmonyLib;
+using UitkForKsp2.API;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.Patch;
@@ -12,18 +13,10 @@ public static class CustomElementsPatch
     [HarmonyPostfix]
     public static void VisualElementFactoryRegistry_RegisterUserFactories()
     {
-        Chainloader.Plugins
-            .SelectMany(plugin => plugin.GetType().Assembly.GetTypes())
-            .Where(type => typeof(IUxmlFactory).IsAssignableFrom(type)
-                           && !type.IsInterface
-                           && !type.IsAbstract
-                           && !type.IsGenericType)
-            .ToList()
-            .ForEach(type =>
-            {
-                var factory = (IUxmlFactory)Activator.CreateInstance(type);
-                VisualElementFactoryRegistry.RegisterFactory(factory);
-            });
+        foreach (var plugin in Chainloader.Plugins)
+        {
+            CustomControls.RegisterFromAssembly(plugin.GetType().Assembly);
+        }
     }
 #pragma warning restore CS0618
 }
