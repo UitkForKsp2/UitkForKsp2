@@ -1,3 +1,4 @@
-[submodule "SpaceWarpUI"]
-	path = SpaceWarpUI
+
+[submodule "src/SpaceWarpUI"]
+	path = src/SpaceWarpUI
 	url = https://github.com/jan-bures/SpaceWarpUI

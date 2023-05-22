@@ -1,29 +1,57 @@
-*.rsuser
+# General C# project
 *.suo
 *.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-*.DotSettings
-mono_crash.*
-.idea/
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
+.vs/
 [Bb]in/
 [Oo]bj/
-[Ll]og/
-[Ll]ogs/
-nuget/
+_UpgradeReport_Files/
+[Pp]ackages/
+
+# Mod template folders
+[Bb]uild/
+[Dd]ist/
+[Nn]uget/
+[Ee]xternal_dlls/*
+![Ee]xternal_dlls/COPY_Assembly-CSharp_dll_HERE
 *.dll
-!plugin_folder/lib/*.dll
-plugin_folder/assets/bundles/*
-!plugin_folder/assets/bundles/PLACE_kerbalui_HERE
-external_dlls/*
-!external_dlls/COPY_Assembly-CSharp_dll_HERE
+!plugin_template/lib/*.dll
+plugin_template/assets/bundles/*
+!plugin_template/assets/bundles/PLACE_kerbalui_HERE
+
+# Rider
+
+# User specific
+**/.idea/**/workspace.xml
+**/.idea/**/tasks.xml
+**/.idea/shelf/*
+**/.idea/dictionaries
+**/.idea/httpRequests/
+
+# Sensitive or high-churn files
+**/.idea/**/dataSources/
+**/.idea/**/dataSources.ids
+**/.idea/**/dataSources.xml
+**/.idea/**/dataSources.local.xml
+**/.idea/**/sqlDataSources.xml
+**/.idea/**/dynamic.xml
+
+# Rider auto-generates .iml files, and contentModel.xml
+**/.idea/**/*.iml
+**/.idea/**/contentModel.xml
+**/.idea/**/modules.xml
+
+# VS Code files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
+# OS-specific
+Thumbs.db
+Desktop.ini
+.DS_Store
