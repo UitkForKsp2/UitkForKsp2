@@ -4,10 +4,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
-        <RestoreAdditionalProjectSources>
-            https://api.nuget.org/v3/index.json;
-            https://nuget.bepinex.dev/v3/index.json
-        </RestoreAdditionalProjectSources>
         <RootNamespace>UitkForKsp2Patcher</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
