@@ -18,7 +18,7 @@
     <!-- Build configuration -->
     <PropertyGroup Label="Build configuration">
         <!-- Set this to the path to your KSP 2 folder if you don't have the KSP2DIR environmental variable set -->
-        <KSP2DIR Condition="'$(KSP2DIR)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Kerbal Space Program 2</KSP2DIR>
+        <KSP2DIR Condition="'$(KSP2DIR)' == ''">C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2</KSP2DIR>
     </PropertyGroup>
 
     <!-- NuGet package configuration -->
@@ -26,16 +26,16 @@
         <PackageId Label="ID of your NuGet package">$(ProjectName)</PackageId>
         <!-- For example https://raw.githubusercontent.com/YourUsername/YourRepo/main/LICENSE -->
         <PackageLicenseUrl Label="URL to the license of your mod">https://raw.githubusercontent.com/jan-bures/UitkForKsp2/main/LICENSE</PackageLicenseUrl>
-        <PackageOutputPath Label="Path to the NuGet package output">..\..\nuget</PackageOutputPath>
+        <PackageOutputPath Label="Path to the NuGet package output">../../nuget</PackageOutputPath>
         <PackageProjectUrl Label="Optional URL to your project's website (e.g. forum post)">https://github.com/jan-bures/UitkForKsp2</PackageProjectUrl>
         <PackageReadmeFile Label="Filename of your README file">README.md</PackageReadmeFile>
         <PackageTags Label="Optional tags of your NuGet package">ksp2;mod;library</PackageTags>
     </PropertyGroup>
     <Target Name="IncludeAllFilesInTargetDir" AfterTargets="Build">
         <ItemGroup>
-            <None Label="Path to LICENSE file" Include="$(SolutionDir)LICENSE" Pack="true" PackagePath="\" />
-            <None Label="Path to README file" Include="$(SolutionDir)\README.md" Pack="true" PackagePath="\" />
-            <None Label="Path to the target build" Include="$(TargetDir)\**" Pack="true" PackagePath="\lib\$(TargetFramework)" />
+            <None Label="Path to LICENSE file" Include="$(SolutionDir)LICENSE" Pack="true" PackagePath="/" />
+            <None Label="Path to README file" Include="$(SolutionDir)/README.md" Pack="true" PackagePath="/" />
+            <None Label="Path to the target build" Include="$(TargetDir)/**" Pack="true" PackagePath="/lib/$(TargetFramework)" />
         </ItemGroup>
     </Target>
 

@@ -9,8 +9,8 @@
 
     <PropertyGroup Label="Build and namespace configuration">
         <SolutionDir Condition="'$(SolutionDir)'==''">$(MSBuildThisFileDirectory)</SolutionDir>
-        <BaseOutputPath>$(SolutionDir)build\bin\$(MSBuildProjectName)</BaseOutputPath>
-        <BaseIntermediateOutputPath>$(SolutionDir)build\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+        <BaseOutputPath>$(SolutionDir)build/bin/$(MSBuildProjectName)</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(SolutionDir)build/obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
         <AssemblyName>$(MSBuildProjectName)</AssemblyName>
         <RootNamespace>$(AssemblyName)</RootNamespace>
         <NoWarn>$(NoWarn);CS0436</NoWarn>
