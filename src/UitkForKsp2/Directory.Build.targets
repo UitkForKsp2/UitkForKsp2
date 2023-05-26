@@ -17,13 +17,18 @@
         <Exec Command="dotnet t4 &quot;%(TextTemplate.Identity)&quot; -o &quot;$(TargetDir)\swinfo.json&quot; -p=ProjectName=&quot;$(ProjectName)&quot; -p=Authors=&quot;$(Authors)&quot; -p=Product=&quot;$(Product)&quot; -p=Description=&quot;$(Description)&quot; -p=RepositoryUrl=&quot;$(RepositoryUrl)&quot; -p=Version=&quot;$(Version)&quot; -p=VersionCheckUrl=&quot;$(VersionCheckUrl)&quot; -p=Ksp2VersionMin=&quot;$(Ksp2VersionMin)&quot; -p=Ksp2VersionMax=&quot;$(Ksp2VersionMax)&quot;"/>
     </Target>
 
+    <ItemGroup Label="Folders used with Copy tasks">
+        <PluginTemplate Include="$(SolutionDir)\plugin_template\**\*.*"/>
+        <DistFolder Include="$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\**\*.*"/>
+    </ItemGroup>
     <Target Label="Post build events" Name="PostBuild" AfterTargets="PostBuildEvent">
         <Message Text="Cleaning up previous build directory"/>
         <RemoveDir Directories="$(SolutionDir)\dist\$(ConfigurationName)"/>
         <MakeDir Directories="$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)"/>
 
         <Message Text="Copying plugin folder to build directory"/>
-        <Exec Command="xcopy /E /Y &quot;$(SolutionDir)\plugin_template&quot; &quot;$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)&quot;"/>
+        <Copy SourceFiles="@(PluginTemplate)"
+              DestinationFolder="$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\%(RecursiveDir)"/>
         <Delete Files="$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\swinfo.tt"/>
         <Delete Files="$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)\assets\bundles\PLACE_kerbalui_HERE"/>
 
@@ -52,12 +57,10 @@
         <Message Text="Clean up the game's plugin folder" Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
         <RemoveDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
                    Directories="$(KSP2DIR)\BepInEx\plugins\$(ProjectName)"/>
-        <MakeDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
-                 Directories="$(KSP2DIR)\BepInEx\plugins\$(ProjectName)"/>
 
         <Message Text="Deploy plugin to game folder"
                  Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
-        <Exec Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
-              Command="xcopy /E /Y &quot;$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\plugins\$(ProjectName)&quot; &quot;$(KSP2DIR)\BepInEx\plugins\$(ProjectName)&quot;"/>
+        <Copy SourceFiles="@(DistFolder)"
+              DestinationFolder="$(KSP2DIR)\BepInEx\plugins\$(ProjectName)\%(RecursiveDir)"/>
     </Target>
 </Project>

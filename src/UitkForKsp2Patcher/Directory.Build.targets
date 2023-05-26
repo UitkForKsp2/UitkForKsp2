@@ -25,13 +25,14 @@
         <Message Text="Clean up the game's plugin folder" Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
         <RemoveDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
                    Directories="$(KSP2DIR)\BepInEx\patchers\$(ProjectName)"/>
-        <MakeDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
-                 Directories="$(KSP2DIR)\BepInEx\patchers\$(ProjectName)"/>
 
+        <ItemGroup Label="Folders used with Copy tasks">
+            <PatchersFolder Include="$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\patchers\$(ProjectName)\**\*.*"/>
+        </ItemGroup>
         <Message Text="Deploy plugin to game folder"
                  Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
-        <Exec Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
-              Command="xcopy /E /Y &quot;$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\patchers\$(ProjectName)&quot; &quot;$(KSP2DIR)\BepInEx\patchers\$(ProjectName)&quot;"/>
+        <Copy SourceFiles="@(PatchersFolder)"
+              DestinationFolder="$(KSP2DIR)\BepInEx\patchers\$(ProjectName)\%(RecursiveDir)"/>
 
         <Message Text="Deploy plugin and run game" Condition="$(ConfigurationName) == DeployAndRun"/>
         <Exec Command="&quot;$(KSP2DIR)\KSP2_x64.exe&quot;" Condition="$(ConfigurationName) == DeployAndRun"/>
