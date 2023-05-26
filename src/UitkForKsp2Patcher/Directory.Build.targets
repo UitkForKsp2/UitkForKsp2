@@ -26,7 +26,7 @@
         <RemoveDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
                    Directories="$(KSP2DIR)\BepInEx\patchers\$(ProjectName)"/>
 
-        <ItemGroup Label="Folders used with Copy tasks">
+        <ItemGroup Label="Dist folder to be copied">
             <PatchersFolder Include="$(SolutionDir)\dist\$(ConfigurationName)\BepInEx\patchers\$(ProjectName)\**\*.*"/>
         </ItemGroup>
         <Message Text="Deploy plugin to game folder"
