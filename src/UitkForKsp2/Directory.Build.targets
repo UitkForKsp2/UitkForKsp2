@@ -25,7 +25,7 @@
         <RemoveDir Directories="$(SolutionDir)/dist/$(ConfigurationName)"/>
         <MakeDir Directories="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
 
-        <Message Text="Copying plugin folder to build directory"/>
+        <Message Text="Copying plugin template to build directory"/>
         <Copy SourceFiles="@(PluginTemplate)"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/%(RecursiveDir)"/>
         <Delete Files="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/swinfo.tt"/>
@@ -62,7 +62,8 @@
         </ItemGroup>
         <Message Text="Deploy plugin to game folder"
                  Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
-        <Copy SourceFiles="@(DistFolder)"
+        <Copy Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
+              SourceFiles="@(DistFolder)"
               DestinationFolder="$(KSP2DIR)/BepInEx/plugins/$(ProjectName)/%(RecursiveDir)"/>
     </Target>
 </Project>
