@@ -41,7 +41,7 @@
         <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*"/>
         <PackageReference Include="HarmonyX" Version="2.10.1"/>
         <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2"/>
-        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33-f1" Publicize="true"/>
-        <PackageReference Include="UnityEngine.UITK" Version="2020.3.33-f1" Publicize="true"/>
+        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" Publicize="true"/>
+        <PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1" Publicize="true"/>
     </ItemGroup>
 </Project>
