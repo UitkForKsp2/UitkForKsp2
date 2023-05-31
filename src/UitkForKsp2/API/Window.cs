@@ -1,15 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UIElements;
-using UnityObject = UnityEngine.Object;
-
-// ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Global
 
 namespace UitkForKsp2.API;
 
 /// <summary>
 /// Contains methods for creating UIDocument windows.
 /// </summary>
+[PublicAPI]
 public static class Window
 {
     private const string UIMainCanvasPath = "GameManager/Default Game Instance(Clone)/UI Manager(Clone)/Main Canvas";

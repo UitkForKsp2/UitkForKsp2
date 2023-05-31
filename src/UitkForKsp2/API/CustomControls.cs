@@ -6,6 +6,7 @@ namespace UitkForKsp2.API;
 /// <summary>
 /// API for everything related to custom UI controls.
 /// </summary>
+[PublicAPI]
 public static class CustomControls
 {
     /// <summary>

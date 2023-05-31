@@ -6,6 +6,7 @@ namespace UitkForKsp2.API;
 /// <summary>
 /// A simple drag manipulator for UIElements.
 /// </summary>
+[PublicAPI]
 public class DragManipulator: IManipulator
 {
     private VisualElement _target;

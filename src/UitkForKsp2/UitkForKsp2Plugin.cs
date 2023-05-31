@@ -1,4 +1,7 @@
-﻿using BepInEx;
+﻿extern alias JB;
+global using JB::JetBrains.Annotations;
+global using UnityObject = UnityEngine.Object;
+using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
@@ -12,29 +15,30 @@ namespace UitkForKsp2;
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public class UitkForKsp2Plugin : BaseUnityPlugin
 {
-    // ReSharper disable UnusedMember.Global
-    // ReSharper disable MemberCanBePrivate.Global
     /// <summary>
     /// Plugin GUID.
     /// </summary>
-    public const string ModGuid = MyPluginInfo.PLUGIN_GUID;
+    [PublicAPI] public const string ModGuid = MyPluginInfo.PLUGIN_GUID;
+
     /// <summary>
     /// Plugin name.
     /// </summary>
-    public const string ModName = MyPluginInfo.PLUGIN_NAME;
+    [PublicAPI] public const string ModName = MyPluginInfo.PLUGIN_NAME;
+
     /// <summary>
     /// Plugin version.
     /// </summary>
-    public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
-    // ReSharper restore UnusedMember.Global
-    // ReSharper restore MemberCanBePrivate.Global
+    [PublicAPI] public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
+
+    /// <summary>
+    /// The default UITK for KSP 2 panel settings with the KerbalUI theme. Do not modify this, as all mods using UITK
+    /// will be affected. It is also strongly discouraged to create your own instance of the PanelSettings class,
+    /// as having multiple panels in use will negatively impact performance.
+    /// </summary>
+    public static PanelSettings PanelSettings { get; private set; }
 
     internal new static ManualLogSource Logger;
 
-    /// <summary>
-    /// The default UITK for KSP 2 panel settings with the KerbalUI theme.
-    /// </summary>
-    public static PanelSettings PanelSettings;
     internal static readonly Dictionary<string, Shader> Shaders = new();
 
     private static readonly string PanelSettingsPath = Path.Combine(

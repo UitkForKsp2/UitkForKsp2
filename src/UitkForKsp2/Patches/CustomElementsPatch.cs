@@ -3,15 +3,15 @@ using HarmonyLib;
 using UitkForKsp2.API;
 using UnityEngine.UIElements;
 
-namespace UitkForKsp2.Patch;
+namespace UitkForKsp2.Patches;
 
 [HarmonyPatch]
-public static class CustomElementsPatch
+internal static class CustomElementsPatch
 {
 #pragma warning disable CS0618
     [HarmonyPatch(typeof(VisualElementFactoryRegistry), nameof(VisualElementFactoryRegistry.RegisterUserFactories))]
     [HarmonyPostfix]
-    public static void VisualElementFactoryRegistry_RegisterUserFactories()
+    private static void VisualElementFactoryRegistry_RegisterUserFactories()
     {
         foreach (var plugin in Chainloader.Plugins)
         {

@@ -7,7 +7,7 @@
         <Description Label="Description of the mod">Unity UI Toolkit support for KSP 2 and an accompanying API.</Description>
         <RepositoryType Label="Type of source repository (git/svn)">git</RepositoryType>
         <RepositoryUrl Label="Source repository URL">https://github.com/jan-bures/UitkForKsp2</RepositoryUrl>
-        <Version Label="Version of the mod">1.1.0</Version>
+        <Version Label="Version of the mod">1.2.0</Version>
         <!-- If using GitHub and this template, VersionCheckUrl points to the raw .csproj file in your main branch,
              e.g. https://raw.githubusercontent.com/YourUsername/YourRepo/main/src/YourProject/YourProject.csproj -->
         <VersionCheckUrl Label="URL to up-to-date swinfo.json">https://raw.githubusercontent.com/jan-bures/UitkForKsp2/main/src/UitkForKsp2/UitkForKsp2.csproj</VersionCheckUrl>
@@ -35,13 +35,14 @@
 
     <!-- Project references -->
     <ItemGroup Label="NuGet package references">
-        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
-        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all"/>
-        <PackageReference Include="BepInEx.Core" Version="5.*"/>
-        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*"/>
-        <PackageReference Include="HarmonyX" Version="2.10.1"/>
-        <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2"/>
-        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" Publicize="true"/>
-        <PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1" Publicize="true"/>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+        <PackageReference Include="HarmonyX" Version="2.10.1" />
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" Aliases="JB" />
+        <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2" />
+        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" Publicize="true" />
+        <PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1" Publicize="true" />
     </ItemGroup>
 </Project>

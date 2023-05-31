@@ -1,13 +1,12 @@
-﻿using UnityEngine.UIElements;
-
-// ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Global
+﻿using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
 
 /// <summary>
 /// Contains extension methods for UI Toolkit documents and elements.
 /// </summary>
+[PublicAPI]
 public static class Extensions
 {
     /// <summary>

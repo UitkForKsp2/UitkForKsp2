@@ -1,13 +1,11 @@
 ﻿using UnityEngine.UIElements;
 
-// ReSharper disable UnusedMember.Global
-// ReSharper disable MemberCanBePrivate.Global
-
 namespace UitkForKsp2.API;
 
 /// <summary>
 /// Contains methods for creating UI elements.
 /// </summary>
+[PublicAPI]
 public static class Element
 {
     /// <summary>

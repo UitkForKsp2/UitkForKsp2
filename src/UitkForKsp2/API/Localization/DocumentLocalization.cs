@@ -9,6 +9,7 @@ using UnityEngine.UIElements;
 /// <para>The <c>LocalizationManager.OnLocalizeEvent</c> is handled to automatically update the localization of all
 /// registered elements when the game language is changed.</para>
 /// </summary>
+[PublicAPI]
 [DisallowMultipleComponent]
 [RequireComponent(typeof(UIDocument))]
 public class DocumentLocalization : MonoBehaviour
