@@ -80,4 +80,42 @@ public static class Extensions
     {
         return document.gameObject.AddComponent<DocumentLocalization>();
     }
+
+    private static EventCallback<GeometryChangedEvent> _geometryChanged;
+
+    /// <summary>
+    /// Set the default position of an element using a callback to calculate the position.
+    /// </summary>
+    /// <param name="element">The element to position.</param>
+    /// <param name="calculatePosition">
+    ///     The callback which will be called when the element is resized. The callback will be passed the size of the
+    ///     element and should return the position to set the element to in the reference resolution.
+    /// </param>
+    public static void SetDefaultPosition(this VisualElement element, Func<Vector2, Vector2> calculatePosition)
+    {
+        _geometryChanged ??= evt =>
+        {
+            if (evt.newRect.width == 0 || evt.newRect.height == 0)
+            {
+                return;
+            }
+
+            element.transform.position = calculatePosition(new Vector2(evt.newRect.width, evt.newRect.height));
+            element.UnregisterCallback(_geometryChanged);
+        };
+
+        element.RegisterCallback(_geometryChanged);
+    }
+
+    /// <summary>
+    /// Set the default position of an element to the center of the screen.
+    /// </summary>
+    /// <param name="element">The element to center.</param>
+    public static void CenterByDefault(this VisualElement element)
+    {
+        element.SetDefaultPosition(windowSize => new Vector2(
+            (ReferenceResolution.Width - windowSize.x) / 2,
+            (ReferenceResolution.Height - windowSize.y) / 2
+        ));
+    }
 }
