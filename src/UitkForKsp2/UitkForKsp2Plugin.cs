@@ -1,5 +1,4 @@
-﻿extern alias JB;
-global using JB::JetBrains.Annotations;
+﻿global using JetBrains.Annotations;
 global using UnityObject = UnityEngine.Object;
 using BepInEx;
 using BepInEx.Logging;
