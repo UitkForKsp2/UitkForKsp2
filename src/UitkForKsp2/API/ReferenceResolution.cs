@@ -12,12 +12,12 @@ public class ReferenceResolution
     /// <summary>
     /// The width of the reference resolution.
     /// </summary>
-    public static readonly float Width = 1920;
+    public static readonly int Width = 1920;
 
     /// <summary>
     /// The height of the reference resolution.
     /// </summary>
-    public static readonly float Height = 1080;
+    public static readonly int Height = 1080;
 
     /// <summary>
     /// Converts percentage of screen width and height to reference resolution pixels.
