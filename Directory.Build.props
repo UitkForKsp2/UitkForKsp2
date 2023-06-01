@@ -21,7 +21,7 @@
         <BaseIntermediateOutputPath>$(SolutionDir)build/obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
         <AssemblyName>$(MSBuildProjectName)</AssemblyName>
         <RootNamespace>$(AssemblyName)</RootNamespace>
-        <NoWarn>$(NoWarn);CS0436</NoWarn>
+        <NoWarn>$(NoWarn);CS0436;NU5125</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Label="Package source configuration">
