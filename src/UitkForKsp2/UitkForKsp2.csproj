@@ -2,6 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <!-- NuGet package configuration -->
     <PropertyGroup Label="NuGet package configuration">
+        <Version Condition="'$(Version)'==''">1.2.0</Version>
         <PackageId Label="ID of your NuGet package">$(ProjectName)</PackageId>
         <!-- For example https://raw.githubusercontent.com/YourUsername/YourRepo/main/LICENSE -->
         <PackageLicenseUrl Label="URL to the license of your mod">https://raw.githubusercontent.com/jan-bures/UitkForKsp2/main/LICENSE</PackageLicenseUrl>
