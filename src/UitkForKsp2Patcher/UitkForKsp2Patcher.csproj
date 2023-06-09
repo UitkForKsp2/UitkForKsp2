@@ -1,9 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
         <RootNamespace>UitkForKsp2Patcher</RootNamespace>
         <NoWarn>$(NoWarn);CS1591</NoWarn>
     </PropertyGroup>
