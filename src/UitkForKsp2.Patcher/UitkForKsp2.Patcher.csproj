@@ -5,9 +5,10 @@
         <NoWarn>$(NoWarn);CS1591</NoWarn>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Mono.Cecil" Version="0.11.4" />
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1"/>
+        <PackageReference Include="Mono.Cecil" Version="0.11.4"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="../UitkForKsp2/UitkForKsp2.csproj" />
+        <ProjectReference Include="../UitkForKsp2/UitkForKsp2.csproj"/>
     </ItemGroup>
 </Project>

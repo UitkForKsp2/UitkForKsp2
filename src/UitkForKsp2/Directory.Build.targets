@@ -1,8 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
     <PropertyGroup>
-        <Configurations>Debug;Release;Deploy;DeployAndRun</Configurations>
-        <Platforms>AnyCPU</Platforms>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild Condition="$(ConfigurationName) == Release">true</GeneratePackageOnBuild>
     </PropertyGroup>
@@ -24,10 +22,20 @@
         <Copy SourceFiles="$(TargetPath)"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
 
+        <Message Text="Copying controls DLL to build directory"/>
+        <Copy SourceFiles="$(BaseOutputPath)/$(ConfigurationName)/$(TargetFramework)/UitkForKsp2.Controls.dll"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
+
         <Message Text="Copying mod PDB to build directory"
                  Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
         <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
               SourceFiles="$(TargetDir)$(TargetName).pdb"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
+
+        <Message Text="Copying controls PDB to build directory"
+                 Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
+        <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
+              SourceFiles="$(BaseOutputPath)/$(ConfigurationName)/$(TargetFramework)/UitkForKsp2.Controls.pdb"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
 
         <Message Text="Copying LICENSE and README to build directory"/>

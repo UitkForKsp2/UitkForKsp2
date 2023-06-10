@@ -20,6 +20,8 @@
         <AssemblyName>$(MSBuildProjectName)</AssemblyName>
         <RootNamespace>$(AssemblyName)</RootNamespace>
         <NoWarn>$(NoWarn);CS0436;NU5125</NoWarn>
+        <Configurations>Debug;Release;Deploy;DeployAndRun</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <PropertyGroup Label="Package source configuration">

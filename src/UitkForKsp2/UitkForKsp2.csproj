@@ -28,4 +28,7 @@
         <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" PrivateAssets="all" Publicize="true"/>
         <PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1" PrivateAssets="all" Publicize="true"/>
     </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="$(SolutionDir)/src/UitkForKsp2.Controls/UitkForKsp2.Controls.csproj"/>
+    </ItemGroup>
 </Project>
