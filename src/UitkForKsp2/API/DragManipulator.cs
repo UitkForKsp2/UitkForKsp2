@@ -7,7 +7,7 @@ namespace UitkForKsp2.API;
 /// A simple drag manipulator for UIElements.
 /// </summary>
 [PublicAPI]
-public class DragManipulator: IManipulator
+public class DragManipulator : IManipulator
 {
     private VisualElement _target;
     private Vector3 _offset;
@@ -36,6 +36,12 @@ public class DragManipulator: IManipulator
 
     private void DragBegin(PointerDownEvent evt)
     {
+        if (evt.target is TextField.TextInput)
+        {
+            evt.StopPropagation();
+            return;
+        }
+
         _mode = target.pickingMode;
         target.pickingMode = PickingMode.Ignore;
         _offset = evt.localPosition;
@@ -43,7 +49,7 @@ public class DragManipulator: IManipulator
         target.CapturePointer(evt.pointerId);
     }
 
-    private void DragEnd(IPointerEvent evt)
+    private void DragEnd(PointerUpEvent evt)
     {
         target.ReleasePointer(evt.pointerId);
         Dragging = false;
@@ -56,6 +62,7 @@ public class DragManipulator: IManipulator
         {
             return;
         }
+
         var delta = evt.localPosition - _offset;
         target.transform.position += delta;
     }

@@ -118,4 +118,15 @@ public static class Extensions
             (ReferenceResolution.Height - windowSize.y) / 2
         ));
     }
+
+    /// <summary>
+    /// Disable dragging on a specific element.
+    /// </summary>
+    /// <param name="element">The element to disable dragging on.</param>
+    public static void DisableDragging(this VisualElement element)
+    {
+        element.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+        element.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
+        element.RegisterCallback<PointerMoveEvent>(evt => evt.StopPropagation());
+    }
 }
