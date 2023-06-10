@@ -55,6 +55,7 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
     private void Awake()
     {
         LoadPanelSettings();
+        Configuration.Initialize(Config);
 
         Harmony.CreateAndPatchAll(typeof(UitkForKsp2Plugin).Assembly);
 
@@ -70,16 +71,14 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
             return;
         }
 
-        Logger.LogInfo($"Loaded PanelSettings bundle successfully from \"{PanelSettingsPath}\".");
-
         PanelSettings = bundle.LoadAllAssets<PanelSettings>()[0];
         Logger.LogInfo($"PanelSettings loaded: {PanelSettings}");
 
         Shaders["Hidden/UIE-Runtime"] = PanelSettings.m_RuntimeShader;
-        Logger.LogInfo($"Shader loaded: {PanelSettings.m_RuntimeShader}");
+        Logger.LogDebug($"Shader loaded: {PanelSettings.m_RuntimeShader}");
         Shaders["Hidden/UIE-RuntimeWorld"] = PanelSettings.m_RuntimeWorldShader;
-        Logger.LogInfo($"Shader loaded: {PanelSettings.m_RuntimeWorldShader}");
+        Logger.LogDebug($"Shader loaded: {PanelSettings.m_RuntimeWorldShader}");
         Shaders["Hidden/UIE-AtlasBlit"] = PanelSettings.m_AtlasBlitShader;
-        Logger.LogInfo($"Shader loaded: {PanelSettings.m_AtlasBlitShader}");
+        Logger.LogDebug($"Shader loaded: {PanelSettings.m_AtlasBlitShader}");
     }
 }
