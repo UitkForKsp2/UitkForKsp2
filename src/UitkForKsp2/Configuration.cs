@@ -66,6 +66,10 @@ public static class Configuration
 
     private static void OnManualUiScaleChanged(object sender, EventArgs e)
     {
+        if (_automaticScaling.Value)
+        {
+            return;
+        }
         UitkForKsp2Plugin.Logger.LogDebug($"Manual UI scale changed to {_manualUiScale.Value}");
         UitkForKsp2Plugin.PanelSettings.scale = _manualUiScale.Value;
     }
@@ -80,6 +84,7 @@ public static class Configuration
                 ReferenceResolution.Width,
                 ReferenceResolution.Height
             );
+            UitkForKsp2Plugin.PanelSettings.scale = 1;
         }
         else
         {
