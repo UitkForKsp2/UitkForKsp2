@@ -1,8 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{AB03A230-B62B-466D-8E30-A5ADDF3385CC}") = "UitkForKsp2", "src/UitkForKsp2/UitkForKsp2.csproj", "{565C7218-C9B6-41BE-8EE3-71E8C31283F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UitkForKsp2", "src/UitkForKsp2/UitkForKsp2.csproj", "{565C7218-C9B6-41BE-8EE3-71E8C31283F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UitkForKsp2Patcher", "src/UitkForKsp2Patcher/UitkForKsp2Patcher.csproj", "{753347B4-A7F3-4AF8-B607-F204C3CD1792}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UitkForKsp2.Patcher", "src/UitkForKsp2.Patcher/UitkForKsp2.Patcher.csproj", "{753347B4-A7F3-4AF8-B607-F204C3CD1792}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UitkForKsp2.Controls", "src/UitkForKsp2.Controls/UitkForKsp2.Controls.csproj", "{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,5 +30,13 @@ Global
 		{753347B4-A7F3-4AF8-B607-F204C3CD1792}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
 		{753347B4-A7F3-4AF8-B607-F204C3CD1792}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
 		{753347B4-A7F3-4AF8-B607-F204C3CD1792}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
+		{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}.DeployAndRun|Any CPU.ActiveCfg = DeployAndRun|Any CPU
+		{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}.DeployAndRun|Any CPU.Build.0 = DeployAndRun|Any CPU
+		{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}.Deploy|Any CPU.ActiveCfg = Deploy|Any CPU
+		{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}.Deploy|Any CPU.Build.0 = Deploy|Any CPU
+		{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFACD8BF-1B23-4869-BC22-6C8C30ACCBEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

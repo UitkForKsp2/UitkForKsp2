@@ -1,21 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
     <PropertyGroup>
-        <Configurations>Debug;Release;Deploy;DeployAndRun</Configurations>
-        <Platforms>AnyCPU</Platforms>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild Condition="$(ConfigurationName) == Release">true</GeneratePackageOnBuild>
     </PropertyGroup>
-
-    <ItemGroup Label="Template parsing configuration">
-        <PackageReference Include="Mono.TextTemplating" Version="2.2.1"/>
-        <TextTemplate Include="$(SolutionDir)/plugin_template/swinfo.tt"/>
-        <Generated Include="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/swinfo.json"/>
-        <None Include="$(SolutionDir)/plugin_template/swinfo.tt"/>
-    </ItemGroup>
-    <Target Name="TextTemplateTransform" BeforeTargets="PostBuildEvent">
-        <Exec Command="dotnet t4 &quot;%(TextTemplate.Identity)&quot; -o &quot;$(TargetDir)/swinfo.json&quot; -p=ProjectName=&quot;$(ProjectName)&quot; -p=Authors=&quot;$(Authors)&quot; -p=Product=&quot;$(Product)&quot; -p=Description=&quot;$(Description)&quot; -p=RepositoryUrl=&quot;$(RepositoryUrl)&quot; -p=Version=&quot;$(Version)&quot; -p=VersionCheckUrl=&quot;$(VersionCheckUrl)&quot; -p=Ksp2VersionMin=&quot;$(Ksp2VersionMin)&quot; -p=Ksp2VersionMax=&quot;$(Ksp2VersionMax)&quot;"/>
-    </Target>
 
     <ItemGroup Label="Plugin template folder to be copied">
         <PluginTemplate Include="$(SolutionDir)/plugin_template/**/*.*"/>
@@ -28,21 +16,26 @@
         <Message Text="Copying plugin template to build directory"/>
         <Copy SourceFiles="@(PluginTemplate)"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/%(RecursiveDir)"/>
-        <Delete Files="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/swinfo.tt"/>
         <Delete Files="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/assets/bundles/PLACE_kerbalui_HERE"/>
 
         <Message Text="Copying mod DLL to build directory"/>
         <Copy SourceFiles="$(TargetPath)"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
 
-        <Message Text="Copying swinfo.json to build directory"/>
-        <Copy SourceFiles="$(TargetDir)/swinfo.json"
+        <Message Text="Copying controls DLL to build directory"/>
+        <Copy SourceFiles="$(BaseOutputPath)/$(ConfigurationName)/$(TargetFramework)/UitkForKsp2.Controls.dll"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
 
         <Message Text="Copying mod PDB to build directory"
                  Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
         <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
               SourceFiles="$(TargetDir)$(TargetName).pdb"
+              DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
+
+        <Message Text="Copying controls PDB to build directory"
+                 Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
+        <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
+              SourceFiles="$(BaseOutputPath)/$(ConfigurationName)/$(TargetFramework)/UitkForKsp2.Controls.pdb"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
 
         <Message Text="Copying LICENSE and README to build directory"/>

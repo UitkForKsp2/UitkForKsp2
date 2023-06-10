@@ -8,8 +8,6 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
-    <Import Project="ModConfiguration.xml" />
-
     <PropertyGroup Label="Game folder configuration">
         <!-- Set this to the path to your KSP 2 folder if you don't have the KSP2DIR environmental variable set -->
         <KSP2DIR Condition="'$(KSP2DIR)' == ''">C:/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program 2</KSP2DIR>
@@ -22,6 +20,8 @@
         <AssemblyName>$(MSBuildProjectName)</AssemblyName>
         <RootNamespace>$(AssemblyName)</RootNamespace>
         <NoWarn>$(NoWarn);CS0436;NU5125</NoWarn>
+        <Configurations>Debug;Release;Deploy;DeployAndRun</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <PropertyGroup Label="Package source configuration">
@@ -29,4 +29,29 @@
             https://nuget.spacewarp.org/v3/index.json
         </RestoreAdditionalProjectSources>
     </PropertyGroup>
+
+    <ItemGroup Label="Dependencies for build targets">
+        <PackageReference Include="JsonPeek" Version="1.2.0" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <!-- Define the main target -->
+    <Target Label="Reading properties from swinfo.json" Name="ReadPropertiesFromJson" BeforeTargets="PreBuildEvent">
+        <JsonPeek ContentPath="$(SolutionDir)/plugin_template/swinfo.json" Query="$">
+            <Output TaskParameter="Result" ItemName="Swinfo"/>
+        </JsonPeek>
+        <JsonPeek ContentPath="$(SolutionDir)/plugin_template/swinfo.json" Query="$.dependencies">
+            <Output TaskParameter="Result" ItemName="Dependencies"/>
+        </JsonPeek>
+
+        <!-- Extract properties from the JSON -->
+        <PropertyGroup>
+            <ModId>@(Swinfo -> '%(mod_id)')</ModId>
+            <Version>@(Swinfo -> '%(version)')</Version>
+            <Product>@(Swinfo -> '%(name)')</Product>
+            <Authors>@(Swinfo -> '%(author)')</Authors>
+            <Description>@(Swinfo -> '%(description)')</Description>
+            <RepositoryType>git</RepositoryType>
+            <RepositoryUrl>@(Swinfo -> '%(source)')</RepositoryUrl>
+        </PropertyGroup>
+    </Target>
 </Project>

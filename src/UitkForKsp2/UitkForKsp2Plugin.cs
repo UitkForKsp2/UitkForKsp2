@@ -1,8 +1,10 @@
 ﻿global using JetBrains.Annotations;
 global using UnityObject = UnityEngine.Object;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -55,8 +57,15 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
     private void Awake()
     {
         LoadPanelSettings();
+        Configuration.Initialize(Config);
 
         Harmony.CreateAndPatchAll(typeof(UitkForKsp2Plugin).Assembly);
+
+        // Register custom controls
+        var controlsAssembly = Assembly.LoadFile(
+            Path.Combine(Paths.PluginPath, ModGuid, "UitkForKsp2.Controls.dll")
+        );
+        CustomControls.RegisterFromAssembly(controlsAssembly);
 
         Logger.LogInfo($"Plugin {ModName} loaded");
     }
@@ -70,16 +79,14 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
             return;
         }
 
-        Logger.LogInfo($"Loaded PanelSettings bundle successfully from \"{PanelSettingsPath}\".");
-
         PanelSettings = bundle.LoadAllAssets<PanelSettings>()[0];
         Logger.LogInfo($"PanelSettings loaded: {PanelSettings}");
 
         Shaders["Hidden/UIE-Runtime"] = PanelSettings.m_RuntimeShader;
-        Logger.LogInfo($"Shader loaded: {PanelSettings.m_RuntimeShader}");
+        Logger.LogDebug($"Shader loaded: {PanelSettings.m_RuntimeShader}");
         Shaders["Hidden/UIE-RuntimeWorld"] = PanelSettings.m_RuntimeWorldShader;
-        Logger.LogInfo($"Shader loaded: {PanelSettings.m_RuntimeWorldShader}");
+        Logger.LogDebug($"Shader loaded: {PanelSettings.m_RuntimeWorldShader}");
         Shaders["Hidden/UIE-AtlasBlit"] = PanelSettings.m_AtlasBlitShader;
-        Logger.LogInfo($"Shader loaded: {PanelSettings.m_AtlasBlitShader}");
+        Logger.LogDebug($"Shader loaded: {PanelSettings.m_AtlasBlitShader}");
     }
 }

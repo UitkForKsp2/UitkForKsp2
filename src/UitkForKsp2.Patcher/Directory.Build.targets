@@ -1,10 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-    <PropertyGroup>
-        <Configurations>Debug;Release;Deploy;DeployAndRun</Configurations>
-        <Platforms>AnyCPU</Platforms>
-    </PropertyGroup>
-
     <Target Label="Post build events" Name="PostBuild" AfterTargets="PostBuildEvent">
         <Message Text="Copying DLL to build directory"/>
         <Copy SourceFiles="$(TargetPath)"
