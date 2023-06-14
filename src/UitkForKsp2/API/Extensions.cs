@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using KSP.Game;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -128,5 +129,15 @@ public static class Extensions
         element.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
         element.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
         element.RegisterCallback<PointerMoveEvent>(evt => evt.StopPropagation());
+    }
+
+    /// <summary>
+    /// Disable game input when an element is focused.
+    /// </summary>
+    /// <param name="element"></param>
+    public static void DisableGameInputOnFocus(this VisualElement element)
+    {
+        element.RegisterCallback<FocusInEvent>(_ => GameManager.Instance?.Game?.Input.Disable());
+        element.RegisterCallback<FocusOutEvent>(_ => GameManager.Instance?.Game?.Input.Enable());
     }
 }
