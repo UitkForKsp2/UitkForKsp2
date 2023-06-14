@@ -1,18 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+    <!-- NuGet package configuration -->
     <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
-        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     </PropertyGroup>
-    <ItemGroup>
-        <Compile Include="Unity/Runtime/**/*.cs"/>
-    </ItemGroup>
+    <PropertyGroup Label="NuGet package configuration">
+        <PackageId Label="ID of your NuGet package">$(MSBuildProjectName)</PackageId>
+        <PackageLicenseUrl Label="URL to the license of your mod">https://raw.githubusercontent.com/jan-bures/UitkForKsp2/main/LICENSE</PackageLicenseUrl>
+        <PackageOutputPath Label="Path to the NuGet package output">$(SolutionDir)/nuget</PackageOutputPath>
+        <PackageProjectUrl Label="Optional URL to your project's website (e.g. forum post)">https://github.com/jan-bures/UitkForKsp2</PackageProjectUrl>
+        <PackageReadmeFile Label="Filename of your README file">README.md</PackageReadmeFile>
+        <PackageTags Label="Optional tags of your NuGet package">ksp2;mod;library</PackageTags>
+    </PropertyGroup>
+    <Target Name="IncludeAllFilesInTargetDir" AfterTargets="Build">
+        <ItemGroup>
+            <None Label="Path to LICENSE file" Include="$(SolutionDir)LICENSE" Pack="true" PackagePath="/"/>
+            <None Label="Path to README file" Include="$(SolutionDir)/README.md" Pack="true" PackagePath="/"/>
+            <None Label="Path to the target build" Include="$(BaseOutputPath)/$(ConfigurationName)/$(TargetFramework)/**" Pack="true" PackagePath="/lib/$(TargetFramework)"/>
+        </ItemGroup>
+    </Target>
+
+    <!-- Package references -->
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all"/>
-    </ItemGroup>
-    <ItemGroup>
         <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" PrivateAssets="all"/>
         <PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1" PrivateAssets="all"/>
     </ItemGroup>
 </Project>
- 
