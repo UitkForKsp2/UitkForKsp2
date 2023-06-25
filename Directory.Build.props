@@ -31,6 +31,10 @@
         </RestoreAdditionalProjectSources>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <Version Condition="'$(Version)'==''">1.4.0</Version>
+    </PropertyGroup>
+
     <ItemGroup Label="Dependencies for build targets">
         <PackageReference Include="JsonPeek" Version="1.2.0" PrivateAssets="all"/>
     </ItemGroup>

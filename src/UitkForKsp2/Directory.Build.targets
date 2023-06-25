@@ -30,7 +30,7 @@
         <Message Text="Copying controls PDB to build directory"
                  Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
         <Copy Condition="$(ConfigurationName) == Debug Or $(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
-              SourceFiles="$(BaseOutputPath)/$(ConfigurationName)/$(TargetFramework)/UitkForKsp2.Controls.pdb"
+              SourceFiles="$(BuildFolder)/UitkForKsp2.Controls/$(ConfigurationName)/$(TargetFramework)/UitkForKsp2.Controls.pdb"
               DestinationFolder="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)"/>
 
         <Message Text="Copying LICENSE and README to build directory"/>
