@@ -1,11 +1,11 @@
-﻿{
+{
   "spec": "1.2",
   "mod_id": "UitkForKsp2",
   "author": "munix",
   "name": "UITK for KSP 2",
   "description": "Unity UI Toolkit support for KSP 2 and an accompanying API.",
   "source": "https://github.com/jan-bures/UitkForKsp2",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "version_check": "https://raw.githubusercontent.com/jan-bures/UitkForKsp2/main/plugin_template/swinfo.json",
   "ksp2_version": {
     "min": "0.1.2",

@@ -1,34 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <!-- NuGet package configuration -->
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
     <PropertyGroup Label="NuGet package configuration">
-        <Version Condition="'$(Version)'==''">1.3.0</Version>
-        <PackageId Label="ID of your NuGet package">$(ProjectName)</PackageId>
+        <PackageId Label="ID of your NuGet package">$(MSBuildProjectName)</PackageId>
         <PackageLicenseUrl Label="URL to the license of your mod">https://raw.githubusercontent.com/jan-bures/UitkForKsp2/main/LICENSE</PackageLicenseUrl>
-        <PackageOutputPath Label="Path to the NuGet package output">../../nuget</PackageOutputPath>
+        <PackageOutputPath Label="Path to the NuGet package output">$(SolutionDir)/nuget</PackageOutputPath>
         <PackageProjectUrl Label="Optional URL to your project's website (e.g. forum post)">https://github.com/jan-bures/UitkForKsp2</PackageProjectUrl>
         <PackageReadmeFile Label="Filename of your README file">README.md</PackageReadmeFile>
         <PackageTags Label="Optional tags of your NuGet package">ksp2;mod;library</PackageTags>
     </PropertyGroup>
     <Target Name="IncludeAllFilesInTargetDir" AfterTargets="Build">
         <ItemGroup>
-            <None Label="Path to LICENSE file" Include="$(SolutionDir)LICENSE" Pack="true" PackagePath="/"/>
-            <None Label="Path to README file" Include="$(SolutionDir)/README.md" Pack="true" PackagePath="/"/>
-            <None Label="Path to the target build" Include="$(TargetDir)/**" Pack="true" PackagePath="/lib/$(TargetFramework)"/>
+            <None Label="Path to LICENSE file" Include="$(SolutionDir)LICENSE" Pack="true" PackagePath="/" />
+            <None Label="Path to README file" Include="$(SolutionDir)/README.md" Pack="true" PackagePath="/" />
+            <None Label="Path to the target build" Include="$(BaseOutputPath)/$(ConfigurationName)/$(TargetFramework)/**" Pack="true" PackagePath="/lib/$(TargetFramework)" />
         </ItemGroup>
     </Target>
 
-    <!-- Project references -->
+    <!-- Package references -->
     <ItemGroup Label="NuGet package references">
-        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all"/>
-        <PackageReference Include="BepInEx.BaseLib" Version="5.4.21"/>
-        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" PrivateAssets="all"/>
-        <PackageReference Include="HarmonyX" Version="2.10.1"/>
-        <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2" PrivateAssets="all"/>
-        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" PrivateAssets="all" Publicize="true"/>
-        <PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1" PrivateAssets="all" Publicize="true"/>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.BaseLib" Version="5.4.21" />
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" PrivateAssets="all" />
+        <PackageReference Include="HarmonyX" Version="2.10.1" />
+        <PackageReference Include="KerbalSpaceProgram2.GameLibs" Version="0.1.2" PrivateAssets="all" />
+        <PackageReference Include="UnityEngine.Modules" Version="2020.3.33.1" PrivateAssets="all" Publicize="true" />
+        <PackageReference Include="UnityEngine.UITK" Version="2020.3.33.1" PrivateAssets="all" Publicize="true" />
     </ItemGroup>
+    <!-- Project references -->
     <ItemGroup>
-        <ProjectReference Include="$(SolutionDir)/src/UitkForKsp2.Controls/UitkForKsp2.Controls.csproj"/>
+        <ProjectReference Include="$(SolutionDir)/src/UitkForKsp2.Controls/UitkForKsp2.Controls.csproj" Private="false" />
     </ItemGroup>
 </Project>

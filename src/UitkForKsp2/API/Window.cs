@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using KSP.Game;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -37,6 +38,8 @@ public static class Window
         document.m_RootVisualElement = root;
         document.AddRootVisualElementToTree();
 
+        document.PostInitialize();
+
         return document;
     }
 
@@ -65,6 +68,8 @@ public static class Window
             document.rootVisualElement.hierarchy.ElementAt(0).MakeDraggable();
         }
 
+        document.PostInitialize();
+
         return document;
     }
 
@@ -92,6 +97,8 @@ public static class Window
 
         document.m_RootVisualElement = element;
         document.AddRootVisualElementToTree();
+
+        document.PostInitialize();
 
         return document;
     }
@@ -123,5 +130,14 @@ public static class Window
         gameObject.SetActive(true);
 
         return document;
+    }
+
+    private static void PostInitialize(this UIDocument document)
+    {
+        document.rootVisualElement.Query<TextField>().ForEach(textField =>
+        {
+            textField.RegisterCallback<FocusInEvent>(_ => GameManager.Instance?.Game?.Input.Disable());
+            textField.RegisterCallback<FocusOutEvent>(_ => GameManager.Instance?.Game?.Input.Enable());
+        });
     }
 }

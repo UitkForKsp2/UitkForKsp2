@@ -15,6 +15,7 @@
 
     <PropertyGroup Label="Build and namespace configuration">
         <SolutionDir Condition="'$(SolutionDir)'==''">$(MSBuildThisFileDirectory)</SolutionDir>
+        <BuildFolder>$(SolutionDir)build/bin</BuildFolder>
         <BaseOutputPath>$(SolutionDir)build/bin/$(MSBuildProjectName)</BaseOutputPath>
         <BaseIntermediateOutputPath>$(SolutionDir)build/obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
         <AssemblyName>$(MSBuildProjectName)</AssemblyName>
@@ -35,7 +36,7 @@
     </ItemGroup>
 
     <!-- Define the main target -->
-    <Target Label="Reading properties from swinfo.json" Name="ReadPropertiesFromJson" BeforeTargets="PreBuildEvent">
+    <Target Label="Reading properties from swinfo.json" Name="ReadPropertiesFromJson" AfterTargets="MinVer">
         <JsonPeek ContentPath="$(SolutionDir)/plugin_template/swinfo.json" Query="$">
             <Output TaskParameter="Result" ItemName="Swinfo"/>
         </JsonPeek>
@@ -46,6 +47,7 @@
         <!-- Extract properties from the JSON -->
         <PropertyGroup>
             <ModId>@(Swinfo -> '%(mod_id)')</ModId>
+            <PackageVersion>@(Swinfo -> '%(version)')</PackageVersion>
             <Version>@(Swinfo -> '%(version)')</Version>
             <Product>@(Swinfo -> '%(name)')</Product>
             <Authors>@(Swinfo -> '%(author)')</Authors>
