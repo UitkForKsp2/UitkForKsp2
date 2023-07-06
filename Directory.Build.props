@@ -32,7 +32,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Version Condition="'$(Version)'==''">1.4.0</Version>
+        <Version Condition="'$(Version)'==''">1.4.1</Version>
     </PropertyGroup>
 
     <ItemGroup Label="Dependencies for build targets">

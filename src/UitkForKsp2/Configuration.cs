@@ -13,13 +13,16 @@ public static class Configuration
     private static ConfigFile _configFile;
 
     private const string SectionUiScaling = "UI Scaling";
+
     private const string KeyAutomaticScaling = "Automatic UI Scaling (restart game after changing)";
     private const string KeyManualUiScale = "Manual UI Scale";
+    private const string KeyDisableBindingWarnings = "Disable input binding warnings";
 
     private const float ManualScalingDpi = 96f;
 
     private static ConfigEntry<bool> _automaticScaling;
     private static ConfigEntry<float> _manualUiScale;
+    private static ConfigEntry<bool> _disableBindingWarnings;
 
     /// <summary>
     /// Whether automatic UI scaling is enabled.
@@ -32,6 +35,11 @@ public static class Configuration
     /// </summary>
     [PublicAPI]
     public static float ManualUiScale => _manualUiScale.Value;
+
+    /// <summary>
+    /// Whether the game's input binding warnings are disabled.
+    /// </summary>
+    internal static bool DisableBindingWarnings => _disableBindingWarnings.Value;
 
     internal static void Initialize(ConfigFile configFile)
     {
@@ -55,6 +63,13 @@ public static class Configuration
             )
         );
         _manualUiScale.SettingChanged += OnManualUiScaleChanged;
+
+        _disableBindingWarnings = _configFile.Bind(
+            SectionUiScaling,
+            KeyDisableBindingWarnings,
+            true,
+            "Disable input binding warnings after interacting with UITK text fields?"
+        );
 
         UpdateScaling();
     }
