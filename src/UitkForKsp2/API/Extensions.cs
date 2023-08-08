@@ -82,8 +82,6 @@ public static class Extensions
         return document.gameObject.AddComponent<DocumentLocalization>();
     }
 
-    private static EventCallback<GeometryChangedEvent> _geometryChanged;
-
     /// <summary>
     /// Set the default position of an element using a callback to calculate the position.
     /// </summary>
@@ -94,18 +92,26 @@ public static class Extensions
     /// </param>
     public static void SetDefaultPosition(this VisualElement element, Func<Vector2, Vector2> calculatePosition)
     {
-        _geometryChanged ??= evt =>
+        EventCallback<GeometryChangedEvent> geometryChanged = null;
+        geometryChanged = evt => { GeometryChangedHandler(evt, element, calculatePosition, geometryChanged); };
+
+        element.RegisterCallback(geometryChanged);
+    }
+
+    private static void GeometryChangedHandler(
+        GeometryChangedEvent evt,
+        VisualElement element,
+        Func<Vector2, Vector2> calculatePosition,
+        EventCallback<GeometryChangedEvent> geometryChanged
+    )
+    {
+        if (evt.newRect.width == 0 || evt.newRect.height == 0)
         {
-            if (evt.newRect.width == 0 || evt.newRect.height == 0)
-            {
-                return;
-            }
+            return;
+        }
 
-            element.transform.position = calculatePosition(new Vector2(evt.newRect.width, evt.newRect.height));
-            element.UnregisterCallback(_geometryChanged);
-        };
-
-        element.RegisterCallback(_geometryChanged);
+        element.transform.position = calculatePosition(new Vector2(evt.newRect.width, evt.newRect.height));
+        element.UnregisterCallback(geometryChanged);
     }
 
     /// <summary>
