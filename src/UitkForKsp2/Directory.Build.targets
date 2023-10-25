@@ -41,6 +41,12 @@
               SourceFiles="$(SolutionDir)/README.md"
               DestinationFiles="$(SolutionDir)/dist/$(ConfigurationName)/BepInEx/plugins/$(ProjectName)/README.txt"/>
 
+        <Message Text="Compressing built plugin folder" Condition="$(ConfigurationName) == Release"/>
+        <Delete Condition="$(ConfigurationName) == Release"
+                Files="$(SolutionDir)/dist/$(SolutionName)-$(Version).zip"/>
+        <Exec Condition="$(ConfigurationName) == Release"
+              Command="powershell Compress-Archive -Path '$(SolutionDir)/dist/$(ConfigurationName)/BepInEx' -DestinationPath '$(SolutionDir)/dist/$(SolutionName)-$(Version).zip'"/>
+
         <Message Text="Clean up the game's plugin folder" Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"/>
         <RemoveDir Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
                    Directories="$(KSP2DIR)/BepInEx/plugins/$(ProjectName)"/>
@@ -53,5 +59,8 @@
         <Copy Condition="$(ConfigurationName) == Deploy Or $(ConfigurationName) == DeployAndRun"
               SourceFiles="@(DistFolder)"
               DestinationFolder="$(KSP2DIR)/BepInEx/plugins/$(ProjectName)/%(RecursiveDir)"/>
+
+        <Message Text="Deploy plugin and run game" Condition="$(ConfigurationName) == DeployAndRun"/>
+        <Exec Command="&quot;$(KSP2DIR)/KSP2_x64.exe&quot;" Condition="$(ConfigurationName) == DeployAndRun"/>
     </Target>
 </Project>

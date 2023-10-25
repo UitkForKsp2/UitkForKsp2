@@ -40,8 +40,6 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
 
     internal new static ManualLogSource Logger;
 
-    internal static readonly Dictionary<string, Shader> Shaders = new();
-
     private static readonly string PanelSettingsPath = Path.Combine(
         Paths.PluginPath, ModGuid, "assets/bundles/kerbalui"
     );
@@ -81,12 +79,5 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
 
         PanelSettings = bundle.LoadAllAssets<PanelSettings>()[0];
         Logger.LogInfo($"PanelSettings loaded: {PanelSettings}");
-
-        Shaders["Hidden/UIE-Runtime"] = PanelSettings.m_RuntimeShader;
-        Logger.LogDebug($"Shader loaded: {PanelSettings.m_RuntimeShader}");
-        Shaders["Hidden/UIE-RuntimeWorld"] = PanelSettings.m_RuntimeWorldShader;
-        Logger.LogDebug($"Shader loaded: {PanelSettings.m_RuntimeWorldShader}");
-        Shaders["Hidden/UIE-AtlasBlit"] = PanelSettings.m_AtlasBlitShader;
-        Logger.LogDebug($"Shader loaded: {PanelSettings.m_AtlasBlitShader}");
     }
 }
