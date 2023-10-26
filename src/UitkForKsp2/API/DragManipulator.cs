@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UitkForKsp2.API;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
@@ -7,7 +8,7 @@ using UnityEngine.UIElements;
 public class DragManipulator : IManipulator
 {
     private VisualElement _target;
-    private Vector2 _offset;
+    private Vector3 _offset;
     private PickingMode _mode;
     private IVisualElementScheduledItem _scheduledItem;
 
@@ -89,15 +90,16 @@ public class DragManipulator : IManipulator
             return;
         }
 
-        var newPosition = new Vector2(evt.position.x, evt.position.y) - _offset;
+        var delta = evt.localPosition - _offset;
+        var newPosition = target.transform.position + delta;
 
         if (!AllowDraggingOffScreen)
         {
-            newPosition.x = Mathf.Clamp(newPosition.x, 0, Screen.width - _target.resolvedStyle.width);
-            newPosition.y = Mathf.Clamp(newPosition.y, 0, Screen.height - _target.resolvedStyle.height);
+            newPosition.x = Mathf.Clamp(newPosition.x, 0, ReferenceResolution.Width - _target.resolvedStyle.width);
+            newPosition.y = Mathf.Clamp(newPosition.y, 0, ReferenceResolution.Height - _target.resolvedStyle.height);
         }
 
-        _target.transform.position = new Vector3(newPosition.x, newPosition.y, _target.transform.position.z);
+        _target.transform.position = newPosition;
     }
 
     /// <summary>
