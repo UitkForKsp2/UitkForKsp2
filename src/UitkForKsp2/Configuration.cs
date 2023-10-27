@@ -37,6 +37,38 @@ public static class Configuration
     public static float ManualUiScale => _manualUiScale.Value;
 
     /// <summary>
+    /// The current UITK screen width, taking into account whether automatic UI scaling is enabled.
+    /// </summary>
+    [PublicAPI]
+    public static int CurrentScreenWidth => IsAutomaticScalingEnabled ? ReferenceResolution.Width : (int)Math.Round(Screen.width / ManualUiScale);
+
+    /// <summary>
+    /// The current UITK screen height, taking into account whether automatic UI scaling is enabled.
+    /// </summary>
+    [PublicAPI]
+    public static int CurrentScreenHeight => IsAutomaticScalingEnabled ? ReferenceResolution.Height : (int)Math.Round(Screen.height / ManualUiScale);
+
+    /// <summary>
+    /// The current mouse position, adjusted to UITK coordinates, taking into account whether automatic UI scaling
+    /// is enabled.
+    /// </summary>
+    /// <returns>The adjusted current mouse position.</returns>
+    [PublicAPI]
+    public static Vector2 GetAdjustedMousePosition()
+    {
+        if (IsAutomaticScalingEnabled)
+        {
+            return ReferenceResolution.GetReferenceMousePosition();
+        }
+
+        var mousePosition = Input.mousePosition;
+        return new Vector2(
+            mousePosition.x / ManualUiScale,
+            CurrentScreenHeight - mousePosition.y / ManualUiScale
+        );
+    }
+
+    /// <summary>
     /// Whether the game's input binding warnings are disabled.
     /// </summary>
     internal static bool DisableBindingWarnings => _disableBindingWarnings.Value;

@@ -134,10 +134,26 @@ public static class Window
 
     private static void PostInitialize(this UIDocument document)
     {
-        document.rootVisualElement.Query<TextField>().ForEach(textField =>
-        {
-            textField.RegisterCallback<FocusInEvent>(_ => GameManager.Instance?.Game?.Input.Disable());
-            textField.RegisterCallback<FocusOutEvent>(_ => GameManager.Instance?.Game?.Input.Enable());
-        });
+        var root = document.rootVisualElement;
+
+        // Clamp window to screen bounds
+        root.SetDefaultPosition(windowSize =>
+            new Vector2(
+                Mathf.Clamp(
+                    root.transform.position.x,
+                    0,
+                    Configuration.CurrentScreenWidth - windowSize.x
+                ),
+                Mathf.Clamp(
+                    root.transform.position.y,
+                    0,
+                    Configuration.CurrentScreenHeight - windowSize.y
+                )
+            )
+        );
+
+        root.AddManipulator(new FixTextElementManipulator());
+
+        root.Query<TextField>().ForEach(textField => textField.DisableGameInputOnFocus());
     }
 }

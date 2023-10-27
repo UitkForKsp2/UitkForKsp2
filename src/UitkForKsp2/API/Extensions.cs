@@ -87,8 +87,8 @@ public static class Extensions
     /// </summary>
     /// <param name="element">The element to position.</param>
     /// <param name="calculatePosition">
-    ///     The callback which will be called when the element is resized. The callback will be passed the size of the
-    ///     element and should return the position to set the element to in the reference resolution.
+    /// The callback which will be called when the element is resized. The callback will be passed the size of the
+    /// element and should return the position to set the element to in the reference resolution.
     /// </param>
     public static void SetDefaultPosition(this VisualElement element, Func<Vector2, Vector2> calculatePosition)
     {
@@ -121,8 +121,8 @@ public static class Extensions
     public static void CenterByDefault(this VisualElement element)
     {
         element.SetDefaultPosition(windowSize => new Vector2(
-            (ReferenceResolution.Width - windowSize.x) / 2,
-            (ReferenceResolution.Height - windowSize.y) / 2
+            (Configuration.CurrentScreenWidth - windowSize.x) / 2,
+            (Configuration.CurrentScreenHeight - windowSize.y) / 2
         ));
     }
 

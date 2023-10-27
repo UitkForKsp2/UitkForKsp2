@@ -1,4 +1,5 @@
-﻿using UitkForKsp2.API;
+﻿using UitkForKsp2;
+using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,7 +11,6 @@ public class DragManipulator : IManipulator
     private VisualElement _target;
     private Vector3 _offset;
     private PickingMode _mode;
-    private IVisualElementScheduledItem _scheduledItem;
 
     /// <summary>
     /// Indicates whether the element is currently being dragged.
@@ -56,9 +56,8 @@ public class DragManipulator : IManipulator
     /// </summary>
     private void OnPointerDown(PointerDownEvent evt)
     {
-        if (!IsEnabled || evt.target is TextField.TextInput)
+        if (!IsEnabled || evt.target is TextElement { parent: TextField.TextInput })
         {
-            evt.StopPropagation();
             return;
         }
 
@@ -67,17 +66,6 @@ public class DragManipulator : IManipulator
         IsDragging = true;
         _offset = evt.localPosition;
         _target.CapturePointer(evt.pointerId);
-
-        // Schedule a recurring check for the mouse button state
-        _scheduledItem = _target.schedule.Execute(CheckMouseButtonState).Every(100);
-    }
-
-    private void CheckMouseButtonState()
-    {
-        if (!Input.GetMouseButton(0))
-        {
-            OnPointerUp(null);
-        }
     }
 
     /// <summary>
@@ -95,8 +83,16 @@ public class DragManipulator : IManipulator
 
         if (!AllowDraggingOffScreen)
         {
-            newPosition.x = Mathf.Clamp(newPosition.x, 0, ReferenceResolution.Width - _target.resolvedStyle.width);
-            newPosition.y = Mathf.Clamp(newPosition.y, 0, ReferenceResolution.Height - _target.resolvedStyle.height);
+            newPosition.x = Mathf.Clamp(
+                newPosition.x,
+                0,
+                Configuration.CurrentScreenWidth - _target.resolvedStyle.width
+            );
+            newPosition.y = Mathf.Clamp(
+                newPosition.y,
+                0,
+                Configuration.CurrentScreenHeight - _target.resolvedStyle.height
+            );
         }
 
         _target.transform.position = newPosition;
@@ -110,9 +106,5 @@ public class DragManipulator : IManipulator
         IsDragging = false;
         _target.ReleasePointer(evt.pointerId);
         target.pickingMode = _mode;
-
-        // Cancel the scheduled mouse button state check
-        _scheduledItem?.Pause();
-        _scheduledItem = null;
     }
 }

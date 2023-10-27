@@ -44,4 +44,17 @@ public class ReferenceResolution
             absolutePixels.y * Height / Screen.height
         );
     }
+
+    /// <summary>
+    /// Gets mouse position converted to reference resolution pixels.
+    /// </summary>
+    /// <returns>Mouse position with corresponding x and flipped y in the reference resolution.</returns>
+    public static Vector2 GetReferenceMousePosition()
+    {
+        var mousePosition = Input.mousePosition;
+        return new Vector2(
+            mousePosition.x * Width / Screen.width,
+            Height - mousePosition.y * Height / Screen.height
+        );
+    }
 }
