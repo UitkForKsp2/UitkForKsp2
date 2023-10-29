@@ -1,5 +1,4 @@
 ﻿using UitkForKsp2;
-using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -56,7 +55,7 @@ public class DragManipulator : IManipulator
     /// </summary>
     private void OnPointerDown(PointerDownEvent evt)
     {
-        if (!IsEnabled || evt.target is TextElement { parent: TextField.TextInput })
+        if (!IsEnabled || evt.target is TextField or TextField.TextInput or TextElement { parent: TextField.TextInput })
         {
             return;
         }

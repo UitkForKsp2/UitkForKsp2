@@ -1,5 +1,4 @@
-﻿using KSP.Game;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -152,8 +151,9 @@ public static class Window
             )
         );
 
-        root.AddManipulator(new FixTextElementManipulator());
-
-        root.Query<TextField>().ForEach(textField => textField.DisableGameInputOnFocus());
+        root.Query<TextField>().ForEach(textField =>
+        {
+            textField.DisableGameInputOnFocus();
+        });
     }
 }
