@@ -2,9 +2,6 @@
 
 This mod brings Unity UI Toolkit support to Kerbal Space Program 2.
 
-## How to use
-For examples of how to use this in a SpaceWarp mod, see the [UitkTestMod project](https://github.com/jan-bures/UitkTestMod).
-
 ## Build requirements
 - .NET SDK which conforms to the .NET Standard 2.1 ([list here](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-1#select-net-standard-version))
 - Unity 2022.5.3 - **if you want to build the theme yourself**
