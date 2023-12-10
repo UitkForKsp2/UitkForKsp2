@@ -15,9 +15,10 @@
 
     <PropertyGroup Label="Build and namespace configuration">
         <SolutionDir Condition="'$(SolutionDir)'==''">$(MSBuildThisFileDirectory)</SolutionDir>
-        <BuildFolder>$(SolutionDir)build/bin</BuildFolder>
-        <BaseOutputPath>$(SolutionDir)build/bin/$(MSBuildProjectName)</BaseOutputPath>
-        <BaseIntermediateOutputPath>$(SolutionDir)build/obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
+        <PluginBinPath>$(SolutionDir)build/bin/plugin</PluginBinPath>
+        <PatcherBinPath>$(SolutionDir)build/bin/patcher</PatcherBinPath>
+        <BaseOutputPath>$(PluginBinPath)/$(MSBuildProjectName)</BaseOutputPath>
+        <BaseIntermediateOutputPath>$(SolutionDir)build/obj/plugin/$(MSBuildProjectName)</BaseIntermediateOutputPath>
         <AssemblyName>$(MSBuildProjectName)</AssemblyName>
         <RootNamespace>$(AssemblyName)</RootNamespace>
         <NoWarn>$(NoWarn);CS0436;NU5125</NoWarn>
@@ -31,33 +32,29 @@
         </RestoreAdditionalProjectSources>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <Version Condition="'$(Version)'==''">2.1.1</Version>
-    </PropertyGroup>
-
     <ItemGroup Label="Dependencies for build targets">
         <PackageReference Include="JsonPeek" Version="1.2.0" PrivateAssets="all"/>
     </ItemGroup>
 
     <!-- Define the main target -->
-    <Target Label="Reading properties from swinfo.json" Name="ReadPropertiesFromJson" AfterTargets="MinVer">
+    <Target Label="Reading properties from swinfo.json" Name="ReadPropertiesFromJson" BeforeTargets="PreBuildEvent;AddGeneratedFile">
         <JsonPeek ContentPath="$(SolutionDir)/plugin_template/swinfo.json" Query="$">
             <Output TaskParameter="Result" ItemName="Swinfo"/>
-        </JsonPeek>
-        <JsonPeek ContentPath="$(SolutionDir)/plugin_template/swinfo.json" Query="$.dependencies">
-            <Output TaskParameter="Result" ItemName="Dependencies"/>
         </JsonPeek>
 
         <!-- Extract properties from the JSON -->
         <PropertyGroup>
             <ModId>@(Swinfo -> '%(mod_id)')</ModId>
-            <PackageVersion>@(Swinfo -> '%(version)')</PackageVersion>
             <Version>@(Swinfo -> '%(version)')</Version>
+            <Version Condition="$(Version.Contains('-'))">$(Version.Substring(0, $(Version.IndexOf('-'))))</Version>
             <Product>@(Swinfo -> '%(name)')</Product>
             <Authors>@(Swinfo -> '%(author)')</Authors>
             <Description>@(Swinfo -> '%(description)')</Description>
             <RepositoryType>git</RepositoryType>
             <RepositoryUrl>@(Swinfo -> '%(source)')</RepositoryUrl>
+            <BepInExPluginGuid>$(ModId)</BepInExPluginGuid>
+            <BepInExPluginName>$(Product)</BepInExPluginName>
+            <BepInExPluginVersion>$(Version)</BepInExPluginVersion>
         </PropertyGroup>
     </Target>
 </Project>
