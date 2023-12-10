@@ -5,7 +5,7 @@
   "name": "UITK for KSP 2",
   "description": "Unity UI Toolkit support for KSP 2 and an accompanying API.",
   "source": "https://github.com/jan-bures/UitkForKsp2",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "version_check": "https://raw.githubusercontent.com/jan-bures/UitkForKsp2/main/plugin_template/swinfo.json",
   "ksp2_version": {
     "min": "0.1.5",
