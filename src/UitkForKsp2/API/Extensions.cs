@@ -5,9 +5,7 @@ using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
 
-/// <summary>
-/// Contains extension methods for UI Toolkit documents and elements.
-/// </summary>
+/// <summary
 [PublicAPI]
 public static class Extensions
 {
@@ -69,6 +67,18 @@ public static class Extensions
     public static T MakeDraggable<T>(this T element) where T : VisualElement
     {
         element.AddManipulator(new DragManipulator());
+        return element;
+    }
+
+    /// <summary>
+    /// Enables the F2 hiding functionality for a visual element.
+    /// </summary>
+    /// <param name="element">The visual element to enable hiding for.</param>
+    /// <typeparam name="T">The type of the visual element.</typeparam>
+    /// <returns>The visual element with the hiding functionality enabled.</returns>
+    public static T EnableHiding<T>(this T element) where T : VisualElement
+    {
+        element.AddManipulator(new HideManipulator());
         return element;
     }
 
