@@ -2,11 +2,22 @@
 
 This mod brings Unity UI Toolkit support to Kerbal Space Program 2.
 
-## Build requirements
+## Installation
+### Recommended
+- Download the latest [ckan.exe](https://github.com/ksp-ckan/ckan/releases/latest) and place it into your KSP2 folder
+- Open CKAN, click the checkbox next to `UITK for KSP2` in the list of mods and click the "Apply changes" button in the toolbar at the top.
+
+### Manual
+- Download the [latest release](https://github.com/jan-bures/UitkForKsp2/releases/latest).
+- Extract the zip file's contents into your KSP2 folder.
+
+## Building
+
+### Build requirements
 - .NET SDK which conforms to the .NET Standard 2.1 ([list here](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-1#select-net-standard-version))
 - Unity 2022.5.3 - **if you want to build the theme yourself**
 
-## Building
+### Building process
 1. Get a copy of the `kerbalui` bundle. You have two options:
    - Download it from the [latest release of KerbalUI](https://github.com/jan-bures/KerbalUI/releases/latest)
    - Build it yourself from the [KerbalUI project](https://github.com/jan-bures/KerbalUI). All you need to do is open it in Unity, and in the
