@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+    <!-- Project settings -->
+    <PropertyGroup>
+        <ImplicitUsings>false</ImplicitUsings>
+        <LangVersion>9</LangVersion>
+        <RootNamespace>UitkForKsp2.Controls</RootNamespace>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+    <!-- Files to compile -->
+    <ItemGroup>
+        <Compile Remove="UitkForKsp2Unity/**"/>
+        <Compile Include="UitkForKsp2Unity/Packages/uitkforksp2.controls/Runtime/**/*.cs"/>
+    </ItemGroup>
     <!-- Package references -->
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all"/>
