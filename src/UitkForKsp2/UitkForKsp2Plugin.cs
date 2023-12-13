@@ -4,8 +4,11 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using KSP.Game;
 using UitkForKsp2.API;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2;
@@ -40,9 +43,10 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
 
     internal new static ManualLogSource Logger;
 
-    private static readonly string PanelSettingsPath = Path.Combine(
-        Paths.PluginPath, ModGuid, "assets/bundles/kerbalui"
+    private static readonly string CatalogPath = Path.Combine(
+        Paths.PluginPath, ModGuid, "addressables", "catalog.json"
     );
+    private const string PanelSettingsLabel = "kerbalui";
 
     /// <summary>
     /// Creates a new instance of the <see cref="UitkForKsp2Plugin"/> class.
@@ -70,14 +74,34 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
 
     private static void LoadPanelSettings()
     {
-        var bundle = AssetBundle.LoadFromFile(PanelSettingsPath);
-        if (!bundle)
+        try
         {
-            Logger.LogError("Failed to load PanelSettings bundle!");
-            return;
-        }
+            var catalogHandle = Addressables.LoadContentCatalogAsync(CatalogPath);
+            catalogHandle.WaitForCompletion();
+            if (catalogHandle.Status == AsyncOperationStatus.Failed)
+            {
+                Logger.LogError($"Failed to load addressables catalog {CatalogPath}");
+                return;
+            }
 
-        PanelSettings = bundle.LoadAllAssets<PanelSettings>()[0];
-        Logger.LogInfo($"PanelSettings loaded: {PanelSettings}");
+            Logger.LogInfo($"Loaded addressables catalog {CatalogPath}");
+            Logger.LogInfo($"{CatalogPath} ----- {catalogHandle.Result.LocatorId}");
+            Addressables.AddResourceLocator(catalogHandle.Result);
+
+            var panelSettingsHandle = Addressables.LoadAssetAsync<PanelSettings>(PanelSettingsLabel);
+            panelSettingsHandle.WaitForCompletion();
+            if (panelSettingsHandle.Status == AsyncOperationStatus.Failed)
+            {
+                Logger.LogError($"Failed to load PanelSettings asset from label '{PanelSettingsLabel}'");
+                return;
+            }
+
+            PanelSettings = panelSettingsHandle.Result;
+            Logger.LogInfo($"PanelSettings loaded: {PanelSettings}");
+        }
+        catch (Exception e)
+        {
+            Logger.LogError($"Failed to load addressables: {e}");
+        }
     }
 }

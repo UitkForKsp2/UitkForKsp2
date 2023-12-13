@@ -10,12 +10,10 @@ _UpgradeReport_Files/
 [Bb]uild/
 [Dd]ist/
 [Nn]uget/
-[Ee]xternal_dlls/*
-![Ee]xternal_dlls/COPY_Assembly-CSharp_dll_HERE
 *.dll
 !plugin_template/lib/*.dll
-plugin_template/assets/bundles/*
-!plugin_template/assets/bundles/PLACE_kerbalui_HERE
+plugin_template/addressables/*
+!plugin_template/addressables/PLACE_kerbalui_HERE
 
 # Rider
 
