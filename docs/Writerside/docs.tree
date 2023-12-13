@@ -14,4 +14,8 @@
         <toc-element topic="New-project.md"/>
         <toc-element topic="Existing-project.md"/>
     </toc-element>
+    <toc-element topic="Making-your-UI.md">
+        <toc-element topic="Creating-UIs-in-Unity.md"/>
+        <toc-element topic="Creating-UIs-with-C.md"/>
+    </toc-element>
 </instance-profile>
