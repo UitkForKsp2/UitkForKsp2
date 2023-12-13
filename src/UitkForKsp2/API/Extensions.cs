@@ -5,7 +5,9 @@ using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
 
-/// <summary
+/// <summary>
+/// Extension methods for UIDocument and VisualElements.
+/// </summary>
 [PublicAPI]
 public static class Extensions
 {
@@ -62,12 +64,25 @@ public static class Extensions
     /// Make a VisualElement draggable by adding a DragManipulator.
     /// </summary>
     /// <param name="element">The element to make draggable.</param>
+    /// <param name="checkScreenBounds">Should the element be draggable only within the screen bounds?</param>
     /// <typeparam name="T">The type of the element which must be a subclass of VisualElement.</typeparam>
     /// <returns>The element which was made draggable.</returns>
+    public static T MakeDraggable<T>(this T element, bool checkScreenBounds) where T : VisualElement
+    {
+        element.AddManipulator(new DragManipulator(checkScreenBounds));
+        return element;
+    }
+
+    /// <summary>
+    /// Make a VisualElement draggable by adding a DragManipulator.
+    /// </summary>
+    /// <param name="element">The element to make draggable.</param>
+    /// <typeparam name="T">The type of the element which must be a subclass of VisualElement.</typeparam>
+    /// <returns>The element which was made draggable.</returns>
+    [Obsolete("This method will be removed in 3.0.0. Use MakeDraggable(T, bool) instead.")]
     public static T MakeDraggable<T>(this T element) where T : VisualElement
     {
-        element.AddManipulator(new DragManipulator());
-        return element;
+        return element.MakeDraggable(true);
     }
 
     /// <summary>
