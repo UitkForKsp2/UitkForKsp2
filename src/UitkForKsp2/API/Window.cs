@@ -150,7 +150,7 @@ public static class Window
             MoveOptions = new MoveOptions
             {
                 IsMovingEnabled = makeDraggable,
-                CheckScreenBounds = false
+                CheckScreenBounds = makeDraggable
             }
         });
 
@@ -253,7 +253,7 @@ public static class Window
             MoveOptions = new MoveOptions
             {
                 IsMovingEnabled = makeDraggable,
-                CheckScreenBounds = false
+                CheckScreenBounds = makeDraggable
             }
         }, element);
     }

@@ -69,7 +69,7 @@ public static class Extensions
     /// <returns>The element which was made draggable.</returns>
     public static T MakeDraggable<T>(this T element, bool checkScreenBounds) where T : VisualElement
     {
-        element.AddManipulator(new DragManipulator(checkScreenBounds));
+        element.AddManipulator(new DragManipulator(!checkScreenBounds));
         return element;
     }
 
