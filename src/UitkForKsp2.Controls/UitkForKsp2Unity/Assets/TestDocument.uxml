@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement class="root" style="flex-grow: 1;">
+        <ui:Label tabindex="-1" text="Label" display-tooltip-when-elided="true" style="-unity-font-definition: url(&apos;project://database/Packages/uitkforksp2.controls/Assets/Theme/Fonts/FutureMillennium/FutureMillennium%20Black%20SDF.asset?fileID=11400000&amp;guid=321d7d8f350be194db2f510157c9f553&amp;type=2#FutureMillennium Black SDF&apos;); font-size: 28px; color: rgb(255, 255, 255);" />
+        <ui:Button text="My Button" display-tooltip-when-elided="true" />
+        <ui:Toggle label="Toggle" class="toggle" />
+        <ui:Foldout text="Foldout">
+            <ui:DropdownField label="Dropdown" index="-1" choices="1,2,3" />
+            <ui:TextField picking-mode="Ignore" label="Text Field" value="filler text" />
+            <ui:Slider picking-mode="Ignore" label="Slider" value="42" high-value="100" />
+        </ui:Foldout>
+        <ui:EnumField label="Enum" type="UnityEngine.TextAlignment, UnityEngine.TextRenderingModule" value="Center" />
+        <ui:RadioButtonGroup label="Radio Button Group" value="-1" choices="1,2,3" />
+        <ui:Label tabindex="-1" text="Label" display-tooltip-when-elided="true" style="font-size: 51px; -unity-font-definition: url(&apos;project://database/Packages/uitkforksp2.controls/Assets/Theme/Fonts/LEDCounter7/led_counter-7%20SDF.asset?fileID=11400000&amp;guid=33e1e97b69ec355479ba49006381fc06&amp;type=2#led_counter-7 SDF&apos;); color: rgb(255, 255, 255);" />
+    </ui:VisualElement>
+</ui:UXML>
