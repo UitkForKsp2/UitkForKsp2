@@ -1,6 +1,5 @@
 ﻿using KSP.Game;
 using KSP.Input;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -23,12 +22,17 @@ public class HideManipulator : IManipulator
         get => _target;
         set
         {
-            var game = GameManager.Instance.Game;
+            if (GameManager.Instance is not { Game: { InputManager: not null, Input: not null } game })
+            {
+                UitkForKsp2Plugin.Logger.LogError("HideManipulator: GameManager.Instance is null.");
+                return;
+            }
+
             if (game.InputManager.TryGetInputDefinition<GlobalInputDefinition>(out var definition))
             {
-                Debug.Log("HideManipulator: Binding ToggleHidden to GlobalInputDefinition");
                 definition.BindAction(game.Input.Global.ToggleUIVisibility.name, ToggleHidden);
             }
+
             _target = value;
         }
     }
@@ -37,13 +41,11 @@ public class HideManipulator : IManipulator
     {
         if (_isHidden)
         {
-            Debug.Log("HideManipulator: Unhiding.");
             _isHidden = false;
             _target.style.display = _originalDisplayStyle;
         }
         else
         {
-            Debug.Log("HideManipulator: Hiding.");
             _isHidden = true;
             _originalDisplayStyle = _target.style.display.value;
             _target.style.display = DisplayStyle.None;

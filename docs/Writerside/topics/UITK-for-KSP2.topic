@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/xhtml-entities.dtd">
+<topic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/topic.v2.xsd"
+       title="Home" id="UITK-for-KSP2">
+
+    <!-- A section combines multiple topics dedicated to a specific subject.
+         Add a starting page to provide an overview of the topics in the section.
+         Start with two topics you want to promote in the <spotlight> group,
+         several important topics in the <primary> group (for example, where to start),
+         several less important topics in the <secondary> group (for example, more advanced topics),
+         and optionally add any other relevant topics in the <misc> group as cards and lists of links
+         (maybe related topics from other sections).
+         Only the spotlight section is limited to two topics.
+         For other groups, try to keep the number between 2 and 6, but you can add more if necessary. -->
+
+    <section-starting-page>
+        <title>UITK for KSP2</title>
+        <description>
+            A library for creating user interfaces with Unity UI Toolkit in Kerbal Space Program 2 mods.
+        </description>
+
+        <!-- Add up to 2 topics that you want to promote. Use the "type" attribute to select an icon. -->
+        <spotlight>
+            <a href="Overview.md" type="start"
+               summary="What is UITK for KSP2 and why should I use it in my mod?">Overview</a>
+            <a href="Installing.md" type="install" summary="How do I install the mod?">Installing</a>
+        </spotlight>
+
+        <!-- Add several topics that are most important for this section. -->
+        <primary>
+            <title>Getting started</title>
+            <a href="New-project.md"
+               summary="Create a new mod project with UITK for KSP2 support from a template.">Creating a new project</a>
+            <a href="Existing-project.md"
+               summary="Upgrade your existing mod project with no UI or IMGUI to use UITK for KSP2"/>
+        </primary>
+
+        <secondary>
+            <title>Making your UI</title>
+            <a href="Creating-UIs-in-Unity.md" summary="The recommended way to create your UI with the library.">Creating UIs in Unity</a>
+            <a href="Creating-UIs-with-C.md" summary="You can also use the library's C# API to create your UI.">Creating UIs with C#</a>
+        </secondary>
+<!--
+        &lt;!&ndash; Add several topics that are less important or are relevant only for advanced/experienced users. &ndash;&gt;
+        <secondary>
+            <title>Explore advanced features</title>
+            <a href=""/>
+            <a href="" summary="With a custom card summary"/>
+            <a href="">Custom card title</a>
+            <a href="" summary="With a custom card summary">Custom card title</a>
+        </secondary>
+
+        &lt;!&ndash; Optionally add additional cards and links to topics that are not in this section but may be relevant. &ndash;&gt;
+        <misc>
+            <cards>
+                <title>Other relevant topics as wide cards</title>
+                <a href=""/>
+                <a href="" summary="With a custom card summary"/>
+                <a href="">Custom card title</a>
+                <a href="" summary="With a custom card summary">Custom card title</a>
+            </cards>
+
+            <cards narrow="true">
+                <title>Other relevant topics as narrow cards</title>
+                <a href=""/>
+                <a href=""/>
+                <a href="" summary="With a custom card summary"/>
+                <a href="">Custom card title</a>
+                <a href="">Custom card title</a>
+                <a href="" summary="With a custom card summary">Custom card title</a>
+            </cards>
+
+            <links>
+                <group>
+                    <title>Other related topics as links</title>
+                    <a href=""/>
+                    <a href="" summary="With a custom card summary"/>
+                    <a href="">Custom card title</a>
+                    <a href="" summary="With a custom card summary">Custom card title</a>
+                </group>
+                <group>
+                    <title>Two in a row</title>
+                    <a href=""/>
+                    <a href="" summary="With a custom card summary"/>
+                    <a href="">Custom card title</a>
+                    <a href="" summary="With a custom card summary">Custom card title</a>
+                </group>
+            </links>
+
+            <links narrow="true">
+                <group>
+                    <title>More related topics</title>
+                    <a href=""/>
+                    <a href="" summary="With a custom card summary"/>
+                    <a href="">Custom card title</a>
+                    <a href="" summary="With a custom card summary">Custom card title</a>
+                </group>
+                <group>
+                    <title>Three in a row</title>
+                    <a href=""/>
+                    <a href=""/>
+                    <a href="">Custom card title</a>
+                    <a href="">Custom card title</a>
+                </group>
+                <group>
+                    <title>Each group is narrow</title>
+                    <a href=""/>
+                    <a href=""/>
+                    <a href="">Custom card title</a>
+                    <a href="">Custom card title</a>
+                </group>
+            </links>
+        </misc>-->
+    </section-starting-page>
+
+</topic>

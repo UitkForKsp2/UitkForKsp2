@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<buildprofiles xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-profiles.xsd"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <variables>
+        <primary-color>iris</primary-color>
+        <header-logo>logo.png</header-logo>
+        <custom-favicons>favicon32.png,favicon96.png,favicon300.png,favicon500.png</custom-favicons>
+        <product-web-url>https://uitkforksp2.github.io</product-web-url>
+        <algolia-id>6SGZO6IMQ5</algolia-id>
+        <algolia-index>uitk_docs</algolia-index>
+        <algolia-api-key>12f95aa72ceedda787d5cd4b79c35fc4</algolia-api-key>
+        <web-root>https://uitkforksp2.github.io</web-root>
+    </variables>
+
+    <build-profile instance="docs">
+        <variables>
+            <noindex-content>true</noindex-content>
+        </variables>
+    </build-profile>
+
+    <footer>
+        <link href="https://github.com/UitkForKsp2">GitHub page</link>
+        <link href="https://github.com/UitkForKsp2/UitkForKsp2/issues">Report a bug</link>
+        <link href="https://discord.gg/hHW5gpHxfE">KSP2 Modding Society Discord</link>
+    </footer>
+</buildprofiles>
