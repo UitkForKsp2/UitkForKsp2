@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using KSP.Game;
+﻿using KSP.Game;
+using KSP.Input;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -221,7 +221,7 @@ public static class Extensions
     /// <summary>
     /// Disable game input when an element is focused.
     /// </summary>
-    /// <param name="element"></param>
+    /// <param name="element">The element to disable game input on focus for.</param>
     public static void DisableGameInputOnFocus(this VisualElement element)
     {
         element.RegisterCallback<FocusInEvent>(_ =>
@@ -229,68 +229,61 @@ public static class Extensions
             Log($"FocusInEvent: {element.GetType().Name} {element.name}");
             Log("\tDisabling game input");
             element.ReleaseMouse();
-            GameManager.Instance?.Game?.Input.Disable();
-
-            if (_mouseCheckCoroutine is not { IsRunning: true })
-            {
-                Log("\tStarting mouse button state check coroutine");
-                _mouseCheckCoroutine = new MouseCheckCoroutine(element).Start();
-            }
-            else
-            {
-                Log("\tCoroutine already running, not starting another one");
-            }
+            SetGameInputDisabled(true);
         });
+
         element.RegisterCallback<FocusOutEvent>(_ =>
         {
             Log($"FocusOutEvent: {element.GetType().Name} {element.name}");
             Log("\tEnabling game input");
-            GameManager.Instance?.Game?.Input.Enable();
-
-            if (_mouseCheckCoroutine is { IsRunning: true })
-            {
-                Log("\tStopping mouse button state check coroutine");
-                _mouseCheckCoroutine.Stop();
-            }
-            else
-            {
-                Log("\tCoroutine not running, not stopping it");
-            }
+            SetGameInputDisabled(false);
         });
-
-        if (element is TextField { multiline: false } textField)
-        {
-            textField.RegisterCallback<KeyUpEvent>(evt =>
-            {
-                if (evt.keyCode is not (KeyCode.Return or KeyCode.KeypadEnter))
-                {
-                    return;
-                }
-
-                Log($"KeyUpEvent Enter: {textField.GetType().Name} {textField.name}");
-                Log("\tReleasing mouse");
-
-                ReleaseTextFieldMouse(textField);
-
-                if (_mouseCheckCoroutine is { IsRunning: true })
-                {
-                    Log("\tStopping mouse button state check coroutine");
-                    _mouseCheckCoroutine.Stop();
-                }
-                else
-                {
-                    Log("\tCoroutine not running, not stopping it");
-                }
-            }, TrickleDown.TrickleDown);
-        }
     }
 
     #endregion
 
     /// <summary>
-    /// The coroutine used by DisableGameInputOnFocus.
+    /// Log a message to the console only in debug builds.
     /// </summary>
-    private static MouseCheckCoroutine _mouseCheckCoroutine;
+    /// <param name="message">The message to log.</param>
+    private static void Log(string message)
+    {
+#if !RELEASE
+        Debug.Log(message);
+#endif
+    }
+
+    /// <summary>
+    /// Disable or enable the game input.
+    /// </summary>
+    /// <param name="isDisabled">True to disable the game input, false to enable it.</param>
+    private static void SetGameInputDisabled(bool isDisabled)
+    {
+        if (GameManager.Instance is not { Game.InputManager: var inputManager })
+        {
+            UitkForKsp2Plugin.Logger.LogError(
+                "Attempted to enable/disable game input, but the game instance has not yet been initialized"
+            );
+            return;
+        }
+
+        if (isDisabled)
+        {
+            inputManager.SetInputLock(InputLocks.TimeWarpDisabled);
+            inputManager.SetInputLock(InputLocks.GlobalInputDisabled);
+            inputManager.SetInputLock(InputLocks.FlightInputDisabled);
+            inputManager.SetInputLock(InputLocks.OABInputDisabled);
+            inputManager.SetInputLock(InputLocks.MapViewInputDisabled);
+        }
+        else
+        {
+            inputManager.SetInputLock(InputLocks.TimeWarpEnabled);
+            inputManager.SetInputLock(InputLocks.GlobalInputEnabled);
+            inputManager.SetInputLock(InputLocks.FlightInputEnabled);
+            inputManager.SetInputLock(InputLocks.OABInputEnabled);
+            inputManager.SetInputLock(InputLocks.MapViewInputEnabled);
+        }
+    }
 
     /// <summary>
     /// Callback to recalculate element position when the geometry of an element changes.
@@ -313,132 +306,5 @@ public static class Extensions
 
         element.transform.position = calculatePosition(new Vector2(evt.newRect.width, evt.newRect.height));
         element.UnregisterCallback(geometryChanged);
-    }
-
-    /// <summary>
-    /// Release the focus and the mouse pointer capture from a text field.
-    /// </summary>
-    /// <param name="textField">The text field to release from.</param>
-    private static void ReleaseTextFieldMouse(TextField textField)
-    {
-        textField.Blur();
-        textField.ReleaseMouse();
-        textField.textInput.Blur();
-        textField.textInput.ReleaseMouse();
-        textField.textInput.textElement.Blur();
-        textField.textInput.textElement.ReleaseMouse();
-    }
-
-    /// <summary>
-    /// Coroutine which checks the state of the mouse button and releases the pointer and blurs the target element
-    /// if the left mouse button is clicked outside of the target element.
-    /// </summary>
-    /// <param name="target">The target element to check.</param>
-    private class MouseCheckCoroutine(VisualElement target = null)
-    {
-        public bool IsRunning { get; private set; }
-
-        private Coroutine _coroutineImpl;
-
-        /// <summary>
-        /// Start the coroutine.
-        /// </summary>
-        /// <returns>The started coroutine.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the coroutine is already running.</exception>
-        public MouseCheckCoroutine Start()
-        {
-            if (IsRunning)
-            {
-                throw new InvalidOperationException("Coroutine is already running");
-            }
-
-            _coroutineImpl = CoroutineUtil.Instance.StartCoroutine(CheckMouseButtonState());
-
-            return this;
-        }
-
-        /// <summary>
-        /// Stop the coroutine.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">Thrown if the coroutine is not running.</exception>
-        public void Stop()
-        {
-            if (!IsRunning)
-            {
-                throw new InvalidOperationException("Coroutine is not running");
-            }
-
-            CoroutineUtil.Instance.StopCoroutine(_coroutineImpl);
-            IsRunning = false;
-        }
-
-        /// <summary>
-        /// The actual coroutine implementation.
-        /// </summary>
-        /// <returns>IEnumerator for the coroutine.</returns>
-        private IEnumerator CheckMouseButtonState()
-        {
-            Log("Coroutine starting...");
-            if (IsRunning)
-            {
-                Log("Coroutine already running, exiting");
-                yield break;
-            }
-
-            IsRunning = true;
-            Log("Coroutine started");
-
-            while (true)
-            {
-                yield return new WaitForSeconds(0.1f);
-
-                Log("\tChecking mouse button state");
-
-                if (!Input.GetMouseButton((int)MouseButton.LeftMouse))
-                {
-                    continue;
-                }
-
-                Log("\t\tMouse button clicked");
-
-                // Check if current mouse position is outside of the position of element
-                // If so, then blur the text field
-                var mousePosition = Configuration.GetAdjustedMousePosition();
-                var targetBound = target.worldBound;
-
-                if (targetBound.Contains(mousePosition))
-                {
-                    continue;
-                }
-
-                Log("\t\t\tMouse position outside of element");
-
-                Log("\t\t\tBlurring element");
-                target.Blur();
-                target.ReleaseMouse();
-
-                if (target is TextField { multiline: false } textField)
-                {
-                    Log("\t\t\tTarget is text field, calling ReleaseTextFieldMouse");
-                    ReleaseTextFieldMouse(textField);
-                }
-
-                break;
-            }
-
-            Log("\tCoroutine ending...");
-            IsRunning = false;
-        }
-    }
-
-    /// <summary>
-    /// Log a message to the console only in debug builds.
-    /// </summary>
-    /// <param name="message">The message to log.</param>
-    private static void Log(string message)
-    {
-#if !RELEASE
-        Debug.Log(message);
-#endif
     }
 }

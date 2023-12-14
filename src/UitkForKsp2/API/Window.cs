@@ -27,7 +27,6 @@ public static class Window
         document.m_RootVisualElement = root;
         document.AddRootVisualElementToTree();
 
-        document.PostInitialize();
         return document;
     }
 
@@ -50,7 +49,6 @@ public static class Window
             SetupRootElement(rootElement, options);
         }
 
-        document.PostInitialize();
         return document;
     }
 
@@ -97,13 +95,13 @@ public static class Window
         {
             root.EnableHiding();
         }
-    }
 
-    private static void PostInitialize(this UIDocument document)
-    {
-        var root = document.rootVisualElement;
+        if (options.DisableGameInputForTextFields)
+        {
+            root.Query<TextField>().ForEach(textField => textField.DisableGameInputOnFocus());
+        }
 
-        // Clamp window to screen bounds
+        // Display window within screen bounds by default
         root.SetDefaultPosition(windowSize =>
             new Vector2(
                 Mathf.Clamp(
@@ -118,8 +116,6 @@ public static class Window
                 )
             )
         );
-
-        root.Query<TextField>().ForEach(textField => { textField.DisableGameInputOnFocus(); });
     }
 
     #region Deprecated
@@ -142,17 +138,17 @@ public static class Window
         bool makeDraggable = false
     )
     {
-        var window = Create(new WindowOptions
-        {
-            WindowId = windowId,
-            Parent = parent,
-            IsHidingEnabled = enableHiding,
-            MoveOptions = new MoveOptions
-            {
-                IsMovingEnabled = makeDraggable,
-                CheckScreenBounds = makeDraggable
-            }
-        });
+        var moveOptions = MoveOptions.Default;
+        moveOptions.IsMovingEnabled = makeDraggable;
+        moveOptions.CheckScreenBounds = makeDraggable;
+
+        var options = WindowOptions.Default;
+        options.WindowId = windowId;
+        options.Parent = parent;
+        options.IsHidingEnabled = enableHiding;
+        options.MoveOptions = moveOptions;
+
+        var window = Create(options);
 
         root = window.rootVisualElement;
         return window;
@@ -195,17 +191,17 @@ public static class Window
         bool makeDraggable = false
     )
     {
-        return Create(new WindowOptions
-        {
-            WindowId = windowId,
-            Parent = parent,
-            IsHidingEnabled = enableHiding,
-            MoveOptions = new MoveOptions
-            {
-                IsMovingEnabled = makeDraggable,
-                CheckScreenBounds = makeDraggable
-            }
-        }, uxml);
+        var moveOptions = MoveOptions.Default;
+        moveOptions.IsMovingEnabled = makeDraggable;
+        moveOptions.CheckScreenBounds = makeDraggable;
+
+        var options = WindowOptions.Default;
+        options.WindowId = windowId;
+        options.Parent = parent;
+        options.IsHidingEnabled = enableHiding;
+        options.MoveOptions = moveOptions;
+
+        return Create(options, uxml);
     }
 
     /// <summary>
@@ -245,17 +241,17 @@ public static class Window
         bool makeDraggable = false
     )
     {
-        return Create(new WindowOptions
-        {
-            WindowId = windowId,
-            Parent = parent,
-            IsHidingEnabled = enableHiding,
-            MoveOptions = new MoveOptions
-            {
-                IsMovingEnabled = makeDraggable,
-                CheckScreenBounds = makeDraggable
-            }
-        }, element);
+        var moveOptions = MoveOptions.Default;
+        moveOptions.IsMovingEnabled = makeDraggable;
+        moveOptions.CheckScreenBounds = makeDraggable;
+
+        var options = WindowOptions.Default;
+        options.WindowId = windowId;
+        options.Parent = parent;
+        options.IsHidingEnabled = enableHiding;
+        options.MoveOptions = moveOptions;
+
+        return Create(options, element);
     }
 
     /// <summary>

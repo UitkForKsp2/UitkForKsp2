@@ -5,6 +5,7 @@ namespace UitkForKsp2.API;
 /// <summary>
 /// Options for creating a window.
 /// </summary>
+[PublicAPI]
 public struct WindowOptions
 {
     /// <summary>
@@ -23,6 +24,11 @@ public struct WindowOptions
     public bool IsHidingEnabled { get; set; }
 
     /// <summary>
+    /// Should the game input be disabled when a text field is focused? This will only affect text fields
+    /// </summary>
+    public bool DisableGameInputForTextFields { get; set; }
+
+    /// <summary>
     /// Options for moving the window by dragging.
     /// </summary>
     public MoveOptions MoveOptions { get; set; }
@@ -35,6 +41,7 @@ public struct WindowOptions
         WindowId = null,
         Parent = null,
         IsHidingEnabled = true,
+        DisableGameInputForTextFields = true,
         MoveOptions = MoveOptions.Default
     };
 }
