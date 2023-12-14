@@ -11,6 +11,23 @@ namespace UitkForKsp2.API;
 [PublicAPI]
 public static class Extensions
 {
+    #region UIDocument extensions
+
+    /// <summary>
+    /// Automatically localize elements in a document. Only elements with a string property "text" whose value is a
+    /// localization key starting with '#' will be localized.
+    /// </summary>
+    /// <param name="document">The document in which to localize all localizable elements.</param>
+    /// <returns>The DocumentLocalization component which was added to the document.</returns>
+    public static DocumentLocalization EnableLocalization(this UIDocument document)
+    {
+        return document.gameObject.AddComponent<DocumentLocalization>();
+    }
+
+    #endregion
+
+    #region VisualElement extensions
+
     /// <summary>
     /// Set a property on a VisualElement.
     /// </summary>
@@ -98,17 +115,6 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Automatically localize elements in a document. Only elements with a string property "text" whose value is a
-    /// localization key starting with '#' will be localized.
-    /// </summary>
-    /// <param name="document">The document in which to localize all localizable elements.</param>
-    /// <returns>The DocumentLocalization component which was added to the document.</returns>
-    public static DocumentLocalization EnableLocalization(this UIDocument document)
-    {
-        return document.gameObject.AddComponent<DocumentLocalization>();
-    }
-
-    /// <summary>
     /// Set the default position of an element using a callback to calculate the position.
     /// </summary>
     /// <param name="element">The element to position.</param>
@@ -122,22 +128,6 @@ public static class Extensions
         geometryChanged = evt => { GeometryChangedHandler(evt, element, calculatePosition, geometryChanged); };
 
         element.RegisterCallback(geometryChanged);
-    }
-
-    private static void GeometryChangedHandler(
-        GeometryChangedEvent evt,
-        VisualElement element,
-        Func<Vector2, Vector2> calculatePosition,
-        EventCallback<GeometryChangedEvent> geometryChanged
-    )
-    {
-        if (evt.newRect.width == 0 || evt.newRect.height == 0)
-        {
-            return;
-        }
-
-        element.transform.position = calculatePosition(new Vector2(evt.newRect.width, evt.newRect.height));
-        element.UnregisterCallback(geometryChanged);
     }
 
     /// <summary>
@@ -163,8 +153,6 @@ public static class Extensions
         element.RegisterCallback<PointerMoveEvent>(evt => evt.StopPropagation());
     }
 
-    private static MouseCheckCoroutine _coroutine;
-
     /// <summary>
     /// Disable game input when an element is focused.
     /// </summary>
@@ -178,10 +166,10 @@ public static class Extensions
             element.ReleaseMouse();
             GameManager.Instance?.Game?.Input.Disable();
 
-            if (_coroutine is not { IsRunning: true })
+            if (_mouseCheckCoroutine is not { IsRunning: true })
             {
                 Log("\tStarting mouse button state check coroutine");
-                _coroutine = new MouseCheckCoroutine(element).Start();
+                _mouseCheckCoroutine = new MouseCheckCoroutine(element).Start();
             }
             else
             {
@@ -194,10 +182,10 @@ public static class Extensions
             Log("\tEnabling game input");
             GameManager.Instance?.Game?.Input.Enable();
 
-            if (_coroutine is { IsRunning: true })
+            if (_mouseCheckCoroutine is { IsRunning: true })
             {
                 Log("\tStopping mouse button state check coroutine");
-                _coroutine.Stop();
+                _mouseCheckCoroutine.Stop();
             }
             else
             {
@@ -219,10 +207,10 @@ public static class Extensions
 
                 ReleaseTextFieldMouse(textField);
 
-                if (_coroutine is { IsRunning: true })
+                if (_mouseCheckCoroutine is { IsRunning: true })
                 {
                     Log("\tStopping mouse button state check coroutine");
-                    _coroutine.Stop();
+                    _mouseCheckCoroutine.Stop();
                 }
                 else
                 {
@@ -232,6 +220,40 @@ public static class Extensions
         }
     }
 
+    #endregion
+
+    /// <summary>
+    /// The coroutine used by DisableGameInputOnFocus.
+    /// </summary>
+    private static MouseCheckCoroutine _mouseCheckCoroutine;
+
+    /// <summary>
+    /// Callback to recalculate element position when the geometry of an element changes.
+    /// </summary>
+    /// <param name="evt">The geometry changed event.</param>
+    /// <param name="element">The element to position.</param>
+    /// <param name="calculatePosition">The callback to calculate the position.</param>
+    /// <param name="geometryChanged">The handler itself.</param>
+    private static void GeometryChangedHandler(
+        GeometryChangedEvent evt,
+        VisualElement element,
+        Func<Vector2, Vector2> calculatePosition,
+        EventCallback<GeometryChangedEvent> geometryChanged
+    )
+    {
+        if (evt.newRect.width == 0 || evt.newRect.height == 0)
+        {
+            return;
+        }
+
+        element.transform.position = calculatePosition(new Vector2(evt.newRect.width, evt.newRect.height));
+        element.UnregisterCallback(geometryChanged);
+    }
+
+    /// <summary>
+    /// Release the focus and the mouse pointer capture from a text field.
+    /// </summary>
+    /// <param name="textField">The text field to release from.</param>
     private static void ReleaseTextFieldMouse(TextField textField)
     {
         textField.Blur();
@@ -242,18 +264,22 @@ public static class Extensions
         textField.textInput.textElement.ReleaseMouse();
     }
 
-    private class MouseCheckCoroutine
+    /// <summary>
+    /// Coroutine which checks the state of the mouse button and releases the pointer and blurs the target element
+    /// if the left mouse button is clicked outside of the target element.
+    /// </summary>
+    /// <param name="target">The target element to check.</param>
+    private class MouseCheckCoroutine(VisualElement target = null)
     {
-        private VisualElement _target;
-        public MouseCheckCoroutine(VisualElement target = null)
-        {
-            _target = target;
-        }
-
         public bool IsRunning { get; private set; }
 
         private Coroutine _coroutineImpl;
 
+        /// <summary>
+        /// Start the coroutine.
+        /// </summary>
+        /// <returns>The started coroutine.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the coroutine is already running.</exception>
         public MouseCheckCoroutine Start()
         {
             if (IsRunning)
@@ -266,6 +292,10 @@ public static class Extensions
             return this;
         }
 
+        /// <summary>
+        /// Stop the coroutine.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if the coroutine is not running.</exception>
         public void Stop()
         {
             if (!IsRunning)
@@ -277,6 +307,10 @@ public static class Extensions
             IsRunning = false;
         }
 
+        /// <summary>
+        /// The actual coroutine implementation.
+        /// </summary>
+        /// <returns>IEnumerator for the coroutine.</returns>
         private IEnumerator CheckMouseButtonState()
         {
             Log("Coroutine starting...");
@@ -305,7 +339,7 @@ public static class Extensions
                 // Check if current mouse position is outside of the position of element
                 // If so, then blur the text field
                 var mousePosition = Configuration.GetAdjustedMousePosition();
-                var targetBound = _target.worldBound;
+                var targetBound = target.worldBound;
 
                 if (targetBound.Contains(mousePosition))
                 {
@@ -315,10 +349,10 @@ public static class Extensions
                 Log("\t\t\tMouse position outside of element");
 
                 Log("\t\t\tBlurring element");
-                _target.Blur();
-                _target.ReleaseMouse();
+                target.Blur();
+                target.ReleaseMouse();
 
-                if (_target is TextField { multiline: false } textField)
+                if (target is TextField { multiline: false } textField)
                 {
                     Log("\t\t\tTarget is text field, calling ReleaseTextFieldMouse");
                     ReleaseTextFieldMouse(textField);
@@ -332,6 +366,10 @@ public static class Extensions
         }
     }
 
+    /// <summary>
+    /// Log a message to the console only in debug builds.
+    /// </summary>
+    /// <param name="message">The message to log.</param>
     private static void Log(string message)
     {
         #if !RELEASE
