@@ -24,6 +24,33 @@ public static class Extensions
         return document.gameObject.AddComponent<DocumentLocalization>();
     }
 
+    /// <summary>
+    /// Show a UIDocument by setting its root VisualElement's display style to DisplayStyle.Flex.
+    /// </summary>
+    /// <param name="document">The document to show.</param>
+    public static void Show(this UIDocument document)
+    {
+        document.rootVisualElement.Show();
+    }
+
+    /// <summary>
+    /// Hide a UIDocument by setting its root VisualElement's display style to DisplayStyle.None.
+    /// </summary>
+    /// <param name="document">The document to hide.</param>
+    public static void Hide(this UIDocument document)
+    {
+        document.rootVisualElement.Hide();
+    }
+
+    /// <summary>
+    /// Toggle the display of a UIDocument between DisplayStyle.Flex and DisplayStyle.None.
+    /// </summary>
+    /// <param name="document">The document to toggle the display of.</param>
+    public static void ToggleDisplay(this UIDocument document)
+    {
+        document.rootVisualElement.ToggleDisplay();
+    }
+
     #endregion
 
     #region VisualElement extensions
@@ -74,6 +101,44 @@ public static class Extensions
             element.Add(child);
         }
 
+        return element;
+    }
+
+    /// <summary>
+    /// Show a VisualElement by setting its display style to DisplayStyle.Flex.
+    /// </summary>
+    /// <param name="element">The element to show.</param>
+    /// <typeparam name="T">The type of the element which must be a subclass of VisualElement.</typeparam>
+    /// <returns>The element which was shown.</returns>
+    public static T Show<T>(this T element) where T : VisualElement
+    {
+        element.style.display = DisplayStyle.Flex;
+        return element;
+    }
+
+    /// <summary>
+    /// Hide a VisualElement by setting its display style to DisplayStyle.None.
+    /// </summary>
+    /// <param name="element">The element to hide.</param>
+    /// <typeparam name="T">The type of the element which must be a subclass of VisualElement.</typeparam>
+    /// <returns>The element which was hidden.</returns>
+    public static T Hide<T>(this T element) where T : VisualElement
+    {
+        element.style.display = DisplayStyle.None;
+        return element;
+    }
+
+    /// <summary>
+    /// Toggle the display of a VisualElement between DisplayStyle.Flex and DisplayStyle.None.
+    /// </summary>
+    /// <param name="element">The element to toggle the display of.</param>
+    /// <typeparam name="T">The type of the element which must be a subclass of VisualElement.</typeparam>
+    /// <returns>The element which was toggled.</returns>
+    public static T ToggleDisplay<T>(this T element) where T : VisualElement
+    {
+        element.style.display = element.style.display == DisplayStyle.None
+            ? DisplayStyle.Flex
+            : DisplayStyle.None;
         return element;
     }
 
@@ -372,8 +437,8 @@ public static class Extensions
     /// <param name="message">The message to log.</param>
     private static void Log(string message)
     {
-        #if !RELEASE
+#if !RELEASE
         Debug.Log(message);
-        #endif
+#endif
     }
 }
