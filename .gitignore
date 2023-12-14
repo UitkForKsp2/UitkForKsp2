@@ -13,7 +13,7 @@ _UpgradeReport_Files/
 *.dll
 !plugin_template/lib/*.dll
 plugin_template/addressables/*
-!plugin_template/addressables/PLACE_kerbalui_HERE
+!plugin_template/addressables/.gitkeep
 
 # Rider
 
