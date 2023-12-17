@@ -4,13 +4,13 @@
     <PropertyGroup>
         <ImplicitUsings>false</ImplicitUsings>
         <LangVersion>9</LangVersion>
-        <RootNamespace>UitkForKsp2.Controls</RootNamespace>
+        <RootNamespace>UitkForKsp2.Unity</RootNamespace>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
     </PropertyGroup>
     <!-- Files to compile -->
     <ItemGroup>
-        <Compile Remove="UitkForKsp2Unity/**"/>
-        <Compile Include="UitkForKsp2Unity/Packages/uitkforksp2.controls/Runtime/**/*.cs"/>
+        <Compile Remove="UitkForKsp2.Unity/**"/>
+        <Compile Include="UitkForKsp2.Unity/Packages/uitkforksp2.unity/Runtime/**/*.cs"/>
     </ItemGroup>
     <!-- Package references -->
     <ItemGroup>

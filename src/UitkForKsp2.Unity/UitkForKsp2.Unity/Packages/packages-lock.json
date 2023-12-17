@@ -64,8 +64,8 @@
       },
       "url": "https://packages.unity.com"
     },
-    "uitkforksp2.controls": {
-      "version": "file:uitkforksp2.controls",
+    "uitkforksp2.unity": {
+      "version": "file:uitkforksp2.unity",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
