@@ -1,3 +1,3 @@
-[submodule "src/UitkForKsp2.Controls/UitkForKsp2Unity/Packages/uitkforksp2.controls"]
-	path = src/UitkForKsp2.Controls/UitkForKsp2Unity/Packages/uitkforksp2.controls
-	url = https://github.com/UitkForKsp2/UitkForKsp2.Controls
+[submodule "src/UitkForKsp2.Unity/UitkForKsp2.Unity/Packages/uitkforksp2.unity"]
+	path = src/UitkForKsp2.Unity/UitkForKsp2.Unity/Packages/uitkforksp2.unity
+	url = https://github.com/UitkForKsp2/UitkForKsp2.Unity
