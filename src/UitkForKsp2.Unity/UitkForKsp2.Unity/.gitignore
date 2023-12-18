@@ -24,8 +24,9 @@
 # Visual Studio cache directory
 .vs/
 
-# JetBrains folder
-.idea/
+## JetBrains folder
+#.idea
+#!.idea/.idea.UitkForKsp2.Unity/.idea/inspectionProfiles/Project_Default.xml
 
 # Gradle cache directory
 .gradle/
