@@ -4,6 +4,8 @@
     "com.unity.ide.rider": "3.0.27",
     "com.unity.ide.visualstudio": "2.0.22",
     "com.unity.ide.vscode": "1.2.5",
+    "io.arfinity.unity.packages.sassexecutables": "https://github.com/arfinity-io/unity-sassexecutables.git?path=/Package#v1.0.2",
+    "io.arfinity.unity.packages.sassimporter": "https://github.com/arfinity-io/unity-sassimporter.git?path=/Package#v1.1.1",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",

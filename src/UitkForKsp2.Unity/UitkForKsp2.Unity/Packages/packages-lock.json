@@ -64,6 +64,20 @@
       },
       "url": "https://packages.unity.com"
     },
+    "io.arfinity.unity.packages.sassexecutables": {
+      "version": "https://github.com/arfinity-io/unity-sassexecutables.git?path=/Package#v1.0.2",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "150307026891d79079eb15c9844b0b989ee274dd"
+    },
+    "io.arfinity.unity.packages.sassimporter": {
+      "version": "https://github.com/arfinity-io/unity-sassimporter.git?path=/Package#v1.1.1",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "31a14af0a3d47c8818674a4c9116fd73533e2abb"
+    },
     "uitkforksp2.unity": {
       "version": "file:uitkforksp2.unity",
       "depth": 0,
