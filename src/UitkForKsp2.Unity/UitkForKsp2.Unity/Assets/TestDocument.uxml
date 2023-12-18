@@ -1,16 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:VisualElement class="root" style="flex-grow: 1;">
-        <ui:Label tabindex="-1" text="Label" display-tooltip-when-elided="true" style="-unity-font-definition: url(&apos;project://database/Packages/uitkforksp2.controls/Assets/Theme/Fonts/FutureMillennium/FutureMillennium%20Black%20SDF.asset?fileID=11400000&amp;guid=321d7d8f350be194db2f510157c9f553&amp;type=2#FutureMillennium Black SDF&apos;); font-size: 28px; color: rgb(255, 255, 255);" />
-        <ui:Button text="My Button" display-tooltip-when-elided="true" />
-        <ui:Toggle label="Toggle" class="toggle" />
-        <ui:Foldout text="Foldout">
+        <ui:VisualElement name="title-bar" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
+            <ui:Button text="←" display-tooltip-when-elided="true" />
+            <ui:Label tabindex="-1" text="Settings Menu" display-tooltip-when-elided="true" />
+        </ui:VisualElement>
+        <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1">
+            <ui:Label tabindex="-1" text="Label" display-tooltip-when-elided="true" style="-unity-font-definition: url(&apos;project://database/Packages/uitkforksp2.unity/Assets/Theme/Fonts/FutureMillennium/FutureMillennium%20Black%20SDF.asset?fileID=11400000&amp;guid=321d7d8f350be194db2f510157c9f553&amp;type=2#FutureMillennium Black SDF&apos;); font-size: 28px; color: rgb(255, 255, 255);" />
+            <ui:Button text="My Button" display-tooltip-when-elided="true" />
+            <ui:Toggle label="Toggle" class="toggle" />
+            <ui:Foldout text="Foldout">
+                <ui:Button text="Button" display-tooltip-when-elided="true" />
+                <ui:TextField picking-mode="Ignore" label="Text Field" value="filler text" />
+                <ui:Slider picking-mode="Ignore" label="Slider" value="42" high-value="100" />
+                <ui:RadioButtonGroup label="Radio Button Group" value="-1" choices="1,2,3" />
+                <ui:DropdownField label="Dropdown" index="-1" choices="a,b,c" />
+            </ui:Foldout>
             <ui:DropdownField label="Dropdown" index="-1" choices="1,2,3" />
-            <ui:TextField picking-mode="Ignore" label="Text Field" value="filler text" />
-            <ui:Slider picking-mode="Ignore" label="Slider" value="42" high-value="100" />
-        </ui:Foldout>
-        <ui:EnumField label="Enum" type="UnityEngine.TextAlignment, UnityEngine.TextRenderingModule" value="Center" />
-        <ui:RadioButtonGroup label="Radio Button Group" value="-1" choices="1,2,3" />
-        <ui:Label tabindex="-1" text="Label" display-tooltip-when-elided="true" style="font-size: 51px; -unity-font-definition: url(&apos;project://database/Packages/uitkforksp2.controls/Assets/Theme/Fonts/LEDCounter7/led_counter-7%20SDF.asset?fileID=11400000&amp;guid=33e1e97b69ec355479ba49006381fc06&amp;type=2#led_counter-7 SDF&apos;); color: rgb(255, 255, 255);" />
+            <ui:EnumField label="Enum" type="UnityEngine.TextAlignment, UnityEngine.TextRenderingModule" value="Center" />
+            <ui:SliderInt picking-mode="Ignore" label="SliderInt" value="42" high-value="100" />
+            <ui:MinMaxSlider picking-mode="Ignore" label="Min/Max Slider" min-value="10" max-value="12" low-limit="-10" high-limit="40" />
+            <ui:IntegerField label="Integer Field" value="42" />
+            <ui:FloatField label="Float Field" value="42,2" />
+            <ui:LongField label="Long Field" value="42" />
+            <ui:DoubleField label="Double Field" value="42,2" />
+            <ui:Hash128Field label="Hash128 Field" value="885eea9fcca73bdadde4ecd6a3af1312" />
+            <ui:Vector2Field label="Vec2 Field" />
+            <ui:Vector3Field label="Vec3 Field" />
+            <ui:Vector4Field label="Vec4 Field" />
+            <ui:RectField label="Rect" />
+            <ui:BoundsField label="Bounds" />
+            <ui:UnsignedIntegerField label="Unsigned Integer Field" value="42" />
+            <ui:UnsignedLongField label="Unsigned Long Field" value="42" />
+            <ui:Vector2IntField label="Vector2Int" />
+            <ui:Vector3IntField label="Vector3Int" />
+            <ui:RectIntField label="RectInt" />
+            <ui:BoundsIntField label="BoundsInt" />
+        </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>
