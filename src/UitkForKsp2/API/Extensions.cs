@@ -254,6 +254,11 @@ public static class Extensions
     }
 
     /// <summary>
+    /// The statuses of all input definitions before they were disabled.
+    /// </summary>
+    private static Dictionary<string, bool> _inputStatuses = new();
+
+    /// <summary>
     /// Disable or enable the game input.
     /// </summary>
     /// <param name="isDisabled">True to disable the game input, false to enable it.</param>
@@ -269,19 +274,32 @@ public static class Extensions
 
         if (isDisabled)
         {
-            inputManager.SetInputLock(InputLocks.TimeWarpDisabled);
+            // Save the current input statuses so we can restore them later
+            foreach (var inputDefinition in inputManager._inputDefinitions)
+            {
+                _inputStatuses[inputDefinition.Key] = inputDefinition.Value._enabled;
+            }
+
+            // Disable all input
             inputManager.SetInputLock(InputLocks.GlobalInputDisabled);
             inputManager.SetInputLock(InputLocks.FlightInputDisabled);
+            inputManager.SetInputLock(InputLocks.EVAInputDisabled);
             inputManager.SetInputLock(InputLocks.OABInputDisabled);
             inputManager.SetInputLock(InputLocks.MapViewInputDisabled);
+            inputManager.SetInputLock(InputLocks.RDInputDisabled);
+            inputManager.SetInputLock(InputLocks.KSCInputDisabled);
+            inputManager.SetInputLock(InputLocks.AudioInputDisabled);
         }
         else
         {
-            inputManager.SetInputLock(InputLocks.TimeWarpEnabled);
-            inputManager.SetInputLock(InputLocks.GlobalInputEnabled);
-            inputManager.SetInputLock(InputLocks.FlightInputEnabled);
-            inputManager.SetInputLock(InputLocks.OABInputEnabled);
-            inputManager.SetInputLock(InputLocks.MapViewInputEnabled);
+            // Restore the original input statuses
+            foreach (var inputDefinition in inputManager._inputDefinitions)
+            {
+                if (_inputStatuses.TryGetValue(inputDefinition.Key, out var wasEnabled))
+                {
+                    inputDefinition.Value.SetEnabled(wasEnabled, true);
+                }
+            }
         }
     }
 
