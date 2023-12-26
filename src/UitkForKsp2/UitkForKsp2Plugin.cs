@@ -4,9 +4,7 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using KSP.Game;
 using UitkForKsp2.API;
-using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
@@ -65,7 +63,7 @@ public class UitkForKsp2Plugin : BaseUnityPlugin
 
         // Register custom controls
         var controlsAssembly = Assembly.LoadFile(
-            Path.Combine(Paths.PluginPath, ModGuid, "UitkForKsp2.Controls.dll")
+            Path.Combine(Paths.PluginPath, ModGuid, "UitkForKsp2.Unity.dll")
         );
         CustomControls.RegisterFromAssembly(controlsAssembly);
 
