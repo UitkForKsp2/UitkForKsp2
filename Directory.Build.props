@@ -15,8 +15,8 @@
 
     <PropertyGroup Label="Build and namespace configuration">
         <SolutionDir Condition="'$(SolutionDir)'==''">$(MSBuildThisFileDirectory)</SolutionDir>
-        <PluginBinPath>$(SolutionDir)build/bin/plugin</PluginBinPath>
-        <PatcherBinPath>$(SolutionDir)build/bin/patcher</PatcherBinPath>
+        <PluginBinPath>$(SolutionDir)build/bin/plugin/$(Configuration)</PluginBinPath>
+        <PatcherBinPath>$(SolutionDir)build/bin/patcher/$(Configuration)</PatcherBinPath>
         <BaseOutputPath>$(PluginBinPath)/$(MSBuildProjectName)</BaseOutputPath>
         <BaseIntermediateOutputPath>$(SolutionDir)build/obj/plugin/$(MSBuildProjectName)</BaseIntermediateOutputPath>
         <AssemblyName>$(MSBuildProjectName)</AssemblyName>
@@ -52,9 +52,9 @@
             <Description>@(Swinfo -> '%(description)')</Description>
             <RepositoryType>git</RepositoryType>
             <RepositoryUrl>@(Swinfo -> '%(source)')</RepositoryUrl>
-            <BepInExPluginGuid>$(ModId)</BepInExPluginGuid>
-            <BepInExPluginName>$(Product)</BepInExPluginName>
-            <BepInExPluginVersion>$(Version)</BepInExPluginVersion>
+            <SpaceWarpPluginGuid>$(ModId)</SpaceWarpPluginGuid>
+            <SpaceWarpPluginName>$(Product)</SpaceWarpPluginName>
+            <SpaceWarpPluginVersion>$(Version)</SpaceWarpPluginVersion>
         </PropertyGroup>
     </Target>
 </Project>
