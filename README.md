@@ -30,13 +30,13 @@ This mod brings Unity UI Toolkit support to Kerbal Space Program 2.
       [latest release of UitkForKsp2.Unity](https://github.com/UitkForKsp2/UitkForKsp2.Unity/releases/latest).
     - Build it yourself from the included Unity project:
         1. Run the command `git submodule update --remote` to fetch the latest version of the submodule.
-        2. Add the project folder `src/UitkForKsp2.Controls/UitkForKsp2Unity` to Unity Hub and open it.
+        2. Add the project folder `src/UitkForKsp2.Unity/UitkForKsp2.Unity` to Unity Hub and open it.
         3. Open `Windows -> Asset Management -> Addressables -> Groups`.
         4. In this window click on `Build -> New Build -> Default Build Script`.
         5. You will find the build addressables in
-           `src/UitkForKsp2.Controls/UitkForKsp2Unity/Library/com.unity.addressables/aa/Windows/`.
+           `src/UitkForKsp2.Unity/UitkForKsp2.Unity/Library/com.unity.addressables/aa/Windows/`.
 2. Copy the contents of either the downloaded `kerbalui.zip` file or the built
-   `src/UitkForKsp2.Controls/UitkForKsp2Unity/Library/com.unity.addressables/aa/Windows/` folder into
+   `src/UitkForKsp2.Uitk/UitkForKsp2.Unity/Library/com.unity.addressables/aa/Windows/` folder into
    `plugin_template/addressables`, so that the following hierarchy is created:
    ```
     plugin_template/addressables
