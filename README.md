@@ -27,7 +27,7 @@ This mod brings Unity UI Toolkit support to Kerbal Space Program 2.
 
 1. Get a copy of the `kerbalui` addressables. You have two options:
     - Download the latest `kerbalui.zip` from the
-      [latest release of UitkForKsp2.Controls](https://github.com/UitkForKsp2/UitkForKsp2.Controls/releases/latest).
+      [latest release of UitkForKsp2.Unity](https://github.com/UitkForKsp2/UitkForKsp2.Unity/releases/latest).
     - Build it yourself from the included Unity project:
         1. Run the command `git submodule update --remote` to fetch the latest version of the submodule.
         2. Add the project folder `src/UitkForKsp2.Controls/UitkForKsp2Unity` to Unity Hub and open it.
