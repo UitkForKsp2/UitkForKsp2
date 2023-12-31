@@ -7,7 +7,7 @@ This mod brings Unity UI Toolkit support to Kerbal Space Program 2.
 ### Recommended
 
 - Download the latest [ckan.exe](https://github.com/ksp-ckan/ckan/releases/latest) and place it into your KSP2 folder
-- Open CKAN, click the checkbox next to `UITK for KSP2` in the list of mods and click the "Apply changes" button in the
+- Open CKAN, click the checkbox next to `UITK for KSP 2` in the list of mods and click the "Apply changes" button in the
   toolbar at the top.
 
 ### Manual
