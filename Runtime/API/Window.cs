@@ -18,7 +18,7 @@ public static class Window
 
     private static MethodInfo _addRootVisualElementToTree =
         typeof(UIDocument).GetMethod("AddRootVisualElementToTree", BindingFlags.Instance | BindingFlags.NonPublic)!;
-    
+
     /// <summary>
     /// Creates an empty UIDocument.
     /// </summary>
@@ -39,7 +39,7 @@ public static class Window
         return document;
     }
 
-    
+
     private static FieldInfo _sourceAsset =
         typeof(UIDocument).GetField("sourceAsset", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
@@ -100,7 +100,7 @@ public static class Window
         return document;
     }
 
-    private static void SetupRootElement(VisualElement? root, WindowOptions options)
+    public static void SetupRootElement(VisualElement? root, WindowOptions options)
     {
         if (options.MoveOptions.IsMovingEnabled)
         {
