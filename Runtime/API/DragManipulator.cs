@@ -1,5 +1,6 @@
 ﻿using System;
 using UitkForKsp2;
+using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -80,7 +81,7 @@ public class DragManipulator : IManipulator
             return;
         }
 
-        var delta = evt.localPosition - _offset;
+        var delta = (evt.localPosition - _offset) * UitkForKsp2Plugin.PanelSettings.scale;
         var newPosition = target.transform.position + delta;
 
         if (!AllowDraggingOffScreen)
@@ -88,12 +89,12 @@ public class DragManipulator : IManipulator
             newPosition.x = Mathf.Clamp(
                 newPosition.x,
                 0,
-                Configuration.CurrentScreenWidth - _target.resolvedStyle.width
+                (ReferenceResolution.Width/UitkForKsp2Plugin.PanelSettings.scale) - _target.resolvedStyle.width
             );
             newPosition.y = Mathf.Clamp(
                 newPosition.y,
                 0,
-                Configuration.CurrentScreenHeight - _target.resolvedStyle.height
+                (ReferenceResolution.Height/UitkForKsp2Plugin.PanelSettings.scale) - _target.resolvedStyle.height
             );
         }
 

@@ -123,12 +123,12 @@ public static class Window
                 Mathf.Clamp(
                     root.transform.position.x,
                     0,
-                    Configuration.CurrentScreenWidth - windowSize.x
+                    ReferenceResolution.Width - windowSize.x
                 ),
                 Mathf.Clamp(
                     root.transform.position.y,
                     0,
-                    Configuration.CurrentScreenHeight - windowSize.y
+                    ReferenceResolution.Height - windowSize.y
                 )
             )
         );

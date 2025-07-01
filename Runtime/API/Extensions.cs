@@ -207,8 +207,8 @@ public static class Extensions
     public static void CenterByDefault(this VisualElement element)
     {
         element.SetDefaultPosition(windowSize => new Vector2(
-            (Configuration.CurrentScreenWidth - windowSize.x) / 2,
-            (Configuration.CurrentScreenHeight - windowSize.y) / 2
+            (ReferenceResolution.Width - windowSize.x) / 2,
+            (ReferenceResolution.Height - windowSize.y) / 2
         ));
     }
 

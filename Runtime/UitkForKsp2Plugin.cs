@@ -49,7 +49,13 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     public static void InitializeUitkForKsp2()
     {
         LoadPanelSettings();
-        Configuration.Initialize(ReduxLib.ReduxLib.ReduxCoreConfig);
+        PanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+        PanelSettings.referenceResolution = new Vector2Int(
+            ReferenceResolution.Width,
+            ReferenceResolution.Height
+        );
+        PanelSettings.scale = 1;
+        _applyPanelSettings.Invoke(PanelSettings, new object[] { });
         /*
             Redo configuration once the game exists
             Configuration.Initialize();
@@ -63,6 +69,12 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
         Logger.LogInfo("Initialized!");
     }
 
+    private static MethodInfo _applyPanelSettings = typeof(PanelSettings).GetMethod("ApplyPanelSettings", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    public static void RescalePercent(float percent)
+    {
+        PanelSettings.scale = percent / 100f;
+        _applyPanelSettings.Invoke(PanelSettings, new object[] { });
+    }
     private static void LoadPanelSettings()
     {
         try
