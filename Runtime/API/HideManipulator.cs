@@ -8,8 +8,7 @@ namespace UitkForKsp2.API;
 /// </summary>
 public class HideManipulator : IManipulator
 {
-    private bool _isHidden;
-    private DisplayStyle _originalDisplayStyle;
+    private Visibility _originalVisibility;
 
     private VisualElement _target;
 
@@ -26,25 +25,23 @@ public class HideManipulator : IManipulator
                 UitkForKsp2Plugin.Logger.LogError("HideManipulator: GameManager.Instance is null.");
                 return;
             }
-
+            _originalVisibility = value.style.visibility.value;
             IInputManager.Instance.BindHideAction(ToggleHidden);
 
             _target = value;
         }
     }
 
-    private void ToggleHidden()
+    private void ToggleHidden(bool hide)
     {
-        if (_isHidden)
+        if (!hide)
         {
-            _isHidden = false;
-            _target.style.display = _originalDisplayStyle;
+            _target.style.visibility = _originalVisibility;
         }
         else
         {
-            _isHidden = true;
-            _originalDisplayStyle = _target.style.display.value;
-            _target.style.display = DisplayStyle.None;
+            _originalVisibility = _target.style.visibility.value;
+            _target.style.visibility = Visibility.Hidden;
         }
     }
 }
