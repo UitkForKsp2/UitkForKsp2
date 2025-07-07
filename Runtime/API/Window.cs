@@ -72,8 +72,8 @@ public static class Window
     {
         var gameObject = new GameObject(options.WindowId ?? $"ui-{Guid.NewGuid()}");
         UnityObject.DontDestroyOnLoad(gameObject);
-        gameObject.hideFlags |= HideFlags.HideAndDontSave;
-
+        gameObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+        
         var document = gameObject.AddComponent<UIDocument>();
 
         document.panelSettings = UitkForKsp2Plugin.PanelSettings;
