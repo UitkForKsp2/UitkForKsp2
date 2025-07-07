@@ -1,4 +1,6 @@
-﻿using ReduxLib.GameInterfaces;
+﻿using System;
+using ReduxLib.GameInterfaces;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -8,6 +10,7 @@ namespace UitkForKsp2.API;
 /// </summary>
 public class HideManipulator : IManipulator
 {
+    private bool _alreadySavedVisibility;
     private Visibility _originalVisibility;
 
     private VisualElement _target;
@@ -36,10 +39,12 @@ public class HideManipulator : IManipulator
     {
         if (!hide)
         {
+            _alreadySavedVisibility = false;
             _target.style.visibility = _originalVisibility;
         }
-        else
+        else if (!_alreadySavedVisibility)
         {
+            _alreadySavedVisibility = true;
             _originalVisibility = _target.style.visibility.value;
             _target.style.visibility = Visibility.Hidden;
         }
