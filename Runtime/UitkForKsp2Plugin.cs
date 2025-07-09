@@ -2,12 +2,7 @@
 global using UnityObject = UnityEngine.Object;
 using System;
 using System.Reflection;
-// using BepInEx;
-// using BepInEx.Logging;
-// using HarmonyLib;
-
 using UitkForKsp2.API;
-using UitkForKsp2.Controls;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -32,7 +27,12 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     internal static ILogger Logger;
 
     private const string PanelSettingsLabel = "kerbalui";
-    
+
+    private static readonly MethodInfo ApplyPanelSettings = typeof(PanelSettings).GetMethod(
+        "ApplyPanelSettings",
+        BindingFlags.Instance | BindingFlags.NonPublic
+    )!;
+
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     public static void AttachToReduxLib()
@@ -45,7 +45,7 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
         Logger = ReduxLib.ReduxLib.GetLogger("UITK For KSP2");
         Logger.LogInfo("Pre-initialized");
     }
-    
+
     public static void InitializeUitkForKsp2()
     {
         LoadPanelSettings();
@@ -56,31 +56,20 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
             ReferenceResolution.Height
         );
         PanelSettings.scale = 1;
-        _applyPanelSettings.Invoke(PanelSettings, new object[] { });
-        /*
-            Redo configuration once the game exists
-            Configuration.Initialize();
-        */
-        // Harmony.CreateAndPatchAll(typeof(UitkForKsp2Plugin).Assembly);
-
-        // Register custom controls
-        // var controlsAssembly = typeof(BaseControl).Assembly;
-        // CustomControls.RegisterFromAssembly(controlsAssembly);
+        ApplyPanelSettings.Invoke(PanelSettings, new object[] { });
 
         Logger.LogInfo("Initialized!");
     }
 
-    private static MethodInfo _applyPanelSettings = typeof(PanelSettings).GetMethod("ApplyPanelSettings", BindingFlags.Instance | BindingFlags.NonPublic)!;
     public static void RescalePercent(float percent)
     {
         PanelSettings.scale = percent / 100f;
-        _applyPanelSettings.Invoke(PanelSettings, new object[] { });
+        ApplyPanelSettings.Invoke(PanelSettings, new object[] { });
     }
     private static void LoadPanelSettings()
     {
         try
         {
-
             var panelSettingsHandle = Addressables.LoadAssetAsync<PanelSettings>(PanelSettingsLabel);
             panelSettingsHandle.WaitForCompletion();
             if (panelSettingsHandle.Status == AsyncOperationStatus.Failed)

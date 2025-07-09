@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using ReduxLib.GameInterfaces;
-// using I2.Loc;
 using UitkForKsp2;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,7 +18,7 @@ public class DocumentLocalization : MonoBehaviour
 {
     private readonly Dictionary<VisualElement, string> _elementDictionary = new();
 
-    
+
     private void Awake()
     {
         var document = gameObject.GetComponentInParent<UIDocument>(includeInactive: true);
@@ -37,13 +36,13 @@ public class DocumentLocalization : MonoBehaviour
     /// <param name="element">The element to register.</param>
     public void RegisterElement(VisualElement element)
     {
-        var textProperty = element?.GetType().GetProperty("text");
+        PropertyInfo? textProperty = element?.GetType().GetProperty("text");
         if (textProperty?.GetValue(element) is not string key || string.IsNullOrEmpty(key) || key[0] != '#')
         {
             return;
         }
 
-        var trimmedKey = key.TrimStart('#');
+        string? trimmedKey = key.TrimStart('#');
         _elementDictionary[element] = trimmedKey;
         UpdateElementLocalization(element, trimmedKey);
     }
@@ -70,9 +69,9 @@ public class DocumentLocalization : MonoBehaviour
     /// </summary>
     public void Localize()
     {
-        foreach (var item in _elementDictionary)
+        foreach ((VisualElement key, string value) in _elementDictionary)
         {
-            UpdateElementLocalization(item.Key, item.Value);
+            UpdateElementLocalization(key, value);
         }
     }
 
@@ -85,8 +84,8 @@ public class DocumentLocalization : MonoBehaviour
 
         RegisterElement(element);
 
-        var hierarchy = element.hierarchy;
-        for (var i = 0; i < hierarchy.childCount; i++)
+        VisualElement.Hierarchy hierarchy = element.hierarchy;
+        for (int i = 0; i < hierarchy.childCount; i++)
         {
             RegisterElementsInternal(hierarchy.ElementAt(i));
         }
@@ -94,10 +93,9 @@ public class DocumentLocalization : MonoBehaviour
 
     private static void UpdateElementLocalization(VisualElement element, string localizationKey)
     {
-        var localization = ILocalizer.Instance.GetTranslation(localizationKey);
+        string? localization = ILocalizer.Instance.GetTranslation(localizationKey);
         if (localization == null)
         {
-            // TODO: Re-add logging
             UitkForKsp2Plugin.Logger.LogError($"Localization key '{localizationKey}' not found");
         }
         else
