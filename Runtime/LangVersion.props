@@ -2,5 +2,8 @@
   <PropertyGroup>
     <LangVersion>11</LangVersion>
     <Nullable Condition="'$(AssemblyName)' != 'Assembly-CSharp'">enable</Nullable>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <TargetRefPath>docs/$(AssemblyName).dll</TargetRefPath>
+    <DocumentationFile>docs/$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 </Project>
