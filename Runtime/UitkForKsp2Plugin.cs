@@ -23,10 +23,14 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     /// as having multiple panels in use will negatively impact performance.
     /// </summary>
     public static PanelSettings PanelSettings { get; private set; }
+    
+    public static PanelSettings FixedPanelSettings { get; private set; }
 
     internal static ILogger Logger;
 
     private const string PanelSettingsLabel = "kerbalui";
+    
+    private const string FixedPanelSettingsLabel = "Packages/uitkforksp2.controls/Assets/UI Toolkit/FixedKerbalPanelSettings.asset";
 
     private static readonly MethodInfo ApplyPanelSettings = typeof(PanelSettings).GetMethod(
         "ApplyPanelSettings",
@@ -50,13 +54,21 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     {
         LoadPanelSettings();
         PanelSettings.sortingOrder = 0;
+        FixedPanelSettings.sortingOrder = 0;
         PanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+        FixedPanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
         PanelSettings.referenceResolution = new Vector2Int(
             ReferenceResolution.Width,
             ReferenceResolution.Height
         );
+        FixedPanelSettings.referenceResolution = new Vector2Int(
+            ReferenceResolution.Width,
+            ReferenceResolution.Height
+        );
         PanelSettings.scale = 1;
+        FixedPanelSettings.scale = 1;
         ApplyPanelSettings.Invoke(PanelSettings, new object[] { });
+        ApplyPanelSettings.Invoke(FixedPanelSettings, new object[] { });
 
         Logger.LogInfo("Initialized!");
     }
@@ -66,6 +78,7 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
         PanelSettings.scale = percent / 100f;
         ApplyPanelSettings.Invoke(PanelSettings, new object[] { });
     }
+    
     private static void LoadPanelSettings()
     {
         try
@@ -77,8 +90,18 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
                 Logger.LogError($"Failed to load PanelSettings asset from label '{PanelSettingsLabel}'");
                 return;
             }
-
             PanelSettings = panelSettingsHandle.Result;
+            
+            var fixedPanelSettingsLabel = Addressables.LoadAssetAsync<PanelSettings>(FixedPanelSettingsLabel);
+            fixedPanelSettingsLabel.WaitForCompletion();
+            if (fixedPanelSettingsLabel.Status == AsyncOperationStatus.Failed)
+            {
+                Logger.LogError($"Failed to load FixedPanelSettings asset from label '{FixedPanelSettingsLabel}'");
+                return;
+            }
+
+            FixedPanelSettings = fixedPanelSettingsLabel.Result;
+
             Logger.LogInfo($"PanelSettings loaded: {PanelSettings}");
         }
         catch (Exception e)
