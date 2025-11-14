@@ -22,6 +22,11 @@ public struct WindowOptions
     /// Should window hiding with F2 be enabled?
     /// </summary>
     public bool IsHidingEnabled { get; set; }
+    
+    /// <summary>
+    /// Should it use the UI scale setting?
+    /// </summary>
+    public bool UseStockScale { get; set; }
 
     /// <summary>
     /// Should the game input be disabled when a text field is focused? This will only affect text fields
@@ -41,6 +46,7 @@ public struct WindowOptions
         WindowId = null,
         Parent = null,
         IsHidingEnabled = true,
+        UseStockScale = true,
         DisableGameInputForTextFields = true,
         MoveOptions = MoveOptions.Default
     };

@@ -75,8 +75,15 @@ public static class Window
         gameObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
         
         var document = gameObject.AddComponent<UIDocument>();
-
-        document.panelSettings = UitkForKsp2Plugin.PanelSettings;
+        if (options.UseStockScale)
+        {
+            document.panelSettings = UitkForKsp2Plugin.PanelSettings;
+        }
+        else
+        {
+            document.panelSettings = UitkForKsp2Plugin.FixedPanelSettings;
+        }
+        
         document.enabled = true;
 
         var parent = options.Parent;
