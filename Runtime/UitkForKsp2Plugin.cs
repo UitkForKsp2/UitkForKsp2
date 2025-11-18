@@ -54,7 +54,7 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     {
         LoadPanelSettings();
         PanelSettings.sortingOrder = 0;
-        FixedPanelSettings.sortingOrder = 0;
+        FixedPanelSettings.sortingOrder = -1;
         PanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
         FixedPanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
         PanelSettings.referenceResolution = new Vector2Int(
