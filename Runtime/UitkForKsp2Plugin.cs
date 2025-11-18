@@ -53,10 +53,6 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     public static void InitializeUitkForKsp2()
     {
         LoadPanelSettings();
-        PanelSettings.sortingOrder = 0;
-        FixedPanelSettings.sortingOrder = 0;
-        PanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
-        FixedPanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
         PanelSettings.referenceResolution = new Vector2Int(
             ReferenceResolution.Width,
             ReferenceResolution.Height
@@ -65,8 +61,6 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
             ReferenceResolution.Width,
             ReferenceResolution.Height
         );
-        PanelSettings.scale = 1;
-        FixedPanelSettings.scale = 1;
         ApplyPanelSettings.Invoke(PanelSettings, new object[] { });
         ApplyPanelSettings.Invoke(FixedPanelSettings, new object[] { });
 
