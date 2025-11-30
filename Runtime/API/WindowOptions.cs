@@ -22,7 +22,7 @@ public struct WindowOptions
     /// Should window hiding with F2 be enabled?
     /// </summary>
     public bool IsHidingEnabled { get; set; }
-    
+
     /// <summary>
     /// Should it use the UI scale setting?
     /// </summary>
