@@ -73,17 +73,12 @@ public static class Window
         var gameObject = new GameObject(options.WindowId ?? $"ui-{Guid.NewGuid()}");
         UnityObject.DontDestroyOnLoad(gameObject);
         gameObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
-        
+
         var document = gameObject.AddComponent<UIDocument>();
-        if (options.UseStockScale)
-        {
-            document.panelSettings = UitkForKsp2Plugin.PanelSettings;
-        }
-        else
-        {
-            document.panelSettings = UitkForKsp2Plugin.FixedPanelSettings;
-        }
-        
+        document.panelSettings = options.UseStockScale
+            ? UitkForKsp2Plugin.PanelSettings
+            : UitkForKsp2Plugin.FixedPanelSettings;
+
         document.enabled = true;
 
         var parent = options.Parent;
@@ -126,19 +121,25 @@ public static class Window
 
         // Display window within screen bounds by default
         root.SetDefaultPosition(windowSize =>
-            new Vector2(
-                Mathf.Clamp(
-                    root.transform.position.x,
-                    0,
-                    ReferenceResolution.Width - windowSize.x
-                ),
-                Mathf.Clamp(
-                    root.transform.position.y,
-                    0,
-                    ReferenceResolution.Height - windowSize.y
-                )
-            )
-        );
+        {
+            Rect panelRect = root.panel?.visualTree.contentRect ??
+                             new Rect(0, 0, ReferenceResolution.Width, ReferenceResolution.Height);
+
+            float clampedX = Mathf.Clamp(
+                root.transform.position.x,
+                0,
+                Mathf.Max(0, panelRect.width  - windowSize.x)
+            );
+
+            float clampedY = Mathf.Clamp(
+                root.transform.position.y,
+                0,
+                Mathf.Max(0, panelRect.height - windowSize.y)
+            );
+
+            return new Vector2(clampedX, clampedY);
+        });
+
     }
 
     #region Deprecated
