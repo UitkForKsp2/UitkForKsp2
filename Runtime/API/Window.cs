@@ -139,6 +139,5 @@ public static class Window
 
             return new Vector2(clampedX, clampedY);
         });
-
     }
 }
