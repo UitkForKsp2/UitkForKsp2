@@ -72,7 +72,6 @@ public class DragManipulator : IManipulator
 
         IsDragging = true;
         _target.CapturePointer(evt.pointerId);
-        evt.StopImmediatePropagation();
     }
 
     /// <summary>
@@ -110,8 +109,6 @@ public class DragManipulator : IManipulator
 
             _target.transform.position = Vector3.zero;
         }
-
-        evt.StopImmediatePropagation();
     }
 
     /// <summary>
@@ -127,6 +124,5 @@ public class DragManipulator : IManipulator
         IsDragging = false;
         _target.ReleasePointer(evt.pointerId);
         _target.pickingMode = _mode;
-        evt.StopImmediatePropagation();
     }
 }
