@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using ReduxLib.GameInterfaces;
-using ReduxLib.GameInterfaces;
+using UitkForKsp2.API.Manipulator;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -59,7 +59,7 @@ public static class Extensions
     #region VisualElement extensions
 
     private static MethodInfo _setMethod = typeof(VisualElement).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.NonPublic)!;
-    
+
     /// <summary>
     /// Set a property on a VisualElement.
     /// </summary>

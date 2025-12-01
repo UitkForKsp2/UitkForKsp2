@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using UitkForKsp2.API.Manipulator;
+using UitkForKsp2.Panel;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,6 +21,12 @@ public static class Window
     private static MethodInfo _addRootVisualElementToTree =
         typeof(UIDocument).GetMethod("AddRootVisualElementToTree", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
+    private static FieldInfo _sourceAsset =
+        typeof(UIDocument).GetField("sourceAsset", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+    private static MethodInfo _recreateUi =
+        typeof(UIDocument).GetMethod("RecreateUI", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
     /// <summary>
     /// Creates an empty UIDocument.
     /// </summary>
@@ -27,24 +35,16 @@ public static class Window
     /// <returns>New empty UIDocument.</returns>
     public static UIDocument Create(WindowOptions options, VisualElement? root = null)
     {
-        var document = CreateInternal(options);
+        UIDocument document = CreateInternal(options);
 
         root ??= Element.Root();
-        SetupRootElement(root, options);
-
+        SetupRootElement(root, document, options);
 
         _rootVisualElement.SetValue(document, root);
         _addRootVisualElementToTree.Invoke(document, Array.Empty<object>());
 
         return document;
     }
-
-
-    private static FieldInfo _sourceAsset =
-        typeof(UIDocument).GetField("sourceAsset", BindingFlags.Instance | BindingFlags.NonPublic)!;
-
-    private static MethodInfo _recreateUi =
-        typeof(UIDocument).GetMethod("RecreateUI", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     /// <summary>
     /// Creates a new UIDocument from a UXML asset.
@@ -54,16 +54,18 @@ public static class Window
     /// <returns>UIDocument with the UI defined in UXML.</returns>
     public static UIDocument Create(WindowOptions options, VisualTreeAsset uxml)
     {
-        var document = CreateInternal(options);
+        UIDocument document = CreateInternal(options);
 
         _sourceAsset.SetValue(document, uxml);
         _recreateUi.Invoke(document, Array.Empty<object>());
 
-        if (document.rootVisualElement.hierarchy.childCount > 0)
+        if (document.rootVisualElement.hierarchy.childCount <= 0)
         {
-            var rootElement = document.rootVisualElement.hierarchy.ElementAt(0);
-            SetupRootElement(rootElement, options);
+            return document;
         }
+
+        VisualElement? rootElement = document.rootVisualElement.hierarchy.ElementAt(0);
+        SetupRootElement(rootElement, document, options);
 
         return document;
     }
@@ -74,14 +76,17 @@ public static class Window
         UnityObject.DontDestroyOnLoad(gameObject);
         gameObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
-        var document = gameObject.AddComponent<UIDocument>();
-        document.panelSettings = options.UseStockScale
-            ? UitkForKsp2Plugin.PanelSettings
-            : UitkForKsp2Plugin.FixedPanelSettings;
+        var document = gameObject.AddComponent<UIDocument>()!;
+
+        PanelSettings panelSettings = PanelFactory.CreateForWindow(options);
+        document.panelSettings = panelSettings;
+
+        var owner = gameObject.AddComponent<PanelSettingsOwner>()!;
+        owner.Owned = panelSettings;
 
         document.enabled = true;
 
-        var parent = options.Parent;
+        Transform? parent = options.Parent;
         if (parent == null && GameObject.Find(UIMainCanvasPath) is var uiMainCanvas)
         {
             if (uiMainCanvas != null)
@@ -102,8 +107,13 @@ public static class Window
         return document;
     }
 
-    public static void SetupRootElement(VisualElement? root, WindowOptions options)
+    public static void SetupRootElement(VisualElement? root, UIDocument document, WindowOptions options)
     {
+        if (root == null)
+        {
+            return;
+        }
+
         if (options.MoveOptions.IsMovingEnabled)
         {
             root.MakeDraggable(options.MoveOptions.CheckScreenBounds);
@@ -119,25 +129,35 @@ public static class Window
             root.Query<TextField>().ForEach(textField => textField.DisableGameInputOnFocus());
         }
 
+        if (options.BringToFrontOnPointerDown)
+        {
+            root.AddManipulator(new OrderManipulator(document.panelSettings!));
+        }
+
         // Display window within screen bounds by default
         root.SetDefaultPosition(windowSize =>
         {
-            Rect panelRect = root.panel?.visualTree.contentRect ??
+            Rect panelRect = root.panel?.visualTree?.contentRect ??
                              new Rect(0, 0, ReferenceResolution.Width, ReferenceResolution.Height);
 
             float clampedX = Mathf.Clamp(
-                root.transform.position.x,
+                root.transform!.position.x,
                 0,
                 Mathf.Max(0, panelRect.width  - windowSize.x)
             );
 
             float clampedY = Mathf.Clamp(
-                root.transform.position.y,
+                root.transform!.position.y,
                 0,
                 Mathf.Max(0, panelRect.height - windowSize.y)
             );
 
             return new Vector2(clampedX, clampedY);
+        });
+
+        root.schedule!.Execute(() =>
+        {
+            PanelFactory.Apply(document.panelSettings!);
         });
     }
 }

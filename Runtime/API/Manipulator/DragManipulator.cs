@@ -1,8 +1,8 @@
 ﻿using System;
-using UitkForKsp2;
-using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
+
+namespace UitkForKsp2.API.Manipulator;
 
 /// <summary>
 /// A manipulator to make UI Toolkit elements draggable within the screen bounds.

@@ -1,7 +1,7 @@
 ﻿using ReduxLib.GameInterfaces;
 using UnityEngine.UIElements;
 
-namespace UitkForKsp2.API;
+namespace UitkForKsp2.API.Manipulator;
 
 /// <summary>
 /// Allows hiding a VisualElement with the F2 key.
