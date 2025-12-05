@@ -34,7 +34,7 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
 
     private static readonly MethodInfo ApplyPanelSettings = typeof(PanelSettings).GetMethod(
         "ApplyPanelSettings",
-        BindingFlags.Instance | BindingFlags.NonPublic
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
     )!;
 
 
@@ -100,7 +100,7 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
 
             MethodInfo? apply = typeof(PanelSettings).GetMethod(
                 "ApplyPanelSettings",
-                BindingFlags.Instance | BindingFlags.NonPublic
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
             );
             apply?.Invoke(ps, Array.Empty<object>());
         }

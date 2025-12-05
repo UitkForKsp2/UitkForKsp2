@@ -9,7 +9,7 @@ internal static class PanelFactory
 {
     private static readonly MethodInfo ApplyPanelSettings = typeof(PanelSettings).GetMethod(
         "ApplyPanelSettings",
-        BindingFlags.Instance | BindingFlags.NonPublic
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
     )!;
 
     public static PanelSettings CreateForWindow(WindowOptions options)

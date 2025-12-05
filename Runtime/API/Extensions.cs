@@ -58,7 +58,7 @@ public static class Extensions
 
     #region VisualElement extensions
 
-    private static MethodInfo _setMethod = typeof(VisualElement).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    private static MethodInfo _setMethod = typeof(VisualElement).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
 
     /// <summary>
     /// Set a property on a VisualElement.

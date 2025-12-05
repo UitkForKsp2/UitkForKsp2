@@ -16,16 +16,16 @@ public static class Window
     private const string UIMainCanvasPath = "GameManager/Default Game Instance(Clone)/UI Manager(Clone)/Main Canvas";
 
     private static FieldInfo _rootVisualElement =
-        typeof(UIDocument).GetField("m_RootVisualElement", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        typeof(UIDocument).GetField("m_RootVisualElement", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
 
     private static MethodInfo _addRootVisualElementToTree =
-        typeof(UIDocument).GetMethod("AddRootVisualElementToTree", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        typeof(UIDocument).GetMethod("AddRootVisualElementToTree", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
 
     private static FieldInfo _sourceAsset =
-        typeof(UIDocument).GetField("sourceAsset", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        typeof(UIDocument).GetField("sourceAsset", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
 
     private static MethodInfo _recreateUi =
-        typeof(UIDocument).GetMethod("RecreateUI", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        typeof(UIDocument).GetMethod("RecreateUI", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
 
     /// <summary>
     /// Creates an empty UIDocument.
