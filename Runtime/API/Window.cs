@@ -117,6 +117,31 @@ public static class Window
         if (options.MoveOptions.IsMovingEnabled)
         {
             root.MakeDraggable(options.MoveOptions.CheckScreenBounds);
+
+            if (options.MoveOptions.CheckScreenBounds)
+            {
+                // Display window within screen bounds by default
+                root.SetDefaultPosition(windowSize =>
+                {
+                    Rect panelRect = root.panel?.visualTree?.contentRect ??
+                                     new Rect(0, 0, ReferenceResolution.Width, ReferenceResolution.Height);
+
+                    float clampedX = Mathf.Clamp(
+                        root.transform!.position.x,
+                        0,
+                        Mathf.Max(0, panelRect.width  - windowSize.x)
+                    );
+
+                    float clampedY = Mathf.Clamp(
+                        root.transform!.position.y,
+                        0,
+                        Mathf.Max(0, panelRect.height - windowSize.y)
+                    );
+
+                    return new Vector2(clampedX, clampedY);
+                });
+
+            }
         }
 
         if (options.IsHidingEnabled)
@@ -133,27 +158,6 @@ public static class Window
         {
             root.AddManipulator(new OrderManipulator(document.panelSettings!));
         }
-
-        // Display window within screen bounds by default
-        root.SetDefaultPosition(windowSize =>
-        {
-            Rect panelRect = root.panel?.visualTree?.contentRect ??
-                             new Rect(0, 0, ReferenceResolution.Width, ReferenceResolution.Height);
-
-            float clampedX = Mathf.Clamp(
-                root.transform!.position.x,
-                0,
-                Mathf.Max(0, panelRect.width  - windowSize.x)
-            );
-
-            float clampedY = Mathf.Clamp(
-                root.transform!.position.y,
-                0,
-                Mathf.Max(0, panelRect.height - windowSize.y)
-            );
-
-            return new Vector2(clampedX, clampedY);
-        });
 
         root.schedule!.Execute(() =>
         {
