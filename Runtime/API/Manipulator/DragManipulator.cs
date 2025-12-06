@@ -9,7 +9,7 @@ namespace UitkForKsp2.API.Manipulator;
 /// </summary>
 public class DragManipulator : IManipulator
 {
-    private VisualElement _target;
+    private VisualElement? _target;
     private Vector2 _mouseOffsetInTarget;
     private PickingMode _mode;
 
@@ -62,8 +62,11 @@ public class DragManipulator : IManipulator
         if (!IsEnabled
             || evt.target is TextField
             || evt.target.GetType() == _textInput
-            || (evt.target is TextElement te && te.parent?.GetType() == _textInput))
+            || (evt.target is TextElement te && te.parent?.GetType() == _textInput)
+            || (evt.target is TextElement { parent: VisualElement } te2 && te2.parent.parent?.GetType() == _textInput))
+        {
             return;
+        }
 
         _mouseOffsetInTarget = (Vector2)evt.position - _target.worldBound.position;
 

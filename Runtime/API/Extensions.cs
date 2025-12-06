@@ -206,10 +206,16 @@ public static class Extensions
     /// <param name="element">The element to center.</param>
     public static void CenterByDefault(this VisualElement element)
     {
-        element.SetDefaultPosition(windowSize => new Vector2(
-            (ReferenceResolution.Width - windowSize.x) / 2,
-            (ReferenceResolution.Height - windowSize.y) / 2
-        ));
+        element.SetDefaultPosition(windowSize =>
+        {
+            Rect rect = element.panel?.visualTree?.contentRect ??
+                        new Rect(0, 0, ReferenceResolution.Width, ReferenceResolution.Height);
+
+            return new Vector2(
+                (rect.width - windowSize.x) / 2,
+                (rect.height - windowSize.y) / 2
+            );
+        });
     }
 
     /// <summary>
@@ -306,7 +312,12 @@ public static class Extensions
             return;
         }
 
-        element.transform.position = calculatePosition(new Vector2(evt.newRect.width, evt.newRect.height));
+        Vector2 position = calculatePosition(new Vector2(evt.newRect.width, evt.newRect.height));
+
+        element.style.position = Position.Absolute;
+        element.style.left = position.x;
+        element.style.top = position.y;
+
         element.UnregisterCallback(geometryChanged);
     }
 }
