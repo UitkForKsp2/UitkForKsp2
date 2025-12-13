@@ -76,7 +76,6 @@ public static class Window
         var gameObject = new GameObject(options.WindowId ?? $"ui-{Guid.NewGuid()}");
         UnityObject.DontDestroyOnLoad(gameObject);
         gameObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
-        gameObject.layer = Layers.LayerUi;
 
         var document = gameObject.AddComponent<UIDocument>()!;
 

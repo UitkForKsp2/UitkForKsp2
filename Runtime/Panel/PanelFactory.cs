@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
+using ReduxLib.Engine;
 using UitkForKsp2.API;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.Panel;
@@ -9,6 +11,16 @@ internal static class PanelFactory
 {
     private static readonly MethodInfo ApplyPanelSettings = typeof(PanelSettings).GetMethod(
         "ApplyPanelSettings",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    )!;
+
+    private static readonly PropertyInfo PanelProperty = typeof(PanelSettings).GetProperty(
+        "panel",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    )!;
+
+    private static readonly PropertyInfo SelectableGameObjectProperty = PanelProperty.PropertyType.GetProperty(
+        "selectableGameObject",
         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
     )!;
 
@@ -34,5 +46,7 @@ internal static class PanelFactory
         }
 
         ApplyPanelSettings.Invoke(panelSettings, Array.Empty<object>());
+        object panel = PanelProperty.GetValue(panelSettings)!;
+        (SelectableGameObjectProperty.GetValue(panel) as GameObject)!.layer = Layers.LayerUi;
     }
 }
