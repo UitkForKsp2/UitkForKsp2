@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using ReduxLib.Engine;
 using UitkForKsp2.API.Manipulator;
 using UitkForKsp2.Panel;
 using UnityEngine;
@@ -75,6 +76,7 @@ public static class Window
         var gameObject = new GameObject(options.WindowId ?? $"ui-{Guid.NewGuid()}");
         UnityObject.DontDestroyOnLoad(gameObject);
         gameObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+        gameObject.layer = Layers.LayerUi;
 
         var document = gameObject.AddComponent<UIDocument>()!;
 

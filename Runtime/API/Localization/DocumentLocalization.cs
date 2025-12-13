@@ -18,7 +18,6 @@ public class DocumentLocalization : MonoBehaviour
 {
     private readonly Dictionary<VisualElement, string> _elementDictionary = new();
 
-
     private void Awake()
     {
         var document = gameObject.GetComponentInParent<UIDocument>(includeInactive: true);
