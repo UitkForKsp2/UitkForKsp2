@@ -9,9 +9,17 @@ namespace UitkForKsp2.API.Manipulator;
 /// </summary>
 public class DragManipulator : IManipulator
 {
+    private const float DragThresholdPx = 6f;
+
     private VisualElement? _target;
+
     private Vector2 _mouseOffsetInTarget;
+
     private PickingMode _mode;
+
+    private Vector2 _pointerDownPos;
+    private bool _pendingDrag;
+    private int _pointerId;
 
     /// <summary>
     /// Indicates whether the element is currently being dragged.
@@ -68,13 +76,11 @@ public class DragManipulator : IManipulator
             return;
         }
 
+        _pointerDownPos = evt.position;
+        _pointerId = evt.pointerId;
         _mouseOffsetInTarget = (Vector2)evt.position - _target.worldBound.position;
 
-        _mode = _target.pickingMode;
-        _target.pickingMode = PickingMode.Ignore;
-
-        IsDragging = true;
-        _target.CapturePointer(evt.pointerId);
+        _pendingDrag = true;
     }
 
     /// <summary>
@@ -82,7 +88,34 @@ public class DragManipulator : IManipulator
     /// </summary>
     private void OnPointerMove(PointerMoveEvent evt)
     {
-        if (!IsDragging || !IsEnabled)
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        if (_pendingDrag && !IsDragging)
+        {
+            if (evt.pointerId != _pointerId)
+            {
+                return;
+            }
+
+            Vector2 delta = (Vector2)evt.position - _pointerDownPos;
+            if (delta.sqrMagnitude < DragThresholdPx * DragThresholdPx)
+            {
+                return;
+            }
+
+            _pendingDrag = false;
+            IsDragging = true;
+
+            _mode = _target.pickingMode;
+            _target.pickingMode = PickingMode.Ignore;
+
+            _target.CapturePointer(evt.pointerId);
+        }
+
+        if (!IsDragging)
         {
             return;
         }
@@ -119,6 +152,12 @@ public class DragManipulator : IManipulator
     /// </summary>
     private void OnPointerUp(PointerUpEvent evt)
     {
+        if (_pendingDrag)
+        {
+            _pendingDrag = false;
+            return;
+        }
+
         if (!IsDragging)
         {
             return;
