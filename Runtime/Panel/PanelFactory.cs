@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using ReduxLib.Engine;
 using UitkForKsp2.API;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -26,9 +28,16 @@ internal static class PanelFactory
 
     public static PanelSettings CreateForWindow(WindowOptions options)
     {
+        #if UNITY_EDITOR
+        PanelSettings baseAsset = AssetDatabase.FindAssets("t:PanelSettings KerbalPanelSettings")
+            .Select(AssetDatabase.GUIDToAssetPath)
+            .Select(AssetDatabase.LoadAssetAtPath<PanelSettings>)
+            .First(ps => ps.name == (options.UseStockScale ? "KerbalPanelSettings" : "FixedKerbalPanelSettings"));
+        #else
         PanelSettings baseAsset = options.UseStockScale
             ? UitkForKsp2Plugin.PanelSettings
             : UitkForKsp2Plugin.FixedPanelSettings;
+        #endif
 
         PanelSettings panelSettings = UnityObject.Instantiate(baseAsset)!;
 
@@ -46,7 +55,18 @@ internal static class PanelFactory
         }
 
         ApplyPanelSettings.Invoke(panelSettings, Array.Empty<object>());
-        object panel = PanelProperty.GetValue(panelSettings)!;
-        (SelectableGameObjectProperty.GetValue(panel) as GameObject)!.layer = Layers.LayerUi;
+        object panel = PanelProperty.GetValue(panelSettings);
+        if (panel == null)
+        {
+            return;
+        }
+
+        var go = SelectableGameObjectProperty.GetValue(panel) as GameObject;
+        if (go == null)
+        {
+            return;
+        }
+
+        go.layer = Layers.LayerUi;
     }
 }

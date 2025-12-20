@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Packages/uitkforksp2/Assets/UITestDocument.uss?fileID=7433441132597879392&amp;guid=d8c0027e187dac24dbf078d6ca574f19&amp;type=3#UITestDocument" />
+    <ui:VisualElement class="root">
+        <UitkForKsp2.Controls.InvertedCornerBox background-color="#161B21FF" style="padding-left: 8px; padding-right: 8px; padding-top: 8px; padding-bottom: 8px;">
+            <ui:Label tabindex="-1" text="JetBrains Mono 版本 こんにちは 안녕하세요 привіт Γειά σου" display-tooltip-when-elided="true" style="-unity-font-definition: url(&apos;project://database/Packages/uitkforksp2.controls/Assets/Theme/Fonts/JetBrainsMono/JetBrainsMono-Regular%20SDF.asset?fileID=11400000&amp;guid=f5454c9c675002c44a5a7234bd40c390&amp;type=2#JetBrainsMono-Regular SDF&apos;); font-size: 28px; color: rgb(255, 255, 255); -unity-font-style: normal;" />
+            <ui:Label tabindex="-1" text="Roses Are #FF0000 版本 こんにちは 안녕하세요 привіт Γειά σου" display-tooltip-when-elided="true" name="Label" style="-unity-font-definition: url(&apos;project://database/Packages/uitkforksp2.controls/Assets/Theme/Fonts/RosesAreFF0000/RosesareFF0000%20SDF.asset?fileID=11400000&amp;guid=f2516f1635a41814ca97b23fac4691fd&amp;type=2#RosesareFF0000 SDF&apos;); font-size: 28px; color: rgb(255, 255, 255); -unity-font-style: normal;" />
+            <ui:Label tabindex="-1" text="LED Counter 7 版本 こんにちは 안녕하세요 привіт Γειά σου" display-tooltip-when-elided="true" style="font-size: 28px; -unity-font-definition: url(&apos;project://database/Packages/uitkforksp2.controls/Assets/Theme/Fonts/LEDCounter7/led_counter-7%20SDF.asset?fileID=11400000&amp;guid=33e1e97b69ec355479ba49006381fc06&amp;type=2#led_counter-7 SDF&apos;); color: rgb(255, 255, 255);" />
+        </UitkForKsp2.Controls.InvertedCornerBox>
+        <ui:Button text="My Button 版本 こんにちは 안녕하세요 привіт Γειά σου" display-tooltip-when-elided="true" />
+        <UitkForKsp2.Controls.OabButton text="My Button 版本 こんにちは 안녕하세요 привіт Γειά σου" />
+        <ui:Toggle label="Toggle (Button)" class="toggle" />
+        <ui:Toggle label="Toggle (Switch)" class="switch" />
+        <ui:TextField picking-mode="Ignore" label="Text Field" value="filler 版本 こんにちは 안녕하세요 привіт Γειά σου" />
+        <ui:Slider picking-mode="Ignore" label="Slider" value="100" high-value="100" />
+        <ui:MinMaxSlider picking-mode="Ignore" label="Min/Max Slider" min-value="10" max-value="12" low-limit="-10" high-limit="40" />
+        <ui:ProgressBar title="Progress Bar" value="50" />
+        <ui:DropdownField label="Dropdown" index="-1" choices="1,2,3" />
+        <ui:EnumField label="Enum" type="UnityEngine.TextAlignment, UnityEngine.TextRenderingModule" value="Center" />
+        <ui:RadioButton label="Radio Button" />
+        <ui:RadioButtonGroup label="Radio Button Group" value="-1" choices="1,2,3" name="RadioButtonGroup" />
+        <ui:Foldout text="Foldout" value="true" style="max-height: 220px;">
+            <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" mode="VerticalAndHorizontal">
+                <ui:Label tabindex="-1" text="Foldout content Foldout content Foldout content Foldout content Foldout content Foldout content Foldout content Foldout content Foldout content Foldout content " display-tooltip-when-elided="true" />
+                <ui:SliderInt picking-mode="Ignore" label="Slider (Horizontal)" value="42" high-value="100" direction="Vertical" style="height: 267px; width: 24px;" />
+            </ui:ScrollView>
+        </ui:Foldout>
+    </ui:VisualElement>
+</ui:UXML>
