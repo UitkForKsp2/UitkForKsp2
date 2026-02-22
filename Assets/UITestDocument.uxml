@@ -10,6 +10,9 @@
         <UitkForKsp2.Controls.OabButton text="My Button 版本 こんにちは 안녕하세요 привіт Γειά σου" />
         <ui:Toggle label="Toggle (Button)" class="toggle" />
         <ui:Toggle label="Toggle (Switch)" class="switch" />
+        <ui:Toggle class="oab-button-toggle" style="height: 30px;">
+            <ui:Label text="Toggle (OAB-style)" class="oab-button-toggle-label" />
+        </ui:Toggle>
         <ui:TextField picking-mode="Ignore" label="Text Field" value="filler 版本 こんにちは 안녕하세요 привіт Γειά σου" />
         <ui:Slider picking-mode="Ignore" label="Slider" value="100" high-value="100" />
         <ui:MinMaxSlider picking-mode="Ignore" label="Min/Max Slider" min-value="10" max-value="12" low-limit="-10" high-limit="40" />
