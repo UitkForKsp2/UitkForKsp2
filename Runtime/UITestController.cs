@@ -9,7 +9,7 @@ internal class UITestController : MonoBehaviour
     private void Start()
     {
         Window.Create(
-            WindowOptions.Default,
+            WindowOptions.Default with { IsHidingEnabled = false },
             testUxml
         );
     }
