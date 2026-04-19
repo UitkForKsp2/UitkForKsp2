@@ -28,6 +28,17 @@ public static class Extensions
     }
 
     /// <summary>
+    /// Enable delegated UI sounds for elements marked with sound USS classes.
+    /// </summary>
+    /// <param name="document">The document whose root element should listen for UI sound events.</param>
+    /// <returns>The document with delegated UI sounds enabled.</returns>
+    public static UIDocument EnableUiSounds(this UIDocument document)
+    {
+        document.rootVisualElement.EnableUiSounds();
+        return document;
+    }
+
+    /// <summary>
     /// Show a UIDocument by setting its root VisualElement's display style to DisplayStyle.Flex.
     /// </summary>
     /// <param name="document">The document to show.</param>
@@ -181,6 +192,18 @@ public static class Extensions
     public static T EnableHiding<T>(this T element) where T : VisualElement
     {
         element.AddManipulator(new HideManipulator());
+        return element;
+    }
+
+    /// <summary>
+    /// Enable delegated UI sounds for child elements marked with sound USS classes.
+    /// </summary>
+    /// <param name="element">The root element that should listen for child sound events.</param>
+    /// <typeparam name="T">The type of the root visual element.</typeparam>
+    /// <returns>The root element with delegated UI sounds enabled.</returns>
+    public static T EnableUiSounds<T>(this T element) where T : VisualElement
+    {
+        element.AddManipulator(new DocumentSoundManipulator());
         return element;
     }
 
