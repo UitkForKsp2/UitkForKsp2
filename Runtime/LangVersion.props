@@ -3,5 +3,6 @@
     <LangVersion>11</LangVersion>
     <Nullable Condition="'$(AssemblyName)' != 'Assembly-CSharp'">enable</Nullable>
     <DocumentationFile>docs/$(AssemblyName).xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 </Project>
