@@ -138,7 +138,7 @@ public static class OrderManager
                 continue;
             }
 
-            int id = GetInstanceId(knownObject);
+            int id = GetEntityId(knownObject);
             alive.Add((knownObject, order, id));
         }
 
@@ -195,8 +195,8 @@ public static class OrderManager
         }
     }
 
-    private static int GetInstanceId(object o)
+    private static int GetEntityId(object o)
     {
-        return o is UnityObject uo ? uo.GetInstanceID() : o.GetHashCode();
+        return o.GetHashCode();
     }
 }
