@@ -2,6 +2,7 @@
 using System.Reflection;
 using ReduxLib.GameInterfaces;
 using UitkForKsp2;
+using UitkForKsp2.API.Localization;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -17,6 +18,18 @@ using UnityEngine.UIElements;
 public class DocumentLocalization : MonoBehaviour
 {
     private readonly Dictionary<VisualElement, string> _elementDictionary = new();
+    private static readonly MethodInfo CreateBindingRequestsMethod = typeof(VisualElement).GetMethod(
+        "CreateBindingRequests",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
+    private static readonly MethodInfo ProcessBindingRequestsMethod = typeof(VisualElement).GetMethod(
+        "ProcessBindingRequests",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
+    private static readonly PropertyInfo SourceToUiConvertersStringProperty = typeof(DataBinding).GetProperty(
+        "sourceToUiConvertersString",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
 
     private void Awake()
     {
@@ -72,6 +85,8 @@ public class DocumentLocalization : MonoBehaviour
         {
             UpdateElementLocalization(key, value);
         }
+
+        RefreshConverterBindings();
     }
 
     private void RegisterElementsInternal(VisualElement element)
@@ -88,6 +103,65 @@ public class DocumentLocalization : MonoBehaviour
         {
             RegisterElementsInternal(hierarchy.ElementAt(i));
         }
+    }
+
+    private void RefreshConverterBindings()
+    {
+        var document = gameObject.GetComponentInParent<UIDocument>(includeInactive: true);
+        if (document?.rootVisualElement == null)
+        {
+            return;
+        }
+
+        RefreshConverterBindingsInternal(document.rootVisualElement);
+    }
+
+    private static void RefreshConverterBindingsInternal(VisualElement element)
+    {
+        bool needsProcessing = false;
+
+        foreach (BindingInfo bindingInfo in element.GetBindingInfos())
+        {
+            if (bindingInfo.binding is not DataBinding dataBinding || !UsesLocalizationConverter(dataBinding))
+            {
+                continue;
+            }
+
+            dataBinding.MarkDirty();
+            needsProcessing = true;
+        }
+
+        if (needsProcessing)
+        {
+            CreateBindingRequestsMethod?.Invoke(element, null);
+            ProcessBindingRequestsMethod?.Invoke(element, null);
+        }
+
+        VisualElement.Hierarchy hierarchy = element.hierarchy;
+        for (int i = 0; i < hierarchy.childCount; i++)
+        {
+            RefreshConverterBindingsInternal(hierarchy.ElementAt(i));
+        }
+    }
+
+    private static bool UsesLocalizationConverter(DataBinding dataBinding)
+    {
+        string converters = SourceToUiConvertersStringProperty?.GetValue(dataBinding) as string;
+        if (string.IsNullOrWhiteSpace(converters))
+        {
+            return false;
+        }
+
+        string[] converterNames = converters.Split(',');
+        foreach (string converterName in converterNames)
+        {
+            if (converterName.Trim() == LocalizationConverter.GroupName)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void UpdateElementLocalization(VisualElement element, string localizationKey)
