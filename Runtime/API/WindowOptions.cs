@@ -39,9 +39,19 @@ public struct WindowOptions
     public bool BringToFrontOnPointerDown { get; set; }
 
     /// <summary>
+    /// Should pointer and wheel input over this window block gameplay input?
+    /// </summary>
+    public bool BlockGameInput { get; set; }
+
+    /// <summary>
     /// Options for moving the window by dragging.
     /// </summary>
     public MoveOptions MoveOptions { get; set; }
+
+    /// <summary>
+    /// Options for resizing the window from the lower-right corner.
+    /// </summary>
+    public ResizeOptions ResizeOptions { get; set; }
 
     /// <summary>
     /// Default options for creating a window.
@@ -54,6 +64,8 @@ public struct WindowOptions
         UseStockScale = true,
         DisableGameInputForTextFields = true,
         BringToFrontOnPointerDown = true,
-        MoveOptions = MoveOptions.Default
+        BlockGameInput = true,
+        MoveOptions = MoveOptions.Default,
+        ResizeOptions = ResizeOptions.Default
     };
 }

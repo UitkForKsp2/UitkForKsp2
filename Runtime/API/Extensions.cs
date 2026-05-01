@@ -172,6 +172,33 @@ public static class Extensions
     }
 
     /// <summary>
+    /// Make a VisualElement act as a drag handle for another VisualElement.
+    /// </summary>
+    /// <param name="handle">The element that receives pointer events.</param>
+    /// <param name="dragTarget">The element to move.</param>
+    /// <param name="checkScreenBounds">Should the element be draggable only within the screen bounds?</param>
+    /// <typeparam name="T">The handle element type.</typeparam>
+    /// <returns>The handle element.</returns>
+    public static T MakeDraggable<T>(this T handle, VisualElement dragTarget, bool checkScreenBounds) where T : VisualElement
+    {
+        handle.AddManipulator(new DragManipulator(dragTarget, !checkScreenBounds));
+        return handle;
+    }
+
+    /// <summary>
+    /// Make a VisualElement resizable by adding a ResizeManipulator.
+    /// </summary>
+    /// <param name="element">The element to make resizable.</param>
+    /// <param name="options">Resize behavior options.</param>
+    /// <typeparam name="T">The type of the element which must be a subclass of VisualElement.</typeparam>
+    /// <returns>The element which was made resizable.</returns>
+    public static T MakeResizable<T>(this T element, ResizeOptions options) where T : VisualElement
+    {
+        element.AddManipulator(new ResizeManipulator(options));
+        return element;
+    }
+
+    /// <summary>
     /// Make a VisualElement draggable by adding a DragManipulator.
     /// </summary>
     /// <param name="element">The element to make draggable.</param>
@@ -204,6 +231,18 @@ public static class Extensions
     public static T EnableUiSounds<T>(this T element) where T : VisualElement
     {
         element.AddManipulator(new DocumentSoundManipulator());
+        return element;
+    }
+
+    /// <summary>
+    /// Block gameplay input while the pointer is over or interacting with a VisualElement.
+    /// </summary>
+    /// <param name="element">The root element that should block gameplay input.</param>
+    /// <typeparam name="T">The type of the root visual element.</typeparam>
+    /// <returns>The root element with gameplay input blocking enabled.</returns>
+    public static T BlockGameInput<T>(this T element) where T : VisualElement
+    {
+        element.AddManipulator(new GameInputBlockManipulator());
         return element;
     }
 
@@ -258,20 +297,45 @@ public static class Extensions
     /// <param name="element">The element to disable game input on focus for.</param>
     public static void DisableGameInputOnFocus(this VisualElement element)
     {
+        bool hasFocusLock = false;
+
+        void AcquireFocusLock()
+        {
+            if (hasFocusLock)
+            {
+                return;
+            }
+
+            hasFocusLock = SetGameInputDisabled(true);
+        }
+
+        void ReleaseFocusLock()
+        {
+            if (!hasFocusLock)
+            {
+                return;
+            }
+
+            hasFocusLock = false;
+            SetGameInputDisabled(false);
+        }
+
         element.RegisterCallback<FocusInEvent>(_ =>
         {
             Log($"FocusInEvent: {element.GetType().Name} {element.name}");
             Log("\tDisabling game input");
             element.ReleaseMouse();
-            SetGameInputDisabled(true);
+            AcquireFocusLock();
         });
 
         element.RegisterCallback<FocusOutEvent>(_ =>
         {
             Log($"FocusOutEvent: {element.GetType().Name} {element.name}");
             Log("\tEnabling game input");
-            SetGameInputDisabled(false);
+            ReleaseFocusLock();
         });
+
+        element.RegisterCallback<DetachFromPanelEvent>(_ => ReleaseFocusLock());
     }
 
     #endregion
@@ -290,30 +354,58 @@ public static class Extensions
     /// <summary>
     /// The statuses of all input definitions before they were disabled.
     /// </summary>
-    private static Dictionary<string, bool> _inputStatuses = new();
+    private static int _gameInputLockCount;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetGameInputLockCount()
+    {
+        _gameInputLockCount = 0;
+    }
 
     /// <summary>
     /// Disable or enable the game input.
     /// </summary>
     /// <param name="isDisabled">True to disable the game input, false to enable it.</param>
-    private static void SetGameInputDisabled(bool isDisabled)
+    internal static bool SetGameInputDisabled(bool isDisabled)
     {
-        if (!IInputManager.Instance.Ready)
-        {
-            // UitkForKsp2Plugin.Logger.LogError(
-            //     "Attempted to enable/disable game input, but the game instance has not yet been initialized"
-            // );
-            return;
-        }
-
         if (isDisabled)
         {
+            if (!IInputManager.Instance.Ready)
+            {
+                // UitkForKsp2Plugin.Logger.LogError(
+                //     "Attempted to disable game input, but the game instance has not yet been initialized"
+                // );
+                return false;
+            }
+
+            _gameInputLockCount++;
+            if (_gameInputLockCount > 1)
+            {
+                return true;
+            }
+
             IInputManager.Instance.SetUitkInputLocks();
+            return true;
         }
-        else
+
+        if (_gameInputLockCount <= 0)
+        {
+            _gameInputLockCount = 0;
+            return false;
+        }
+
+        _gameInputLockCount--;
+        if (_gameInputLockCount > 0)
+        {
+            return true;
+        }
+
+        if (IInputManager.Instance.Ready)
         {
             IInputManager.Instance.RestoreUitkInputLocks();
         }
+
+        return true;
     }
 
     /// <summary>

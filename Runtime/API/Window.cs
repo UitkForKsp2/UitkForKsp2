@@ -117,7 +117,8 @@ public static class Window
 
         if (options.MoveOptions.IsMovingEnabled)
         {
-            root.MakeDraggable(options.MoveOptions.CheckScreenBounds);
+            VisualElement moveHandle = options.MoveOptions.ResolveHandle(root);
+            moveHandle.MakeDraggable(root, options.MoveOptions.CheckScreenBounds);
 
             if (options.MoveOptions.CheckScreenBounds)
             {
@@ -150,9 +151,19 @@ public static class Window
             root.EnableHiding();
         }
 
+        if (options.ResizeOptions.IsResizingEnabled)
+        {
+            root.MakeResizable(options.ResizeOptions);
+        }
+
         if (options.DisableGameInputForTextFields)
         {
             root.Query<TextField>().ForEach(textField => textField.DisableGameInputOnFocus());
+        }
+
+        if (options.BlockGameInput)
+        {
+            root.BlockGameInput();
         }
 
         if (options.BringToFrontOnPointerDown)

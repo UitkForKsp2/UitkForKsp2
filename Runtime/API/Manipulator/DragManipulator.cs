@@ -11,7 +11,9 @@ public class DragManipulator : IManipulator
 {
     private const float DragThresholdPx = 6f;
 
-    private VisualElement? _target;
+    private VisualElement? _handle;
+
+    private VisualElement? _dragTarget;
 
     private Vector2 _mouseOffsetInTarget;
 
@@ -20,6 +22,7 @@ public class DragManipulator : IManipulator
     private Vector2 _pointerDownPos;
     private bool _pendingDrag;
     private int _pointerId;
+    private bool _hasPointerCapture;
 
     /// <summary>
     /// Indicates whether the element is currently being dragged.
@@ -41,13 +44,25 @@ public class DragManipulator : IManipulator
     /// </summary>
     public VisualElement target
     {
-        get => _target;
+        get => _handle;
         set
         {
-            _target = value;
-            _target.RegisterCallback<PointerDownEvent>(OnPointerDown);
-            _target.RegisterCallback<PointerMoveEvent>(OnPointerMove);
-            _target.RegisterCallback<PointerUpEvent>(OnPointerUp);
+            if (_handle != null)
+            {
+                _handle.UnregisterCallback<PointerDownEvent>(OnPointerDown);
+                _handle.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
+                _handle.UnregisterCallback<PointerUpEvent>(OnPointerUp);
+                _handle.UnregisterCallback<PointerCancelEvent>(OnPointerCancel);
+                _handle.UnregisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
+            }
+
+            _handle = value;
+            _dragTarget ??= value;
+            _handle.RegisterCallback<PointerDownEvent>(OnPointerDown);
+            _handle.RegisterCallback<PointerMoveEvent>(OnPointerMove);
+            _handle.RegisterCallback<PointerUpEvent>(OnPointerUp);
+            _handle.RegisterCallback<PointerCancelEvent>(OnPointerCancel);
+            _handle.RegisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
         }
     }
 
@@ -60,6 +75,17 @@ public class DragManipulator : IManipulator
         AllowDraggingOffScreen = allowDraggingOffScreen;
     }
 
+    /// <summary>
+    /// Creates a new instance of the <see cref="DragManipulator"/> class that moves a separate element.
+    /// </summary>
+    /// <param name="dragTarget">Element to move when the handle is dragged.</param>
+    /// <param name="allowDraggingOffScreen">Allow dragging off screen?</param>
+    public DragManipulator(VisualElement dragTarget, bool allowDraggingOffScreen = false)
+        : this(allowDraggingOffScreen)
+    {
+        _dragTarget = dragTarget;
+    }
+
     private static Type _textInput = Type.GetType("UnityEngine.UIElements.TextField+TextInput, UnityEngine.UIElementsModule")!;
 
     /// <summary>
@@ -68,19 +94,19 @@ public class DragManipulator : IManipulator
     private void OnPointerDown(PointerDownEvent evt)
     {
         if (!IsEnabled
-            || evt.target is TextField
-            || evt.target.GetType() == _textInput
-            || (evt.target is TextElement te && te.parent?.GetType() == _textInput)
-            || (evt.target is TextElement { parent: VisualElement } te2 && te2.parent.parent?.GetType() == _textInput))
+            || IsDragBlockedTarget(evt.target))
         {
             return;
         }
 
         _pointerDownPos = evt.position;
         _pointerId = evt.pointerId;
-        _mouseOffsetInTarget = (Vector2)evt.position - _target.worldBound.position;
+        VisualElement dragTarget = _dragTarget ?? _handle;
+        _mouseOffsetInTarget = (Vector2)evt.position - dragTarget.worldBound.position;
 
         _pendingDrag = true;
+        _handle.CapturePointer(evt.pointerId);
+        _hasPointerCapture = true;
     }
 
     /// <summary>
@@ -90,6 +116,13 @@ public class DragManipulator : IManipulator
     {
         if (!IsEnabled)
         {
+            EndInteraction(evt.pointerId, true);
+            return;
+        }
+
+        if ((_pendingDrag || IsDragging) && evt.pointerId == _pointerId && evt.pressedButtons == 0)
+        {
+            EndInteraction(evt.pointerId, true);
             return;
         }
 
@@ -109,10 +142,8 @@ public class DragManipulator : IManipulator
             _pendingDrag = false;
             IsDragging = true;
 
-            _mode = _target.pickingMode;
-            _target.pickingMode = PickingMode.Ignore;
-
-            _target.CapturePointer(evt.pointerId);
+            _mode = _handle.pickingMode;
+            _handle.pickingMode = PickingMode.Ignore;
         }
 
         if (!IsDragging)
@@ -120,11 +151,12 @@ public class DragManipulator : IManipulator
             return;
         }
 
+        VisualElement dragTarget = _dragTarget ?? _handle;
         Vector2 desiredTopLeftInPanel = (Vector2)evt.position - _mouseOffsetInTarget;
 
-        Rect panelRect = _target.panel?.visualTree.contentRect ?? new Rect(0, 0, Screen.width, Screen.height);
+        Rect panelRect = dragTarget.panel?.visualTree.contentRect ?? new Rect(0, 0, Screen.width, Screen.height);
 
-        Vector2 size = _target.worldBound.size;
+        Vector2 size = dragTarget.worldBound.size;
 
         if (!AllowDraggingOffScreen)
         {
@@ -134,17 +166,19 @@ public class DragManipulator : IManipulator
             desiredTopLeftInPanel.y = Mathf.Clamp(desiredTopLeftInPanel.y, panelRect.yMin, panelRect.yMin + maxY);
         }
 
-        VisualElement? parent = _target.parent ?? _target.hierarchy.parent;
-        if (parent != null)
+        VisualElement? parent = dragTarget.parent ?? dragTarget.hierarchy.parent;
+        if (parent == null)
         {
-            Vector2 parentLocal = parent.WorldToLocal(new Vector2(desiredTopLeftInPanel.x, desiredTopLeftInPanel.y));
-
-            _target.style.position = Position.Absolute;
-            _target.style.left = parentLocal.x;
-            _target.style.top  = parentLocal.y;
-
-            _target.transform.position = Vector3.zero;
+            return;
         }
+
+        Vector2 parentLocal = parent.WorldToLocal(new Vector2(desiredTopLeftInPanel.x, desiredTopLeftInPanel.y));
+
+        dragTarget.style.position = Position.Absolute;
+        dragTarget.style.left = parentLocal.x;
+        dragTarget.style.top  = parentLocal.y;
+
+        dragTarget.transform.position = Vector3.zero;
     }
 
     /// <summary>
@@ -152,19 +186,75 @@ public class DragManipulator : IManipulator
     /// </summary>
     private void OnPointerUp(PointerUpEvent evt)
     {
-        if (_pendingDrag)
+        EndInteraction(evt.pointerId, true);
+    }
+
+    private void OnPointerCancel(PointerCancelEvent evt)
+    {
+        EndInteraction(evt.pointerId, true);
+    }
+
+    private void OnPointerCaptureOut(PointerCaptureOutEvent evt)
+    {
+        if (evt.pointerId == _pointerId)
         {
-            _pendingDrag = false;
+            ResetInteractionState(true);
+        }
+    }
+
+    private void EndInteraction(int pointerId, bool restorePickingMode)
+    {
+        if (pointerId != _pointerId || (!_pendingDrag && !IsDragging && !_hasPointerCapture))
+        {
             return;
         }
 
-        if (!IsDragging)
+        if (_hasPointerCapture && _handle.HasPointerCapture(pointerId))
         {
-            return;
+            _handle.ReleasePointer(pointerId);
         }
 
+        ResetInteractionState(restorePickingMode);
+    }
+
+    private void ResetInteractionState(bool restorePickingMode)
+    {
+        if (IsDragging && restorePickingMode)
+        {
+            _handle.pickingMode = _mode;
+        }
+
+        _pendingDrag = false;
         IsDragging = false;
-        _target.ReleasePointer(evt.pointerId);
-        _target.pickingMode = _mode;
+        _hasPointerCapture = false;
+    }
+
+    private bool IsDragBlockedTarget(object eventTarget)
+    {
+        if (eventTarget is not VisualElement element)
+        {
+            return false;
+        }
+
+        while (element != null && element != _handle)
+        {
+            if (element is Button
+                or TextField
+                or Toggle
+                or Slider
+                or SliderInt
+                or MinMaxSlider
+                or Scroller
+                or ScrollView
+                or ListView
+                || element.GetType() == _textInput)
+            {
+                return true;
+            }
+
+            element = element.parent;
+        }
+
+        return false;
     }
 }
