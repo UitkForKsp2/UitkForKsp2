@@ -2,7 +2,7 @@
 using System.Reflection;
 using ReduxLib.GameInterfaces;
 using UitkForKsp2;
-using UitkForKsp2.API.Localization;
+using UitkForKsp2.MVVM.Converters;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -122,7 +122,7 @@ public class DocumentLocalization : MonoBehaviour
 
         foreach (BindingInfo bindingInfo in element.GetBindingInfos())
         {
-            if (bindingInfo.binding is not DataBinding dataBinding || !UsesLocalizationConverter(dataBinding))
+            if (bindingInfo.binding is not DataBinding dataBinding || !RefreshesOnLocalizationChange(dataBinding))
             {
                 continue;
             }
@@ -144,7 +144,7 @@ public class DocumentLocalization : MonoBehaviour
         }
     }
 
-    private static bool UsesLocalizationConverter(DataBinding dataBinding)
+    private static bool RefreshesOnLocalizationChange(DataBinding dataBinding)
     {
         string converters = SourceToUiConvertersStringProperty?.GetValue(dataBinding) as string;
         if (string.IsNullOrWhiteSpace(converters))
@@ -155,7 +155,7 @@ public class DocumentLocalization : MonoBehaviour
         string[] converterNames = converters.Split(',');
         foreach (string converterName in converterNames)
         {
-            if (converterName.Trim() == LocalizationConverter.GroupName)
+            if (ConverterGroupRegistry.RefreshesOnLocalizationChange(converterName.Trim()))
             {
                 return true;
             }

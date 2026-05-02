@@ -3,7 +3,7 @@ global using UnityObject = UnityEngine.Object;
 using System;
 using System.Reflection;
 using UitkForKsp2.API;
-using UitkForKsp2.API.Localization;
+using UitkForKsp2.MVVM.Converters;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -53,7 +53,10 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
 
     public static void InitializeUitkForKsp2()
     {
-        LocalizationConverter.Register();
+        ConverterGroupRegistry.Register(
+            new LocalizationGroup(),
+            new UppercaseLocalizationGroup()
+        );
         LoadPanelSettings();
 
         PanelSettings.referenceResolution = new Vector2Int(

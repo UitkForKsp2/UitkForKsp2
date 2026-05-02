@@ -1,4 +1,5 @@
 using UitkForKsp2.MVVM.Commands;
+using UitkForKsp2.MVVM.Converters;
 using UitkForKsp2.MVVM.Core;
 using Unity.Properties;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace UitkForKsp2
 
         public BindingTestView()
         {
-            GreetingConverter.Register();
+            ConverterGroupRegistry.Register(new GreetingConverterGroup());
         }
 
         private void Start()
@@ -61,13 +62,21 @@ namespace UitkForKsp2
         }
     }
 
-    public static class GreetingConverter
+    public sealed class GreetingConverter : IConverter<string, string>
     {
-        public static void Register()
-        {
-            var group = new ConverterGroup("GreetingConverter");
-            group.AddConverter((ref string username) => $"Hello, {username}!");
-            ConverterGroups.RegisterConverterGroup(group);
-        }
+        public string Convert(string username) => $"Hello, {username}!";
+    }
+
+    public sealed class GreetingConverterGroup : IConverterGroup
+    {
+        public string Id => "GreetingConverter";
+
+        public string DisplayName => "Greeting Converter";
+
+        public string Description => "Formats a username as a greeting.";
+
+        public bool RefreshOnLocalizationChange => false;
+
+        public void RegisterConverters(ConverterGroupBuilder builder) => builder.Add(new GreetingConverter());
     }
 }
