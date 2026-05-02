@@ -298,6 +298,7 @@ public static class Extensions
     public static void DisableGameInputOnFocus(this VisualElement element)
     {
         bool hasFocusLock = false;
+        IVisualElementScheduledItem? focusLockStateCheck = null;
 
         void AcquireFocusLock()
         {
@@ -320,6 +321,14 @@ public static class Extensions
             SetGameInputDisabled(false);
         }
 
+        void CheckFocusLockState()
+        {
+            if (hasFocusLock && !IsElementAvailableForFocusLock(element))
+            {
+                ReleaseFocusLock();
+            }
+        }
+
         element.RegisterCallback<FocusInEvent>(_ =>
         {
             Log($"FocusInEvent: {element.GetType().Name} {element.name}");
@@ -335,7 +344,19 @@ public static class Extensions
             ReleaseFocusLock();
         });
 
-        element.RegisterCallback<DetachFromPanelEvent>(_ => ReleaseFocusLock());
+        element.RegisterCallback<GeometryChangedEvent>(_ => CheckFocusLockState());
+        element.RegisterCallback<DetachFromPanelEvent>(_ =>
+        {
+            ReleaseFocusLock();
+            focusLockStateCheck?.Pause();
+        });
+        element.RegisterCallback<AttachToPanelEvent>(_ =>
+        {
+            focusLockStateCheck?.Pause();
+            focusLockStateCheck = element.schedule.Execute(CheckFocusLockState).Every(100);
+        });
+
+        focusLockStateCheck = element.schedule.Execute(CheckFocusLockState).Every(100);
     }
 
     #endregion
@@ -403,6 +424,28 @@ public static class Extensions
         if (IInputManager.Instance.Ready)
         {
             IInputManager.Instance.RestoreUitkInputLocks();
+        }
+
+        return true;
+    }
+
+    private static bool IsElementAvailableForFocusLock(VisualElement element)
+    {
+        if (element.panel == null || element.worldBound.width <= 0 || element.worldBound.height <= 0)
+        {
+            return false;
+        }
+
+        VisualElement? current = element;
+        while (current != null)
+        {
+            if (current.resolvedStyle.display == DisplayStyle.None ||
+                current.resolvedStyle.visibility == Visibility.Hidden)
+            {
+                return false;
+            }
+
+            current = current.parent;
         }
 
         return true;
