@@ -1,4 +1,5 @@
 using UitkForKsp2.Controls;
+using UitkForKsp2.MVVM.Converters;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -30,7 +31,7 @@ namespace UitkForKsp2.API.Manipulator
         protected override void RegisterCallbacksOnTarget()
         {
             target.RegisterCallback<MouseEnterEvent>(MouseIn);
-            target.RegisterCallback<MouseOutEvent>(MouseOut);
+            target.RegisterCallback<MouseLeaveEvent>(MouseOut);
             target.RegisterCallback<TooltipEvent>(SuppressNativeTooltip);
         }
 
@@ -39,7 +40,7 @@ namespace UitkForKsp2.API.Manipulator
             CancelPendingShow();
             tooltip.Close(target, GetFadeOutDuration());
             target.UnregisterCallback<MouseEnterEvent>(MouseIn);
-            target.UnregisterCallback<MouseOutEvent>(MouseOut);
+            target.UnregisterCallback<MouseLeaveEvent>(MouseOut);
             target.UnregisterCallback<TooltipEvent>(SuppressNativeTooltip);
         }
 
@@ -59,7 +60,7 @@ namespace UitkForKsp2.API.Manipulator
                 .StartingIn(hoverDelay);
         }
 
-        private void MouseOut(MouseOutEvent e)
+        private void MouseOut(MouseLeaveEvent e)
         {
             hoverVersion++;
             CancelPendingShow();
@@ -74,7 +75,15 @@ namespace UitkForKsp2.API.Manipulator
             }
 
             showTask = null;
-            tooltip.Show(target, 0, GetFadeInDuration(), GetFadeOutDuration());
+            Tooltip.ParseTooltip(target, out char hint, out string message);
+            tooltip.Show(
+                target,
+                LocalizationConverter.Translate(message),
+                hint,
+                0,
+                GetFadeInDuration(),
+                GetFadeOutDuration()
+            );
         }
 
         private void CancelPendingShow()
