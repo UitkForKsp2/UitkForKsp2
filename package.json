@@ -1,0 +1,19 @@
+{
+    "name": "uitkforksp2",
+    "version": "3.0.0",
+    "displayName": "UITK for KSP 2",
+    "description": "This package contains code for creating UIs with UITK for KSP 2.",
+    "unity": "2022.3",
+    "unityRelease": "5f1",
+    "documentationUrl": "https://github.com/UitkForKsp2/UitkForKsp2",
+    "licensesUrl": "https://raw.githubusercontent.com/UitkForKsp2/UitkForKsp2/main/LICENSE",
+    "hideInEditor": false,
+    "keywords": [
+      "ui",
+      "ksp",
+      "mods"
+    ],
+    "author": {
+      "name": "munix"
+    }
+  }
