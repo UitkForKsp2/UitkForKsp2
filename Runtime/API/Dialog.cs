@@ -186,7 +186,7 @@ public static class Dialog
 
         handle = new DialogHandle(document, documentRoot, dialogElement, options.OnClose);
 
-        dialogElement.CenterByDefault();
+        CenterDialogByDefault(dialogElement);
 
         if (options.UseCurtain)
         {
@@ -204,6 +204,28 @@ public static class Dialog
         }
 
         return handle;
+    }
+
+    private static void CenterDialogByDefault(VisualElement dialogElement)
+    {
+        dialogElement.CenterByDefault();
+        dialogElement.schedule.Execute(() => CenterDialog(dialogElement));
+    }
+
+    private static void CenterDialog(VisualElement dialogElement)
+    {
+        Rect windowRect = dialogElement.contentRect;
+        if (windowRect.width == 0 || windowRect.height == 0)
+        {
+            return;
+        }
+
+        Rect panelRect = dialogElement.panel?.visualTree?.contentRect ??
+                         new Rect(0, 0, ReferenceResolution.Width, ReferenceResolution.Height);
+
+        dialogElement.style.position = Position.Absolute;
+        dialogElement.style.left = (panelRect.width - windowRect.width) / 2f;
+        dialogElement.style.top = (panelRect.height - windowRect.height) / 2f;
     }
 
     private static void EnableLocalization(UIDocument document)
