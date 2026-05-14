@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UitkForKsp2.API.Order;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -173,14 +174,17 @@ public static class Dialog
         {
             windowOptions.MoveOptions = MoveOptions.Default with { IsMovingEnabled = false };
             windowOptions.ResizeOptions = ResizeOptions.Default;
+            windowOptions.BlockGameInput = true;
         }
 
-        VisualElement root = CreateRoot(options, actions, () => handle, out VisualElement dialogElement);
-        UIDocument document = Window.Create(windowOptions, root);
+        VisualElement dialogElement = CreateDialogElement(options, actions, () => handle);
+        UIDocument document = Window.Create(windowOptions, dialogElement);
+        VisualElement documentRoot = document.rootVisualElement;
+        ConfigureDocumentRoot(documentRoot, options.UseCurtain);
         OrderManager.Register(document.panelSettings);
         OrderManager.BringToFront(document.panelSettings);
 
-        handle = new DialogHandle(document, root, dialogElement, options.OnClose);
+        handle = new DialogHandle(document, documentRoot, dialogElement, options.OnClose);
 
         dialogElement.CenterByDefault();
 
@@ -252,29 +256,59 @@ public static class Dialog
         });
     }
 
-    private static VisualElement CreateRoot(
+    private static VisualElement CreateDialogElement(
         DialogOptions options,
         IReadOnlyList<DialogAction> actions,
-        Func<DialogHandle?> getHandle,
-        out VisualElement dialogElement
+        Func<DialogHandle?> getHandle
     )
     {
-        dialogElement = Element.Root(classes: "uitk-dialog")!;
+        VisualElement dialogElement = Element.Root(classes: "uitk-dialog")!;
 
         dialogElement.Add(CreateHeader(options.Title, options.ShowCloseButton, getHandle));
         dialogElement.Add(Element.Label("dialog-message", options.Message, "uitk-dialog__message"));
         dialogElement.Add(CreateButtonRow(actions, getHandle));
 
-        if (!options.UseCurtain)
+        return dialogElement;
+    }
+
+    private static void ConfigureDocumentRoot(VisualElement root, bool useCurtain)
+    {
+        root.style.flexGrow = 1;
+        root.style.width = Length.Percent(100);
+        root.style.height = Length.Percent(100);
+
+        if (!useCurtain)
         {
-            return dialogElement;
+            root.style.backgroundColor = Color.clear;
+            root.pickingMode = PickingMode.Ignore;
+            return;
         }
 
-        VisualElement root = Element.VisualElement("dialog-layer", "uitk-dialog-layer")!;
-        root.Add(Element.VisualElement("dialog-curtain", "uitk-dialog-curtain")!);
-        root.Add(dialogElement);
+        root.style.backgroundColor = new Color(0f, 0f, 0f, 0.45f);
+        root.pickingMode = PickingMode.Position;
+        root.BlockGameInput();
+        RegisterCurtainBlockers(root);
+    }
 
-        return root;
+    private static void RegisterCurtainBlockers(VisualElement curtain)
+    {
+        curtain.RegisterCallback<PointerDownEvent>(evt => BlockCurtainEvent(evt));
+        curtain.RegisterCallback<PointerUpEvent>(evt => BlockCurtainEvent(evt));
+        curtain.RegisterCallback<PointerMoveEvent>(evt => BlockCurtainEvent(evt));
+        curtain.RegisterCallback<PointerCancelEvent>(evt => BlockCurtainEvent(evt));
+        curtain.RegisterCallback<ClickEvent>(evt => BlockCurtainEvent(evt));
+        curtain.RegisterCallback<WheelEvent>(evt => BlockCurtainEvent(evt));
+    }
+
+    private static void BlockCurtainEvent(EventBase evt)
+    {
+        if (evt.target != evt.currentTarget)
+        {
+            return;
+        }
+
+        evt.StopPropagation();
+        evt.PreventDefault();
     }
 
     private static VisualElement CreateHeader(string title, bool showCloseButton, Func<DialogHandle?> getHandle)
