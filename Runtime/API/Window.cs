@@ -41,7 +41,8 @@ public static class Window
         root ??= Element.Root();
         SetupRootElement(root, document, options);
 
-        _rootVisualElement.SetValue(document, root);
+        VisualElement documentRoot = CreateDocumentRoot(document, root);
+        _rootVisualElement.SetValue(document, documentRoot);
         _addRootVisualElementToTree.Invoke(document, Array.Empty<object>());
 
         return document;
@@ -69,6 +70,34 @@ public static class Window
         SetupRootElement(rootElement, document, options);
 
         return document;
+    }
+
+    private static VisualElement CreateDocumentRoot(UIDocument document, VisualElement root)
+    {
+        Type documentRootType = _rootVisualElement.FieldType;
+        if (documentRootType.IsInstanceOfType(root))
+        {
+            return root;
+        }
+
+        ConstructorInfo? documentConstructor = documentRootType.GetConstructor(
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+            null,
+            new[] { typeof(UIDocument), typeof(VisualTreeAsset) },
+            null
+        );
+
+        if (documentConstructor == null)
+        {
+            throw new MissingMethodException(
+                documentRootType.FullName,
+                ".ctor(UnityEngine.UIElements.UIDocument, UnityEngine.UIElements.VisualTreeAsset)"
+            );
+        }
+
+        var documentRoot = (VisualElement)documentConstructor.Invoke(new object?[] { document, null })!;
+        documentRoot.Add(root);
+        return documentRoot;
     }
 
     private static UIDocument CreateInternal(WindowOptions options)
