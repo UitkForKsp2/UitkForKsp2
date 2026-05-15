@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using UitkForKsp2.API.Order;
+using UitkForKsp2.Controls;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -58,6 +61,21 @@ public struct DialogOptions
     public string Message { get; set; }
 
     /// <summary>
+    /// Optional addressable Texture2D or Sprite used as the title-bar icon.
+    /// </summary>
+    public string? IconAddress { get; set; }
+
+    /// <summary>
+    /// Optional direct Texture2D used as the title-bar icon.
+    /// </summary>
+    public Texture2D? IconTexture { get; set; }
+
+    /// <summary>
+    /// Optional direct Sprite used as the title-bar icon.
+    /// </summary>
+    public Sprite? IconSprite { get; set; }
+
+    /// <summary>
     /// Dialog buttons. Button text accepts localization keys starting with '#' when localization is enabled.
     /// </summary>
     public IReadOnlyList<DialogAction>? Actions { get; set; }
@@ -83,11 +101,14 @@ public struct DialogOptions
     {
         Title = string.Empty,
         Message = string.Empty,
+        IconAddress = null,
+        IconTexture = null,
+        IconSprite = null,
         Actions = null,
         WindowOptions = WindowOptions.Default with
         {
             WindowId = null,
-            MoveOptions = MoveOptions.Default with { HandleElementName = "dialog-header" },
+            MoveOptions = MoveOptions.Default with { HandleElementName = "header" },
             ResizeOptions = ResizeOptions.Default,
         },
         EnableLocalization = true,
@@ -152,6 +173,21 @@ public sealed class DialogHandle
 [PublicAPI]
 public static class Dialog
 {
+    private const string DialogTemplateAddress = "Packages/uitkforksp2.controls/Assets/Templates/Dialog/DialogTemplate.uxml";
+    private const string DialogStyleAddress = "Packages/uitkforksp2.controls/Assets/Templates/Dialog/DialogTemplate.uss";
+    private const string RootName = "root";
+    private const string DialogIconName = "dialog-header-icon";
+    private const string DialogTitleName = "dialog-title";
+    private const string DialogMessageName = "dialog-message";
+    private const string DialogActionsName = "dialog-actions";
+    private const string DialogCloseContainerName = "dialog-close-container";
+    private const string DialogCloseButtonName = "dialog-close-button";
+
+    private static VisualTreeAsset? _dialogTemplate;
+    private static StyleSheet? _dialogStyleSheet;
+    private static bool _templateLoadAttempted;
+    private static bool _styleLoadAttempted;
+
     public static DialogHandle Open(string title, string message, params DialogAction[] actions)
     {
         return Open(DialogOptions.Default with
@@ -284,13 +320,252 @@ public static class Dialog
         Func<DialogHandle?> getHandle
     )
     {
-        VisualElement dialogElement = Element.Root(classes: "uitk-dialog")!;
-
-        dialogElement.Add(CreateHeader(options.Title, options.ShowCloseButton, getHandle));
-        dialogElement.Add(Element.Label("dialog-message", options.Message, "uitk-dialog__message"));
-        dialogElement.Add(CreateButtonRow(actions, getHandle));
+        VisualElement dialogElement = CreateTemplateElement();
+        ConfigureIcon(dialogElement, options);
+        ConfigureTitle(dialogElement, options.Title);
+        ConfigureCloseButton(dialogElement, options.ShowCloseButton, getHandle);
+        ConfigureMessage(dialogElement, options.Message);
+        ConfigureActions(dialogElement, actions, getHandle);
 
         return dialogElement;
+    }
+
+    private static VisualElement CreateTemplateElement()
+    {
+        LoadTemplate();
+        if (_dialogTemplate == null)
+        {
+            return CreateFallbackTemplateElement();
+        }
+
+        TemplateContainer container = _dialogTemplate.CloneTree();
+        var root = container.Q<VisualElement>(RootName);
+        if (root == null)
+        {
+            AddDialogStyleSheet(container);
+            return container;
+        }
+
+        root.RemoveFromHierarchy();
+        AddDialogStyleSheet(root);
+        return root;
+    }
+
+    private static VisualElement CreateFallbackTemplateElement()
+    {
+        var root = new AppShell
+        {
+            name = RootName,
+            TitleName = DialogTitleName,
+            IconName = DialogIconName,
+            DashesName = "dialog-header-dashes",
+            CloseContainerName = DialogCloseContainerName,
+            CloseButtonName = DialogCloseButtonName,
+            UppercaseTitle = true
+        };
+        root.AddToClassList("uitk-dialog");
+
+        VisualElement body = Element.VisualElement("dialog-body", "uitk-dialog__body oab-window-body")!;
+        body.Add(Element.Label(DialogMessageName, classes: "uitk-dialog__message"));
+
+        root.Add(body);
+        root.Add(Element.VisualElement(DialogActionsName, "uitk-dialog__actions oab-window-actions"));
+        AddDialogStyleSheet(root);
+        return root;
+    }
+
+    private static void AddDialogStyleSheet(VisualElement root)
+    {
+        LoadStyleSheet();
+        if (_dialogStyleSheet != null)
+        {
+            root.styleSheets.Add(_dialogStyleSheet);
+        }
+    }
+
+    private static void LoadTemplate()
+    {
+        if (_templateLoadAttempted)
+        {
+            return;
+        }
+
+        _templateLoadAttempted = true;
+        AsyncOperationHandle<VisualTreeAsset> handle =
+            Addressables.LoadAssetAsync<VisualTreeAsset>(DialogTemplateAddress);
+        _dialogTemplate = handle.WaitForCompletion();
+
+        if (handle.Status != AsyncOperationStatus.Succeeded)
+        {
+            Debug.LogError(
+                $"Failed to load dialog UXML from address '{DialogTemplateAddress}': {handle.OperationException}"
+            );
+            _dialogTemplate = null;
+        }
+    }
+
+    private static void LoadStyleSheet()
+    {
+        if (_styleLoadAttempted)
+        {
+            return;
+        }
+
+        _styleLoadAttempted = true;
+        AsyncOperationHandle<StyleSheet> handle =
+            Addressables.LoadAssetAsync<StyleSheet>(DialogStyleAddress);
+        _dialogStyleSheet = handle.WaitForCompletion();
+
+        if (handle.Status != AsyncOperationStatus.Succeeded)
+        {
+            Debug.LogError(
+                $"Failed to load dialog USS from address '{DialogStyleAddress}': {handle.OperationException}"
+            );
+            _dialogStyleSheet = null;
+        }
+    }
+
+    private static void ConfigureTitle(VisualElement dialogElement, string title)
+    {
+        var titleLabel = dialogElement.Q<Label>(DialogTitleName);
+        if (titleLabel != null)
+        {
+            titleLabel.text = string.IsNullOrEmpty(title) || title[0] == '#'
+                ? title
+                : title.ToUpperInvariant();
+        }
+    }
+
+    private static void ConfigureIcon(VisualElement dialogElement, DialogOptions options)
+    {
+        VisualElement? icon = dialogElement.Q(DialogIconName);
+        if (icon == null)
+        {
+            return;
+        }
+
+        icon.style.display = DisplayStyle.None;
+        icon.style.backgroundImage = StyleKeyword.Null;
+
+        if (options.IconTexture != null)
+        {
+            icon.style.backgroundImage = new StyleBackground(options.IconTexture);
+            icon.style.display = DisplayStyle.Flex;
+            return;
+        }
+
+        if (options.IconSprite != null)
+        {
+            icon.style.backgroundImage = new StyleBackground(options.IconSprite);
+            icon.style.display = DisplayStyle.Flex;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(options.IconAddress))
+        {
+            return;
+        }
+
+        AsyncOperationHandle<UnityEngine.Object> handle =
+            Addressables.LoadAssetAsync<UnityEngine.Object>(options.IconAddress);
+        UnityEngine.Object iconAsset = handle.WaitForCompletion();
+        if (handle.Status != AsyncOperationStatus.Succeeded || iconAsset == null)
+        {
+            Debug.LogError(
+                $"Failed to load dialog icon from address '{options.IconAddress}': {handle.OperationException}"
+            );
+            return;
+        }
+
+        switch (iconAsset)
+        {
+            case Texture2D texture:
+                icon.style.backgroundImage = new StyleBackground(texture);
+                icon.style.display = DisplayStyle.Flex;
+                break;
+            case Sprite sprite:
+                icon.style.backgroundImage = new StyleBackground(sprite);
+                icon.style.display = DisplayStyle.Flex;
+                break;
+            default:
+                Debug.LogError(
+                    $"Dialog icon address '{options.IconAddress}' resolved to unsupported asset type '{iconAsset.GetType().Name}'"
+                );
+                break;
+        }
+    }
+
+    private static void ConfigureMessage(VisualElement dialogElement, string message)
+    {
+        var messageLabel = dialogElement.Q<Label>(DialogMessageName);
+        if (messageLabel != null)
+        {
+            messageLabel.text = message;
+        }
+    }
+
+    private static void ConfigureCloseButton(
+        VisualElement dialogElement,
+        bool showCloseButton,
+        Func<DialogHandle?> getHandle
+    )
+    {
+        VisualElement? closeContainer = dialogElement.Q(DialogCloseContainerName);
+        if (closeContainer != null)
+        {
+            closeContainer.style.display = showCloseButton ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        var closeButton = dialogElement.Q<Button>(DialogCloseButtonName);
+        if (closeButton != null)
+        {
+            closeButton.clicked += () => getHandle()?.Close();
+        }
+    }
+
+    private static void ConfigureActions(
+        VisualElement dialogElement,
+        IReadOnlyList<DialogAction> actions,
+        Func<DialogHandle?> getHandle
+    )
+    {
+        VisualElement? row = dialogElement.Q(DialogActionsName);
+        if (row == null)
+        {
+            row = Element.VisualElement(DialogActionsName, "uitk-dialog__actions oab-window-actions")!;
+            dialogElement.Add(row);
+        }
+
+        row.Clear();
+
+        for (int i = 0; i < actions.Count; i++)
+        {
+            DialogAction action = actions[i];
+            Button button = Element.Button(null, action.Text, "uitk-dialog__button");
+            button.name = $"dialog-action-{i}";
+
+            if (!string.IsNullOrWhiteSpace(action.ClassName))
+            {
+                button.AddToClassList(action.ClassName);
+            }
+
+            button.clicked += () =>
+            {
+                try
+                {
+                    action.Callback?.Invoke();
+                }
+                finally
+                {
+                    if (action.CloseDialog)
+                    {
+                        getHandle()?.Close();
+                    }
+                }
+            };
+
+            row.Add(button);
+        }
     }
 
     private static void ConfigureDocumentRoot(VisualElement root, bool useCurtain)
@@ -331,66 +606,5 @@ public static class Dialog
 
         evt.StopPropagation();
         evt.PreventDefault();
-    }
-
-    private static VisualElement CreateHeader(string title, bool showCloseButton, Func<DialogHandle?> getHandle)
-    {
-        VisualElement header = Element.VisualElement("dialog-header", "uitk-dialog__header")!;
-        header.Add(Element.Label("dialog-title", title, "uitk-dialog__title"));
-        header.Add(CreateHeaderDashes());
-
-        if (showCloseButton)
-        {
-            Button closeButton = Element.Button("dialog-close-button", "x", "uitk-dialog__close-button ui-sound-close");
-            closeButton.clicked += () => getHandle()?.Close();
-            header.Add(closeButton);
-        }
-
-        return header;
-    }
-
-    private static VisualElement CreateHeaderDashes()
-    {
-        VisualElement dashes = Element.VisualElement("dialog-header-dashes", "uitk-dialog__header-dashes")!;
-        dashes.Add(Element.Label("dialog-header-dashes-run", new string('-', 250), "uitk-dialog__header-dashes-run"));
-        dashes.Add(Element.Label("dialog-header-dashes-slash", "/", "uitk-dialog__header-dashes-slash"));
-
-        return dashes;
-    }
-
-    private static VisualElement CreateButtonRow(IReadOnlyList<DialogAction> actions, Func<DialogHandle?> getHandle)
-    {
-        VisualElement row = Element.VisualElement("dialog-actions", "uitk-dialog__actions")!;
-
-        for (int i = 0; i < actions.Count; i++)
-        {
-            DialogAction action = actions[i];
-            Button button = Element.Button(null, action.Text, "uitk-dialog__button");
-            button.name = $"dialog-action-{i}";
-
-            if (!string.IsNullOrWhiteSpace(action.ClassName))
-            {
-                button.AddToClassList(action.ClassName);
-            }
-
-            button.clicked += () =>
-            {
-                try
-                {
-                    action.Callback?.Invoke();
-                }
-                finally
-                {
-                    if (action.CloseDialog)
-                    {
-                        getHandle()?.Close();
-                    }
-                }
-            };
-
-            row.Add(button);
-        }
-
-        return row;
     }
 }

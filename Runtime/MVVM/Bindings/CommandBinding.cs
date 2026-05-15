@@ -7,6 +7,7 @@ namespace UitkForKsp2.MVVM.Bindings
     /// <summary>
     /// Convenience binding for Button.clicked -> ICommand. Wires the button's
     /// clicked event and enable state to a parameterless command on the data source.
+    /// Composite controls can use target-name to bind a named descendant button.
     ///
     /// UXML usage:
     /// <code>
@@ -26,6 +27,12 @@ namespace UitkForKsp2.MVVM.Bindings
         [UxmlAttribute("data-source-path")]
         public string DataSourcePath { get; set; }
 
+        /// <summary>
+        /// Optional descendant Button name. When omitted, the binding target must be a Button.
+        /// </summary>
+        [UxmlAttribute("target-name")]
+        public string TargetName { get; set; } = string.Empty;
+
         private ICommand _currentCommand;
         private Button _button;
 
@@ -36,12 +43,12 @@ namespace UitkForKsp2.MVVM.Bindings
 
         protected override BindingResult Update(in BindingContext context)
         {
-            if (context.targetElement is not Button button)
+            if (!TryGetTargetButton(context.targetElement, out Button button))
             {
                 return new BindingResult(
                     BindingStatus.Failure,
-                    "CommandBinding must be on a Button. Use EventBinding with event-type=\"ClickEvent\" " +
-                    "for other elements."
+                    "CommandBinding must be on a Button or specify target-name for a descendant Button. " +
+                    "Use EventBinding with event-type=\"ClickEvent\" for other elements."
                 );
             }
 
@@ -65,7 +72,7 @@ namespace UitkForKsp2.MVVM.Bindings
                 return new BindingResult(BindingStatus.Failure, $"'{DataSourcePath}' does not implement ICommand.");
             }
 
-            if (!ReferenceEquals(command, _currentCommand))
+            if (!ReferenceEquals(command, _currentCommand) || !ReferenceEquals(button, _button))
             {
                 Unbind();
                 _currentCommand = command;
@@ -103,5 +110,17 @@ namespace UitkForKsp2.MVVM.Bindings
 
         private void OnClicked() => _currentCommand?.Execute();
         private void OnCanExecuteChanged() => _button?.SetEnabled(_currentCommand?.CanExecute() ?? false);
+
+        private bool TryGetTargetButton(VisualElement targetElement, out Button button)
+        {
+            if (!string.IsNullOrWhiteSpace(TargetName))
+            {
+                button = targetElement?.Q<Button>(TargetName);
+                return button != null;
+            }
+
+            button = targetElement as Button;
+            return button != null;
+        }
     }
 }

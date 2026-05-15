@@ -17,6 +17,8 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(UIDocument))]
 public class DocumentLocalization : MonoBehaviour
 {
+    public const string UppercaseClass = "uppercase";
+
     private readonly Dictionary<VisualElement, string> _elementDictionary = new();
     private static readonly MethodInfo CreateBindingRequestsMethod = typeof(VisualElement).GetMethod(
         "CreateBindingRequests",
@@ -173,6 +175,11 @@ public class DocumentLocalization : MonoBehaviour
         }
         else
         {
+            if (element.ClassListContains(UppercaseClass))
+            {
+                localization = localization.ToUpperInvariant();
+            }
+
             element.GetType().GetProperty("text")?.SetValue(element, localization);
         }
     }
