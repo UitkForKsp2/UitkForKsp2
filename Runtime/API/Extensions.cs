@@ -14,6 +14,8 @@ namespace UitkForKsp2.API;
 [PublicAPI]
 public static class Extensions
 {
+    internal static event Action<VisualElement>? ElementHidden;
+
     #region UIDocument extensions
 
     /// <summary>
@@ -140,8 +142,15 @@ public static class Extensions
     /// <returns>The element which was hidden.</returns>
     public static T Hide<T>(this T element) where T : VisualElement
     {
+        NotifyElementHidden(element);
         element.style.display = DisplayStyle.None;
+        NotifyElementHidden(element);
         return element;
+    }
+
+    internal static void NotifyElementHidden(VisualElement element)
+    {
+        ElementHidden?.Invoke(element);
     }
 
     /// <summary>
@@ -152,10 +161,9 @@ public static class Extensions
     /// <returns>The element which was toggled.</returns>
     public static T ToggleDisplay<T>(this T element) where T : VisualElement
     {
-        element.style.display = element.style.display == DisplayStyle.None
-            ? DisplayStyle.Flex
-            : DisplayStyle.None;
-        return element;
+        return element.style.display == DisplayStyle.None
+            ? element.Show()
+            : element.Hide();
     }
 
     /// <summary>
@@ -299,6 +307,7 @@ public static class Extensions
     {
         bool hasFocusLock = false;
         IVisualElementScheduledItem? focusLockStateCheck = null;
+        bool isListeningForHiddenElements = false;
 
         void AcquireFocusLock()
         {
@@ -319,6 +328,43 @@ public static class Extensions
 
             hasFocusLock = false;
             SetGameInputDisabled(false);
+        }
+
+        void OnElementHidden(VisualElement hiddenElement)
+        {
+            if (hasFocusLock && IsSameElementOrAncestor(hiddenElement, element))
+            {
+                ReleaseFocusLock();
+            }
+        }
+
+        void SubscribeToHiddenElements()
+        {
+            if (isListeningForHiddenElements)
+            {
+                return;
+            }
+
+            ElementHidden += OnElementHidden;
+            isListeningForHiddenElements = true;
+        }
+
+        void UnsubscribeFromHiddenElements()
+        {
+            if (!isListeningForHiddenElements)
+            {
+                return;
+            }
+
+            ElementHidden -= OnElementHidden;
+            isListeningForHiddenElements = false;
+        }
+
+        void StartFocusLockStateCheck()
+        {
+            focusLockStateCheck?.Pause();
+            VisualElement scheduleTarget = element.panel?.visualTree ?? element;
+            focusLockStateCheck = scheduleTarget.schedule.Execute(CheckFocusLockState).Every(100);
         }
 
         void CheckFocusLockState()
@@ -349,14 +395,16 @@ public static class Extensions
         {
             ReleaseFocusLock();
             focusLockStateCheck?.Pause();
+            UnsubscribeFromHiddenElements();
         });
         element.RegisterCallback<AttachToPanelEvent>(_ =>
         {
-            focusLockStateCheck?.Pause();
-            focusLockStateCheck = element.schedule.Execute(CheckFocusLockState).Every(100);
+            SubscribeToHiddenElements();
+            StartFocusLockStateCheck();
         });
 
-        focusLockStateCheck = element.schedule.Execute(CheckFocusLockState).Every(100);
+        SubscribeToHiddenElements();
+        StartFocusLockStateCheck();
     }
 
     #endregion
@@ -449,6 +497,22 @@ public static class Extensions
         }
 
         return true;
+    }
+
+    internal static bool IsSameElementOrAncestor(VisualElement possibleAncestor, VisualElement element)
+    {
+        VisualElement? current = element;
+        while (current != null)
+        {
+            if (current == possibleAncestor)
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
     }
 
     /// <summary>

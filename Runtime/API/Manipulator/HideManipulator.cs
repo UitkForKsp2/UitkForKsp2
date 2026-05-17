@@ -44,7 +44,9 @@ public class HideManipulator : IManipulator
         {
             _alreadySavedVisibility = true;
             _originalVisibility = _target.style.visibility.value;
+            Extensions.NotifyElementHidden(_target);
             _target.style.visibility = Visibility.Hidden;
+            Extensions.NotifyElementHidden(_target);
         }
     }
 }

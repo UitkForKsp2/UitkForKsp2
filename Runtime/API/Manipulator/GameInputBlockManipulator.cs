@@ -53,7 +53,8 @@ public class GameInputBlockManipulator : IManipulator
         _target.RegisterCallback<ClickEvent>(OnClick);
         _target.RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
         _target.RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
-        _stateCheck = _target.schedule.Execute(CheckPointerState).Every(100);
+        Extensions.ElementHidden += OnElementHidden;
+        StartStateCheck();
     }
 
     private void UnregisterCallbacks(VisualElement target)
@@ -70,6 +71,7 @@ public class GameInputBlockManipulator : IManipulator
         target.UnregisterCallback<ClickEvent>(OnClick);
         target.UnregisterCallback<AttachToPanelEvent>(OnAttachToPanel);
         target.UnregisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
+        Extensions.ElementHidden -= OnElementHidden;
         _stateCheck?.Pause();
         _stateCheck = null;
     }
@@ -172,12 +174,28 @@ public class GameInputBlockManipulator : IManipulator
 
     private void OnAttachToPanel(AttachToPanelEvent evt)
     {
+        StartStateCheck();
         CheckPointerState();
     }
 
     private void OnDetachFromPanel(DetachFromPanelEvent evt)
     {
         ResetInteractionState();
+    }
+
+    private void OnElementHidden(VisualElement hiddenElement)
+    {
+        if (_target != null && Extensions.IsSameElementOrAncestor(hiddenElement, _target))
+        {
+            ResetInteractionState();
+        }
+    }
+
+    private void StartStateCheck()
+    {
+        _stateCheck?.Pause();
+        VisualElement? scheduleTarget = _target?.panel?.visualTree ?? _target;
+        _stateCheck = scheduleTarget?.schedule.Execute(CheckPointerState).Every(100);
     }
 
     private void CheckPointerState()
