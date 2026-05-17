@@ -78,8 +78,7 @@ public class GameInputBlockManipulator : IManipulator
 
     private void OnPointerEnter(PointerEnterEvent evt)
     {
-        _isPointerOver = true;
-        AcquireLockIfTargetIsAvailable();
+        CheckPointerState();
     }
 
     private void OnPointerLeave(PointerLeaveEvent evt)
@@ -93,21 +92,27 @@ public class GameInputBlockManipulator : IManipulator
 
     private void OnPointerDownTrickle(PointerDownEvent evt)
     {
-        AcquireLockIfTargetIsAvailable();
+        AcquireLockIfPointerOverTarget();
     }
 
     private void OnPointerDown(PointerDownEvent evt)
     {
+        if (!AcquireLockIfPointerOverTarget())
+        {
+            _isPointerDown = false;
+            return;
+        }
+
         _pointerId = evt.pointerId;
         _isPointerDown = true;
-        AcquireLockIfTargetIsAvailable();
         evt.StopPropagation();
         evt.PreventDefault();
     }
 
     private void OnPointerUp(PointerUpEvent evt)
     {
-        if (evt.pointerId == _pointerId)
+        bool wasPointerDown = _isPointerDown && evt.pointerId == _pointerId;
+        if (wasPointerDown)
         {
             _isPointerDown = false;
             if (!_isPointerOver)
@@ -116,13 +121,17 @@ public class GameInputBlockManipulator : IManipulator
             }
         }
 
-        evt.StopPropagation();
-        evt.PreventDefault();
+        if (wasPointerDown || IsPointerOverTarget(_target))
+        {
+            evt.StopPropagation();
+            evt.PreventDefault();
+        }
     }
 
     private void OnPointerCancel(PointerCancelEvent evt)
     {
-        if (evt.pointerId == _pointerId)
+        bool wasPointerDown = _isPointerDown && evt.pointerId == _pointerId;
+        if (wasPointerDown)
         {
             _isPointerDown = false;
             if (!_isPointerOver)
@@ -131,8 +140,11 @@ public class GameInputBlockManipulator : IManipulator
             }
         }
 
-        evt.StopPropagation();
-        evt.PreventDefault();
+        if (wasPointerDown || IsPointerOverTarget(_target))
+        {
+            evt.StopPropagation();
+            evt.PreventDefault();
+        }
     }
 
     private void OnPointerCaptureOut(PointerCaptureOutEvent evt)
@@ -149,12 +161,16 @@ public class GameInputBlockManipulator : IManipulator
 
     private void OnWheelTrickle(WheelEvent evt)
     {
-        AcquireLockIfTargetIsAvailable();
+        AcquireLockIfPointerOverTarget();
     }
 
     private void OnWheel(WheelEvent evt)
     {
-        AcquireLockIfTargetIsAvailable();
+        if (!AcquireLockIfPointerOverTarget())
+        {
+            return;
+        }
+
         evt.StopPropagation();
         evt.PreventDefault();
         _target?.schedule.Execute(() =>
@@ -168,8 +184,11 @@ public class GameInputBlockManipulator : IManipulator
 
     private void OnClick(ClickEvent evt)
     {
-        evt.StopPropagation();
-        evt.PreventDefault();
+        if (IsPointerOverTarget(_target))
+        {
+            evt.StopPropagation();
+            evt.PreventDefault();
+        }
     }
 
     private void OnAttachToPanel(AttachToPanelEvent evt)
@@ -222,15 +241,27 @@ public class GameInputBlockManipulator : IManipulator
         ReleaseLock();
     }
 
-    private void AcquireLockIfTargetIsAvailable()
+    private bool AcquireLockIfPointerOverTarget()
     {
         if (_target == null || !IsTargetAvailable(_target))
         {
             ResetInteractionState();
-            return;
+            return false;
+        }
+
+        _isPointerOver = IsPointerOverTarget(_target);
+        if (!_isPointerOver)
+        {
+            if (!_isPointerDown)
+            {
+                ReleaseLock();
+            }
+
+            return false;
         }
 
         AcquireLock();
+        return true;
     }
 
     private void ResetInteractionState()
@@ -245,8 +276,13 @@ public class GameInputBlockManipulator : IManipulator
         return Input.GetMouseButton(0) || Input.GetMouseButton(1) || Input.GetMouseButton(2);
     }
 
-    private static bool IsPointerOverTarget(VisualElement target)
+    private static bool IsPointerOverTarget(VisualElement? target)
     {
+        if (target == null || !IsTargetAvailable(target))
+        {
+            return false;
+        }
+
         IPanel panel = target.panel;
         if (panel == null)
         {
@@ -254,7 +290,29 @@ public class GameInputBlockManipulator : IManipulator
         }
 
         Vector2 panelPosition = RuntimePanelUtils.ScreenToPanel(panel, Input.mousePosition);
-        return target.worldBound.Contains(panelPosition);
+        if (!target.worldBound.Contains(panelPosition))
+        {
+            return false;
+        }
+
+        VisualElement? pickedElement = panel.Pick(panelPosition);
+        if (pickedElement == target)
+        {
+            return HasVisibleSurface(target);
+        }
+
+        return pickedElement != null && Extensions.IsSameElementOrAncestor(target, pickedElement);
+    }
+
+    private static bool HasVisibleSurface(VisualElement element)
+    {
+        IResolvedStyle style = element.resolvedStyle;
+        return style.backgroundColor.a > 0f ||
+               !style.backgroundImage.IsEmpty() ||
+               style.borderBottomWidth > 0f && style.borderBottomColor.a > 0f ||
+               style.borderLeftWidth > 0f && style.borderLeftColor.a > 0f ||
+               style.borderRightWidth > 0f && style.borderRightColor.a > 0f ||
+               style.borderTopWidth > 0f && style.borderTopColor.a > 0f;
     }
 
     private static bool IsTargetAvailable(VisualElement target)
@@ -286,7 +344,7 @@ public class GameInputBlockManipulator : IManipulator
             return;
         }
 
-        _hasLock = Extensions.SetGameInputDisabled(true);
+        _hasLock = Extensions.SetGameInputDisabled(this, true);
     }
 
     private void ReleaseLock()
@@ -297,6 +355,6 @@ public class GameInputBlockManipulator : IManipulator
         }
 
         _hasLock = false;
-        Extensions.SetGameInputDisabled(false);
+        Extensions.SetGameInputDisabled(this, false);
     }
 }

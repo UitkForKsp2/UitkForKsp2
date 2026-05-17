@@ -39,11 +39,10 @@ public static class Window
         UIDocument document = CreateInternal(options);
 
         root ??= Element.Root();
-        SetupRootElement(root, document, options);
-
         VisualElement documentRoot = CreateDocumentRoot(document, root);
         _rootVisualElement.SetValue(document, documentRoot);
         _addRootVisualElementToTree.Invoke(document, Array.Empty<object>());
+        SetupRootElement(root, document, options);
 
         return document;
     }
@@ -66,7 +65,8 @@ public static class Window
             return document;
         }
 
-        VisualElement? rootElement = document.rootVisualElement.hierarchy.ElementAt(0);
+        ConfigureDocumentRoot(document.rootVisualElement);
+        VisualElement? rootElement = ResolveWindowRoot(document.rootVisualElement);
         SetupRootElement(rootElement, document, options);
 
         return document;
@@ -96,8 +96,40 @@ public static class Window
         }
 
         var documentRoot = (VisualElement)documentConstructor.Invoke(new object?[] { document, null })!;
+        ConfigureDocumentRoot(documentRoot);
         documentRoot.Add(root);
         return documentRoot;
+    }
+
+    private static void ConfigureDocumentRoot(VisualElement documentRoot)
+    {
+        documentRoot.style.alignItems = Align.FlexStart;
+    }
+
+    private static VisualElement? ResolveWindowRoot(VisualElement documentRoot)
+    {
+        if (documentRoot.hierarchy.childCount <= 0)
+        {
+            return null;
+        }
+
+        VisualElement windowRoot = documentRoot.hierarchy.ElementAt(0);
+        while (windowRoot is TemplateContainer && windowRoot.hierarchy.childCount == 1)
+        {
+            ConfigureTemplateContainer(windowRoot);
+            windowRoot = windowRoot.hierarchy.ElementAt(0);
+        }
+
+        return windowRoot;
+    }
+
+    private static void ConfigureTemplateContainer(VisualElement container)
+    {
+        container.style.alignSelf = Align.FlexStart;
+        container.style.alignItems = Align.FlexStart;
+        container.style.flexGrow = 0f;
+        container.style.width = new StyleLength(StyleKeyword.Auto);
+        container.style.height = new StyleLength(StyleKeyword.Auto);
     }
 
     private static UIDocument CreateInternal(WindowOptions options)
@@ -188,6 +220,7 @@ public static class Window
         if (options.DisableGameInputForTextFields)
         {
             root.Query<TextField>().ForEach(textField => textField.DisableGameInputOnFocus());
+            RegisterTextFieldBlurOnOutsidePointerDown(root, document.rootVisualElement);
         }
 
         if (options.BlockGameInput)
@@ -204,5 +237,33 @@ public static class Window
         {
             PanelFactory.Apply(document.panelSettings!);
         });
+    }
+
+    private static void RegisterTextFieldBlurOnOutsidePointerDown(VisualElement root, VisualElement documentRoot)
+    {
+        documentRoot.RegisterCallback<PointerDownEvent>(
+            evt => BlurTextFieldOnOutsidePointerDown(root, documentRoot, evt),
+            TrickleDown.TrickleDown
+        );
+    }
+
+    private static void BlurTextFieldOnOutsidePointerDown(
+        VisualElement root,
+        VisualElement documentRoot,
+        PointerDownEvent evt
+    )
+    {
+        if (evt.target is VisualElement target && Extensions.IsSameElementOrAncestor(root, target))
+        {
+            return;
+        }
+
+        if (documentRoot.panel?.focusController?.focusedElement is not VisualElement focusedElement ||
+            !Extensions.IsSameElementOrAncestor(root, focusedElement))
+        {
+            return;
+        }
+
+        focusedElement.Blur();
     }
 }

@@ -142,6 +142,8 @@ public static class Extensions
     /// <returns>The element which was hidden.</returns>
     public static T Hide<T>(this T element) where T : VisualElement
     {
+        BlurFocusedElementWithin(element);
+        ReleaseTextInputLocksWithin(element);
         NotifyElementHidden(element);
         element.style.display = DisplayStyle.None;
         NotifyElementHidden(element);
@@ -306,6 +308,7 @@ public static class Extensions
     public static void DisableGameInputOnFocus(this VisualElement element)
     {
         bool hasFocusLock = false;
+        object focusLockOwner = new();
         IVisualElementScheduledItem? focusLockStateCheck = null;
         bool isListeningForHiddenElements = false;
 
@@ -316,7 +319,7 @@ public static class Extensions
                 return;
             }
 
-            hasFocusLock = SetGameInputDisabled(true);
+            hasFocusLock = SetTextInputDisabled(focusLockOwner, true, element);
         }
 
         void ReleaseFocusLock()
@@ -327,7 +330,7 @@ public static class Extensions
             }
 
             hasFocusLock = false;
-            SetGameInputDisabled(false);
+            SetTextInputDisabled(focusLockOwner, false);
         }
 
         void OnElementHidden(VisualElement hiddenElement)
@@ -369,7 +372,8 @@ public static class Extensions
 
         void CheckFocusLockState()
         {
-            if (hasFocusLock && !IsElementAvailableForFocusLock(element))
+            if (hasFocusLock &&
+                (!IsElementAvailableForFocusLock(element) || !IsElementOrDescendantFocused(element)))
             {
                 ReleaseFocusLock();
             }
@@ -423,12 +427,22 @@ public static class Extensions
     /// <summary>
     /// The statuses of all input definitions before they were disabled.
     /// </summary>
-    private static int _gameInputLockCount;
+    private static readonly object LegacyGameInputLockOwner = new();
+
+    private static readonly object LegacyTextInputLockOwner = new();
+
+    private static readonly HashSet<object> GameInputLockOwners = new();
+
+    private static readonly HashSet<object> TextInputLockOwners = new();
+
+    private static readonly Dictionary<object, VisualElement> TextInputLockOwnerElements = new();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetGameInputLockCount()
     {
-        _gameInputLockCount = 0;
+        GameInputLockOwners.Clear();
+        TextInputLockOwners.Clear();
+        TextInputLockOwnerElements.Clear();
     }
 
     /// <summary>
@@ -436,6 +450,11 @@ public static class Extensions
     /// </summary>
     /// <param name="isDisabled">True to disable the game input, false to enable it.</param>
     internal static bool SetGameInputDisabled(bool isDisabled)
+    {
+        return SetGameInputDisabled(LegacyGameInputLockOwner, isDisabled);
+    }
+
+    internal static bool SetGameInputDisabled(object owner, bool isDisabled)
     {
         if (isDisabled)
         {
@@ -447,8 +466,12 @@ public static class Extensions
                 return false;
             }
 
-            _gameInputLockCount++;
-            if (_gameInputLockCount > 1)
+            if (!GameInputLockOwners.Add(owner))
+            {
+                return true;
+            }
+
+            if (GameInputLockOwners.Count > 1)
             {
                 return true;
             }
@@ -457,14 +480,12 @@ public static class Extensions
             return true;
         }
 
-        if (_gameInputLockCount <= 0)
+        if (!GameInputLockOwners.Remove(owner))
         {
-            _gameInputLockCount = 0;
             return false;
         }
 
-        _gameInputLockCount--;
-        if (_gameInputLockCount > 0)
+        if (GameInputLockOwners.Count > 0)
         {
             return true;
         }
@@ -475,6 +496,90 @@ public static class Extensions
         }
 
         return true;
+    }
+
+    internal static bool SetTextInputDisabled(bool isDisabled)
+    {
+        return SetTextInputDisabled(LegacyTextInputLockOwner, isDisabled);
+    }
+
+    internal static bool SetTextInputDisabled(object owner, bool isDisabled)
+    {
+        return SetTextInputDisabled(owner, isDisabled, null);
+    }
+
+    private static bool SetTextInputDisabled(object owner, bool isDisabled, VisualElement? element)
+    {
+        if (isDisabled)
+        {
+            if (!IInputManager.Instance.Ready)
+            {
+                return false;
+            }
+
+            if (element != null)
+            {
+                TextInputLockOwnerElements[owner] = element;
+            }
+
+            if (!TextInputLockOwners.Add(owner))
+            {
+                return true;
+            }
+
+            if (TextInputLockOwners.Count > 1)
+            {
+                return true;
+            }
+
+            IInputManager.Instance.SetUitkTextInputLocks();
+            return true;
+        }
+
+        if (!TextInputLockOwners.Remove(owner))
+        {
+            TextInputLockOwnerElements.Remove(owner);
+            return false;
+        }
+
+        TextInputLockOwnerElements.Remove(owner);
+
+        if (TextInputLockOwners.Count > 0)
+        {
+            return true;
+        }
+
+        if (IInputManager.Instance.Ready)
+        {
+            IInputManager.Instance.RestoreUitkTextInputLocks();
+        }
+
+        return true;
+    }
+
+    private static void ReleaseTextInputLocksWithin(VisualElement hiddenElement)
+    {
+        List<object>? ownersToRelease = null;
+        foreach (KeyValuePair<object, VisualElement> ownerElement in TextInputLockOwnerElements)
+        {
+            if (!IsSameElementOrAncestor(hiddenElement, ownerElement.Value))
+            {
+                continue;
+            }
+
+            ownersToRelease ??= new List<object>();
+            ownersToRelease.Add(ownerElement.Key);
+        }
+
+        if (ownersToRelease == null)
+        {
+            return;
+        }
+
+        foreach (object owner in ownersToRelease)
+        {
+            SetTextInputDisabled(owner, false);
+        }
     }
 
     private static bool IsElementAvailableForFocusLock(VisualElement element)
@@ -497,6 +602,27 @@ public static class Extensions
         }
 
         return true;
+    }
+
+    private static bool IsElementOrDescendantFocused(VisualElement element)
+    {
+        if (element.panel?.focusController?.focusedElement is not VisualElement focusedElement)
+        {
+            return false;
+        }
+
+        return IsSameElementOrAncestor(element, focusedElement);
+    }
+
+    private static void BlurFocusedElementWithin(VisualElement element)
+    {
+        if (element.panel?.focusController?.focusedElement is not VisualElement focusedElement ||
+            !IsSameElementOrAncestor(element, focusedElement))
+        {
+            return;
+        }
+
+        focusedElement.Blur();
     }
 
     internal static bool IsSameElementOrAncestor(VisualElement possibleAncestor, VisualElement element)
