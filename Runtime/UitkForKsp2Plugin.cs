@@ -1,6 +1,7 @@
 ﻿global using JetBrains.Annotations;
 global using UnityObject = UnityEngine.Object;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UitkForKsp2.API;
 using UitkForKsp2.MVVM.Converters;
@@ -38,6 +39,8 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
     )!;
 
+    private static readonly List<RuntimePanelSettingsRegistration> RuntimePanelSettings = new();
+    private static float UiScale = 1f;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     public static void AttachToReduxLib()
@@ -59,59 +62,130 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
         );
         LoadPanelSettings();
 
-        PanelSettings.referenceResolution = new Vector2Int(
-            ReferenceResolution.Width,
-            ReferenceResolution.Height
-        );
-        ApplyPanelSettings.Invoke(PanelSettings, new object[] { });
-        AutoAdjustMatch(PanelSettings);
-
-        FixedPanelSettings.referenceResolution = new Vector2Int(
-            ReferenceResolution.Width,
-            ReferenceResolution.Height
-        );
-        ApplyPanelSettings.Invoke(FixedPanelSettings, new object[] { });
-        AutoAdjustMatch(FixedPanelSettings);
+        ConfigurePanelSettings(PanelSettings, true);
+        ConfigurePanelSettings(FixedPanelSettings, false);
 
         Logger.LogInfo("Initialized!");
     }
 
     public static void RescalePercent(float percent)
     {
-        PanelSettings.scale = percent / 100f;
-        ApplyPanelSettings.Invoke(PanelSettings, new object[] { });
+        UiScale = Mathf.Max(0.01f, percent / 100f);
+        ConfigureAllPanelSettings();
     }
 
-    private static void AutoAdjustMatch(PanelSettings ps)
+    public static void RegisterRuntimePanelSettings(PanelSettings panelSettings, bool useUiScale = false)
+    {
+        RuntimePanelSettings.Add(new RuntimePanelSettingsRegistration(panelSettings, useUiScale));
+    }
+
+    public static void ConfigurePanelSettings(PanelSettings ps)
+    {
+        ConfigurePanelSettings(ps, ps == PanelSettings);
+    }
+
+    public static void ConfigurePanelSettings(PanelSettings ps, bool useUiScale)
     {
         try
         {
-            if (ps == null || ps.referenceResolution.x <= 0 || ps.referenceResolution.y <= 0)
+            if (ps == null)
             {
                 return;
             }
 
-            float screenW = Screen.width;
-            float screenH = Screen.height;
-            float refW = ps.referenceResolution.x;
-            float refH = ps.referenceResolution.y;
+            Vector2Int backingResolution = GetBackingResolution();
+            Vector2Int gameResolution = GetGameResolution(backingResolution);
 
-            // Current aspect vs. reference
-            float screenAR = screenW / screenH;
-            float refAR = refW / refH;
+            ps.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+            ps.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
+            ps.scale = useUiScale ? UiScale : 1f;
+            ps.referenceResolution = GetPanelReferenceResolution(backingResolution, gameResolution);
+            ps.match = GetMatchAxis(gameResolution);
 
-            // Pick whichever axis is more constraining
-            ps.match = screenAR >= refAR ? 1f : 0f;
-
-            MethodInfo? apply = typeof(PanelSettings).GetMethod(
-                "ApplyPanelSettings",
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-            );
-            apply?.Invoke(ps, Array.Empty<object>());
+            ApplyPanelSettings.Invoke(ps, Array.Empty<object>());
         }
         catch (Exception e)
         {
-            Logger.LogError($"Failed to auto-adjust match: {e}");
+            Logger?.LogError($"Failed to configure panel settings: {e}");
+        }
+    }
+
+    private static void ConfigureAllPanelSettings()
+    {
+        ConfigurePanelSettings(PanelSettings, true);
+        ConfigurePanelSettings(FixedPanelSettings, false);
+
+        for (int i = RuntimePanelSettings.Count - 1; i >= 0; i--)
+        {
+            RuntimePanelSettingsRegistration registration = RuntimePanelSettings[i];
+            if (registration.TryGetTarget(out PanelSettings panelSettings) && panelSettings != null)
+            {
+                ConfigurePanelSettings(panelSettings, registration.UseUiScale);
+            }
+            else
+            {
+                RuntimePanelSettings.RemoveAt(i);
+            }
+        }
+    }
+
+    private static Vector2Int GetBackingResolution()
+    {
+        return new Vector2Int(
+            Mathf.Max(1, Screen.width),
+            Mathf.Max(1, Screen.height)
+        );
+    }
+
+    private static Vector2Int GetGameResolution(Vector2Int backingResolution)
+    {
+        Display display = Display.main;
+        if (display != null &&
+            display.renderingWidth > 0 &&
+            display.renderingHeight > 0 &&
+            display.renderingWidth <= backingResolution.x &&
+            display.renderingHeight <= backingResolution.y)
+        {
+            return new Vector2Int(display.renderingWidth, display.renderingHeight);
+        }
+
+        return backingResolution;
+    }
+
+    private static Vector2Int GetPanelReferenceResolution(Vector2Int backingResolution, Vector2Int gameResolution)
+    {
+        float gameScaleX = gameResolution.x / (float)ReferenceResolution.Width;
+        float gameScaleY = gameResolution.y / (float)ReferenceResolution.Height;
+
+        return new Vector2Int(
+            Mathf.Max(1, Mathf.RoundToInt(backingResolution.x / gameScaleX)),
+            Mathf.Max(1, Mathf.RoundToInt(backingResolution.y / gameScaleY))
+        );
+    }
+
+    private static float GetMatchAxis(Vector2Int gameResolution)
+    {
+        float gameAspectRatio = gameResolution.x / (float)gameResolution.y;
+        float referenceAspectRatio = ReferenceResolution.Width / (float)ReferenceResolution.Height;
+
+        return gameAspectRatio >= referenceAspectRatio ? 1f : 0f;
+    }
+
+    private readonly struct RuntimePanelSettingsRegistration
+    {
+        private readonly WeakReference<PanelSettings> _panelSettings;
+
+        public RuntimePanelSettingsRegistration(PanelSettings panelSettings, bool useUiScale)
+        {
+            _panelSettings = new WeakReference<PanelSettings>(panelSettings);
+            UseUiScale = useUiScale;
+        }
+
+        public bool UseUiScale { get; }
+
+        public bool TryGetTarget(out PanelSettings panelSettings)
+        {
+            return _panelSettings.TryGetTarget(out panelSettings);
         }
     }
 
@@ -158,16 +232,29 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     private class ResolutionWatcher : MonoBehaviour
     {
         private Vector2Int _last;
-        private void Awake() => _last = new Vector2Int(Screen.width, Screen.height);
+        private Vector2Int _lastGameResolution;
+        private FullScreenMode _lastFullScreenMode;
+
+        private void Awake()
+        {
+            _last = GetBackingResolution();
+            _lastGameResolution = GetGameResolution(_last);
+            _lastFullScreenMode = Screen.fullScreenMode;
+        }
+
         private void Update()
         {
-            var now = new Vector2Int(Screen.width, Screen.height);
-            if (now != _last)
+            Vector2Int now = GetBackingResolution();
+            Vector2Int gameResolution = GetGameResolution(now);
+            if (now == _last && gameResolution == _lastGameResolution && Screen.fullScreenMode == _lastFullScreenMode)
             {
-                _last = now;
-                AutoAdjustMatch(PanelSettings);
-                AutoAdjustMatch(FixedPanelSettings);
+                return;
             }
+
+            _last = now;
+            _lastGameResolution = gameResolution;
+            _lastFullScreenMode = Screen.fullScreenMode;
+            ConfigureAllPanelSettings();
         }
     }
 }

@@ -43,6 +43,8 @@ internal static class PanelFactory
 
         string name = options.WindowId ?? Guid.NewGuid().ToString();
         panelSettings.name = $"PS[{(options.UseStockScale ? "Scaled" : "Fixed")}]::{name}";
+        UitkForKsp2Plugin.ConfigurePanelSettings(panelSettings, options.UseStockScale);
+        UitkForKsp2Plugin.RegisterRuntimePanelSettings(panelSettings, options.UseStockScale);
 
         return panelSettings;
     }
