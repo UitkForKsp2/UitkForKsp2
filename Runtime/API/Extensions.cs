@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using ReduxLib.GameInterfaces;
 using UitkForKsp2.API.Manipulator;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace UitkForKsp2.API;
 public static class Extensions
 {
     internal static event Action<VisualElement>? ElementHidden;
+    private static readonly ConditionalWeakTable<ScrollView, ScrollViewAutoScrollState> ScrollViewAutoScrollStates = new();
 
     #region UIDocument extensions
 
@@ -254,6 +256,86 @@ public static class Extensions
     {
         element.AddManipulator(new GameInputBlockManipulator());
         return element;
+    }
+
+    /// <summary>
+    /// Keep a ScrollView pinned to the bottom while the user is already at the bottom. Scrolling upward disables
+    /// automatic scrolling until the user scrolls back down.
+    /// </summary>
+    /// <param name="scrollView">The ScrollView to track.</param>
+    /// <param name="bottomTolerance">Distance in pixels from the bottom that still counts as pinned.</param>
+    /// <typeparam name="T">The ScrollView type.</typeparam>
+    /// <returns>The ScrollView with pinned-bottom autoscroll enabled.</returns>
+    public static T EnablePinnedBottomAutoScroll<T>(this T scrollView, float bottomTolerance = 1f) where T : ScrollView
+    {
+        ScrollViewAutoScrollState state = ScrollViewAutoScrollStates.GetOrCreateValue(scrollView);
+        if (state.IsEnabled)
+        {
+            state.BottomTolerance = bottomTolerance;
+            return scrollView;
+        }
+
+        state.Initialize(scrollView, bottomTolerance);
+        scrollView.verticalScroller.valueChanged += state.OnVerticalScrollValueChanged;
+        scrollView.RegisterCallback<GeometryChangedEvent>(state.OnGeometryChanged);
+        scrollView.contentContainer.RegisterCallback<GeometryChangedEvent>(state.OnGeometryChanged);
+        scrollView.RegisterCallback<DetachFromPanelEvent>(_ =>
+        {
+            scrollView.verticalScroller.valueChanged -= state.OnVerticalScrollValueChanged;
+            scrollView.UnregisterCallback<GeometryChangedEvent>(state.OnGeometryChanged);
+            scrollView.contentContainer.UnregisterCallback<GeometryChangedEvent>(state.OnGeometryChanged);
+            ScrollViewAutoScrollStates.Remove(scrollView);
+        });
+        scrollView.ScrollToBottomIfPinned();
+        return scrollView;
+    }
+
+    /// <summary>
+    /// Scroll to the bottom if pinned-bottom autoscroll is enabled and the ScrollView is currently pinned.
+    /// </summary>
+    /// <param name="scrollView">The ScrollView to scroll.</param>
+    public static void ScrollToBottomIfPinned(this ScrollView? scrollView)
+    {
+        if (scrollView == null)
+        {
+            return;
+        }
+
+        ScrollViewAutoScrollState state = ScrollViewAutoScrollStates.GetOrCreateValue(scrollView);
+        if (!state.IsEnabled)
+        {
+            scrollView.EnablePinnedBottomAutoScroll();
+            state = ScrollViewAutoScrollStates.GetOrCreateValue(scrollView);
+        }
+
+        if (!state.IsPinnedToBottom)
+        {
+            return;
+        }
+
+        scrollView.schedule.Execute(() => state.ScrollToBottomIfPinned());
+    }
+
+    /// <summary>
+    /// Force a ScrollView back into pinned-bottom mode and scroll it to the current bottom.
+    /// </summary>
+    /// <param name="scrollView">The ScrollView to pin.</param>
+    public static void PinToBottom(this ScrollView? scrollView)
+    {
+        if (scrollView == null)
+        {
+            return;
+        }
+
+        ScrollViewAutoScrollState state = ScrollViewAutoScrollStates.GetOrCreateValue(scrollView);
+        if (!state.IsEnabled)
+        {
+            scrollView.EnablePinnedBottomAutoScroll();
+            state = ScrollViewAutoScrollStates.GetOrCreateValue(scrollView);
+        }
+
+        state.IsPinnedToBottom = true;
+        scrollView.schedule.Execute(() => state.ScrollToBottomIfPinned());
     }
 
     /// <summary>
@@ -639,6 +721,66 @@ public static class Extensions
         }
 
         return false;
+    }
+
+    private sealed class ScrollViewAutoScrollState
+    {
+        private ScrollView? _scrollView;
+
+        public bool IsEnabled { get; private set; }
+        public bool IsPinnedToBottom { get; set; } = true;
+        public float BottomTolerance { get; set; } = 1f;
+
+        public void Initialize(ScrollView scrollView, float bottomTolerance)
+        {
+            _scrollView = scrollView;
+            BottomTolerance = bottomTolerance;
+            IsPinnedToBottom = true;
+            IsEnabled = true;
+        }
+
+        public void OnVerticalScrollValueChanged(float _)
+        {
+            if (_scrollView == null)
+            {
+                return;
+            }
+
+            IsPinnedToBottom = IsAtBottom(_scrollView);
+        }
+
+        public void OnGeometryChanged(GeometryChangedEvent _)
+        {
+            ScrollToBottomIfPinned();
+        }
+
+        public void ScrollToBottomIfPinned()
+        {
+            if (_scrollView == null)
+            {
+                return;
+            }
+
+            if (IsAtBottom(_scrollView))
+            {
+                IsPinnedToBottom = true;
+            }
+
+            if (!IsPinnedToBottom)
+            {
+                return;
+            }
+
+            _scrollView.verticalScroller.value = _scrollView.verticalScroller.highValue;
+            IsPinnedToBottom = true;
+        }
+
+        private bool IsAtBottom(ScrollView scrollView)
+        {
+            Scroller scroller = scrollView.verticalScroller;
+            return scroller.highValue <= BottomTolerance ||
+                   scroller.value >= scroller.highValue - BottomTolerance;
+        }
     }
 
     /// <summary>
