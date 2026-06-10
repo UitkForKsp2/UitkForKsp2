@@ -59,10 +59,6 @@ public static class Window
 
         _sourceAsset.SetValue(document, uxml);
         _recreateUi.Invoke(document, Array.Empty<object>());
-        // Runtime windows are controller-owned after creation. Leaving the
-        // source asset attached lets play-mode UXML/USS reimports recreate the
-        // tree in its raw template state, bypassing controller bindings/hide state.
-        _sourceAsset.SetValue(document, null);
 
         if (document.rootVisualElement.hierarchy.childCount <= 0)
         {
