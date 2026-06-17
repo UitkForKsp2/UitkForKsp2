@@ -124,7 +124,7 @@ public static class OrderManager
 
     private static void RenumberAll()
     {
-        var alive = new List<(object obj, int order, int id)>();
+        var alive = new List<(object obj, int order, int tiebreaker)>();
         foreach (object knownObject in Known.ToArray())
         {
             if (IsDestroyed(knownObject))
@@ -138,14 +138,14 @@ public static class OrderManager
                 continue;
             }
 
-            int id = GetInstanceId(knownObject);
-            alive.Add((knownObject, order, id));
+            int tiebreaker = GetTiebreaker(knownObject);
+            alive.Add((knownObject, order, tiebreaker));
         }
 
         alive.Sort((a, b) =>
         {
             int comparison = a.order.CompareTo(b.order);
-            return comparison != 0 ? comparison : a.id.CompareTo(b.id);
+            return comparison != 0 ? comparison : a.tiebreaker.CompareTo(b.tiebreaker);
         });
 
         int current = InitialSortingOrder;
@@ -195,8 +195,8 @@ public static class OrderManager
         }
     }
 
-    private static int GetInstanceId(object o)
+    private static int GetTiebreaker(object o)
     {
-        return o is UnityObject uo ? uo.GetInstanceID() : o.GetHashCode();
+        return o is UnityObject uo ? uo.GetEntityId().GetHashCode() : o.GetHashCode();
     }
 }
