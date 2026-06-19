@@ -188,6 +188,15 @@ public static class Dialog
     private static bool _templateLoadAttempted;
     private static bool _styleLoadAttempted;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStaticState()
+    {
+        _dialogTemplate = null;
+        _dialogStyleSheet = null;
+        _templateLoadAttempted = false;
+        _styleLoadAttempted = false;
+    }
+
     public static DialogHandle Open(string title, string message, params DialogAction[] actions)
     {
         return Open(DialogOptions.Default with

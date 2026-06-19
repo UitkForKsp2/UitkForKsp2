@@ -45,6 +45,15 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     public static void AttachToReduxLib()
     {
+        // With Domain Reload disabled this runs on every Play Mode enter, so reset mutable static
+        // state and re-subscribe idempotently to the static event (UDR0005).
+        PanelSettings = null;
+        FixedPanelSettings = null;
+        Logger = null;
+        UiScale = 1f;
+        RuntimePanelSettings.Clear();
+
+        ReduxLib.ReduxLib.OnReduxLibInitialized -= PreInitializeUitkForKsp2;
         ReduxLib.ReduxLib.OnReduxLibInitialized += PreInitializeUitkForKsp2;
     }
 

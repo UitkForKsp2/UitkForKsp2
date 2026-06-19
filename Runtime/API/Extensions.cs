@@ -525,6 +525,7 @@ public static class Extensions
         GameInputLockOwners.Clear();
         TextInputLockOwners.Clear();
         TextInputLockOwnerElements.Clear();
+        ElementHidden = null;
     }
 
     /// <summary>

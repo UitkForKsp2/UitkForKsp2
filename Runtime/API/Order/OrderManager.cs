@@ -17,6 +17,12 @@ public static class OrderManager
     private static int _top = InitialSortingOrder;
     private static readonly HashSet<object> Known = new();
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStaticState()
+    {
+        _top = InitialSortingOrder;
+    }
+
     private static int Next()
     {
         if (_top > MaxSortingOrder)
