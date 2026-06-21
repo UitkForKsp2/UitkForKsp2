@@ -125,9 +125,9 @@ public struct DialogOptions
 [PublicAPI]
 public sealed class DialogHandle
 {
-    internal DialogHandle(UIDocument document, VisualElement root, VisualElement dialogElement, Action? onClose)
+    internal DialogHandle(PanelRenderer renderer, VisualElement root, VisualElement dialogElement, Action? onClose)
     {
-        Document = document;
+        Renderer = renderer;
         Root = root;
         DialogElement = dialogElement;
         _onClose = onClose;
@@ -136,7 +136,7 @@ public sealed class DialogHandle
     private readonly Action? _onClose;
     private bool _isClosed;
 
-    public UIDocument Document { get; }
+    public PanelRenderer Renderer { get; }
     public VisualElement Root { get; }
     public VisualElement DialogElement { get; }
     public bool IsClosed => _isClosed;
@@ -157,12 +157,11 @@ public sealed class DialogHandle
         {
             Root.RemoveFromHierarchy();
 
-            if (Document.panelSettings != null)
+            if (Renderer != null)
             {
-                OrderManager.Unregister(Document.panelSettings);
+                OrderManager.Unregister(Renderer);
+                UnityObject.Destroy(Renderer.gameObject);
             }
-
-            UnityObject.Destroy(Document.gameObject);
         }
     }
 }
@@ -223,13 +222,13 @@ public static class Dialog
         }
 
         VisualElement dialogElement = CreateDialogElement(options, actions, () => handle);
-        UIDocument document = Window.Create(windowOptions, dialogElement);
-        VisualElement documentRoot = document.rootVisualElement;
+        PanelRenderer renderer = Window.Create(windowOptions, dialogElement);
+        VisualElement documentRoot = renderer.GetPanelRoot()!;
         ConfigureDocumentRoot(documentRoot, options.UseCurtain);
-        OrderManager.Register(document.panelSettings);
-        OrderManager.BringToFront(document.panelSettings);
+        OrderManager.Register(renderer);
+        OrderManager.BringToFront(renderer);
 
-        handle = new DialogHandle(document, documentRoot, dialogElement, options.OnClose);
+        handle = new DialogHandle(renderer, documentRoot, dialogElement, options.OnClose);
 
         CenterDialogByDefault(dialogElement);
 
@@ -240,12 +239,12 @@ public static class Dialog
 
         if (options.EnableLocalization)
         {
-            EnableLocalization(document);
+            renderer.EnableLocalization();
         }
 
         if (options.EnableUiSounds)
         {
-            document.EnableUiSounds();
+            renderer.EnableUiSounds();
         }
 
         return handle;
@@ -271,15 +270,6 @@ public static class Dialog
         dialogElement.style.position = Position.Absolute;
         dialogElement.style.left = (panelRect.width - windowRect.width) / 2f;
         dialogElement.style.top = (panelRect.height - windowRect.height) / 2f;
-    }
-
-    private static void EnableLocalization(UIDocument document)
-    {
-        DocumentLocalization localization = document.TryGetComponent(out DocumentLocalization existing)
-            ? existing
-            : document.gameObject.AddComponent<DocumentLocalization>();
-
-        localization.RegisterDocument(document);
     }
 
     public static DialogHandle Alert(

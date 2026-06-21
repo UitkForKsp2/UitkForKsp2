@@ -4,13 +4,14 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using ReduxLib.GameInterfaces;
 using UitkForKsp2.API.Manipulator;
+using UitkForKsp2.Panel;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
 
 /// <summary>
-/// Extension methods for UIDocument and VisualElements.
+/// Extension methods for PanelRenderer windows and VisualElements.
 /// </summary>
 [PublicAPI]
 public static class Extensions
@@ -18,55 +19,262 @@ public static class Extensions
     internal static event Action<VisualElement>? ElementHidden;
     private static readonly ConditionalWeakTable<ScrollView, ScrollViewAutoScrollState> ScrollViewAutoScrollStates = new();
 
-    #region UIDocument extensions
+    #region PanelRenderer (window) extensions
+
+    private static readonly PropertyInfo? RendererRootProperty = typeof(PanelRenderer).GetProperty(
+        "rootVisualElement",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
+
+    private static readonly MethodInfo? RefreshAssetsMethod = typeof(PanelRenderer).GetMethod(
+        "RefreshAssets",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
+
+    private static readonly MethodInfo? SetupFromHierarchyMethod = typeof(PanelRenderer).GetMethod(
+        "SetupFromHierarchy",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
+
+    private static readonly MethodInfo? AddRootToTreeMethod = typeof(PanelRenderer).GetMethod(
+        "AddRootVisualElementToTree",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
 
     /// <summary>
-    /// Automatically localize elements in a document. Only elements with a string property "text" whose value is a
+    /// The PanelRenderer's internal per-window container, accessed by reflection. Works for any PanelRenderer,
+    /// including prefab/scene renderers that were not created through <see cref="Window"/>.
+    /// </summary>
+    internal static VisualElement? GetRendererRoot(this PanelRenderer renderer)
+    {
+        return RendererRootProperty?.GetValue(renderer) as VisualElement;
+    }
+
+    /// <summary>
+    /// Forces the PanelRenderer to build/clone its root synchronously. By default PanelRenderer defers cloning a
+    /// UXML into its root until the next UI update tick; this makes the root + content available immediately after
+    /// <see cref="Window.Create"/> returns, matching the old synchronous UIDocument contract.
+    /// </summary>
+    internal static void ForceBuild(this PanelRenderer renderer)
+    {
+        if (renderer != null)
+        {
+            RefreshAssetsMethod?.Invoke(renderer, null);
+        }
+    }
+
+    /// <summary>
+    /// The PanelRenderer's per-window container. Replaces the old <c>UIDocument.rootVisualElement</c>. Works for
+    /// both <see cref="Window"/>-created windows and raw prefab/scene PanelRenderers.
+    /// </summary>
+    /// <param name="renderer">The window's PanelRenderer.</param>
+    /// <returns>The panel container, or null if the UI has not been resolved yet.</returns>
+    public static VisualElement? GetPanelRoot(this PanelRenderer renderer)
+    {
+        if (renderer == null)
+        {
+            return null;
+        }
+
+        // Prefer the live root: PanelRenderer can replace its rootVisualElement instance on a rebuild, so a cached
+        // value can go stale. Fall back to the companion cache only if the live root is not yet available.
+        return renderer.GetRendererRoot() ?? renderer.GetComponent<WindowComponent>()?.PanelRoot;
+    }
+
+    /// <summary>
+    /// The resolved, TemplateContainer-unwrapped window root. Replaces the old <c>UIDocument.rootVisualElement[0]</c>.
+    /// Works for both <see cref="Window"/>-created windows and raw prefab/scene PanelRenderers.
+    /// </summary>
+    /// <param name="renderer">The window's PanelRenderer.</param>
+    /// <returns>The window root, or null if the UI has not been resolved yet.</returns>
+    public static VisualElement? GetWindowRoot(this PanelRenderer renderer)
+    {
+        if (renderer == null)
+        {
+            return null;
+        }
+
+        // Resolve from the live root each time (it can be rebuilt); fall back to the companion cache otherwise.
+        VisualElement? panelRoot = renderer.GetRendererRoot();
+        if (panelRoot != null)
+        {
+            return Window.ResolveWindowRoot(panelRoot) ?? panelRoot;
+        }
+
+        return renderer.GetComponent<WindowComponent>()?.WindowRoot;
+    }
+
+    /// <summary>
+    /// Run an action against the panel container as soon as it is resolved (immediately if available, otherwise on
+    /// the next UI reload). Robust to deferred/inactive windows and to raw prefab/scene PanelRenderers.
+    /// </summary>
+    /// <param name="renderer">The window's PanelRenderer.</param>
+    /// <param name="action">The action to run with the resolved panel container.</param>
+    public static void OnPanelRoot(this PanelRenderer renderer, Action<VisualElement> action)
+    {
+        OnResolvedRoot(renderer, action, unwrap: false);
+    }
+
+    /// <summary>
+    /// Run an action against the unwrapped window root as soon as it is resolved (immediately if available,
+    /// otherwise on the next UI reload). Robust to deferred/inactive windows and to raw prefab/scene PanelRenderers.
+    /// </summary>
+    /// <param name="renderer">The window's PanelRenderer.</param>
+    /// <param name="action">The action to run with the resolved window root.</param>
+    public static void OnWindowRoot(this PanelRenderer renderer, Action<VisualElement> action)
+    {
+        OnResolvedRoot(renderer, action, unwrap: true);
+    }
+
+    private static void OnResolvedRoot(PanelRenderer renderer, Action<VisualElement> action, bool unwrap)
+    {
+        if (renderer == null || action == null)
+        {
+            return;
+        }
+
+        VisualElement Project(VisualElement panelRoot)
+        {
+            return unwrap ? Window.ResolveWindowRoot(panelRoot) ?? panelRoot : panelRoot;
+        }
+
+        var component = renderer.GetComponent<WindowComponent>();
+        if (component != null)
+        {
+            // Gate on WindowRoot (the resolved content root), not PanelRoot: for a UXML window PanelRoot can be a
+            // not-yet-populated container, so firing on it would hand consumers a root with no queryable content.
+            if (component.WindowRoot != null)
+            {
+                action(unwrap ? component.WindowRoot : component.PanelRoot ?? component.WindowRoot);
+                return;
+            }
+
+            void Handler(VisualElement windowRoot)
+            {
+                component.RootResolved -= Handler;
+                action(unwrap ? windowRoot : component.PanelRoot ?? windowRoot);
+            }
+
+            component.RootResolved += Handler;
+            return;
+        }
+
+        // Raw prefab/scene PanelRenderer: force a synchronous build, then resolve if content is present, otherwise
+        // hook the native reload callback so the action runs once the UI is actually populated.
+        renderer.ForceBuild();
+        VisualElement? existing = renderer.GetRendererRoot();
+        if (existing is { childCount: > 0 })
+        {
+            action(Project(existing));
+            return;
+        }
+
+        PanelRenderer.UIReloadCallback? callback = null;
+        callback = (pr, panelRoot) =>
+        {
+            pr.UnregisterUIReloadCallback(callback);
+            action(Project(panelRoot));
+        };
+        renderer.RegisterUIReloadCallback(callback);
+    }
+
+    /// <summary>
+    /// Automatically localize elements in a window. Only elements with a string property "text" whose value is a
     /// localization key starting with '#' will be localized.
     /// </summary>
-    /// <param name="document">The document in which to localize all localizable elements.</param>
-    /// <returns>The DocumentLocalization component which was added to the document.</returns>
-    public static DocumentLocalization EnableLocalization(this UIDocument document)
+    /// <param name="renderer">The window in which to localize all localizable elements.</param>
+    /// <returns>The DocumentLocalization component which was added to the window.</returns>
+    public static DocumentLocalization EnableLocalization(this PanelRenderer renderer)
     {
-        return document.gameObject.AddComponent<DocumentLocalization>();
+        DocumentLocalization localization = renderer.TryGetComponent(out DocumentLocalization existing)
+            ? existing
+            : renderer.gameObject.AddComponent<DocumentLocalization>();
+
+        localization.RegisterRenderer(renderer);
+        return localization;
     }
 
     /// <summary>
     /// Enable delegated UI sounds for elements marked with sound USS classes.
     /// </summary>
-    /// <param name="document">The document whose root element should listen for UI sound events.</param>
-    /// <returns>The document with delegated UI sounds enabled.</returns>
-    public static UIDocument EnableUiSounds(this UIDocument document)
+    /// <param name="renderer">The window whose root element should listen for UI sound events.</param>
+    /// <returns>The window with delegated UI sounds enabled.</returns>
+    public static PanelRenderer EnableUiSounds(this PanelRenderer renderer)
     {
-        document.rootVisualElement.EnableUiSounds();
-        return document;
+        // OnWindowRoot runs exactly once, so the sound manipulator is added a single time.
+        renderer.OnWindowRoot(root => root.EnableUiSounds());
+        return renderer;
     }
 
     /// <summary>
-    /// Show a UIDocument by setting its root VisualElement's display style to DisplayStyle.Flex.
+    /// Show a window by enabling its PanelRenderer component. The GameObject stays active (so any controller on it
+    /// keeps running) and the renderer re-attaches its preserved content to the panel.
     /// </summary>
-    /// <param name="document">The document to show.</param>
-    public static void Show(this UIDocument document)
+    /// <param name="renderer">The window to show.</param>
+    public static void Show(this PanelRenderer renderer)
     {
-        document.rootVisualElement.Show();
+        if (renderer == null)
+        {
+            return;
+        }
+
+        renderer.enabled = true;
+
+        // Re-enabling a previously-disabled PanelRenderer does NOT re-insert its content into the panel's visual
+        // tree (disable detaches via OnPanelRendererDeactivated, but enable doesn't re-attach). Force the re-attach
+        // so the window actually renders again.
+        renderer.ForceBuild();
+        VisualElement? root = renderer.GetRendererRoot();
+        if (root is { panel: null })
+        {
+            SetupFromHierarchyMethod?.Invoke(renderer, null);
+            AddRootToTreeMethod?.Invoke(renderer, null);
+        }
     }
 
     /// <summary>
-    /// Hide a UIDocument by setting its root VisualElement's display style to DisplayStyle.None.
+    /// Hide a window by disabling its PanelRenderer component. The renderer detaches from its panel and stops
+    /// rendering while preserving the UI content in memory; the GameObject (and any controller on it) stays active.
     /// </summary>
-    /// <param name="document">The document to hide.</param>
-    public static void Hide(this UIDocument document)
+    /// <param name="renderer">The window to hide.</param>
+    public static void Hide(this PanelRenderer renderer)
     {
-        document.rootVisualElement.Hide();
+        if (renderer == null)
+        {
+            return;
+        }
+
+        // Focus/lock cleanup so a focused text field does not strand a game-input lock when the window is hidden.
+        VisualElement? root = renderer.GetWindowRoot();
+        if (root != null)
+        {
+            BlurFocusedElementWithin(root);
+            ReleaseTextInputLocksWithin(root);
+            NotifyElementHidden(root);
+        }
+
+        renderer.enabled = false;
     }
 
     /// <summary>
-    /// Toggle the display of a UIDocument between DisplayStyle.Flex and DisplayStyle.None.
+    /// Toggle a window between shown and hidden by enabling/disabling its PanelRenderer component.
     /// </summary>
-    /// <param name="document">The document to toggle the display of.</param>
-    public static void ToggleDisplay(this UIDocument document)
+    /// <param name="renderer">The window to toggle.</param>
+    public static void ToggleDisplay(this PanelRenderer renderer)
     {
-        document.rootVisualElement.ToggleDisplay();
+        if (renderer == null)
+        {
+            return;
+        }
+
+        if (renderer.enabled)
+        {
+            renderer.Hide();
+        }
+        else
+        {
+            renderer.Show();
+        }
     }
 
     #endregion

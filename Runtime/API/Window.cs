@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reflection;
-using ReduxLib.Engine;
+using System;
 using UitkForKsp2.API.Manipulator;
 using UitkForKsp2.Panel;
 using UnityEngine;
@@ -9,104 +7,62 @@ using UnityEngine.UIElements;
 namespace UitkForKsp2.API;
 
 /// <summary>
-/// Contains methods for creating UIDocument windows.
+/// Contains methods for creating UI Toolkit windows backed by <see cref="PanelRenderer"/>.
 /// </summary>
 [PublicAPI]
 public static class Window
 {
     private const string UIMainCanvasPath = "GameManager/Default Game Instance(Clone)/UI Manager(Clone)/Main Canvas";
 
-    private static FieldInfo _rootVisualElement =
-        typeof(UIDocument).GetField("m_RootVisualElement", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
-
-    private static MethodInfo _addRootVisualElementToTree =
-        typeof(UIDocument).GetMethod("AddRootVisualElementToTree", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
-
-    private static FieldInfo _sourceAsset =
-        typeof(UIDocument).GetField("sourceAsset", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
-
-    private static MethodInfo _recreateUi =
-        typeof(UIDocument).GetMethod("RecreateUI", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
-
     /// <summary>
-    /// Creates an empty UIDocument.
+    /// Creates an empty window.
     /// </summary>
     /// <param name="options">Options for creating the window.</param>
-    /// <param name="root">Root element of the UIDocument. If null, a new empty VisualElement is created.</param>
-    /// <returns>New empty UIDocument.</returns>
-    public static UIDocument Create(WindowOptions options, VisualElement? root = null)
+    /// <param name="root">Root element of the window. If null, a new empty VisualElement is created.</param>
+    /// <returns>The <see cref="PanelRenderer"/> driving the new window.</returns>
+    public static PanelRenderer Create(WindowOptions options, VisualElement? root = null)
     {
-        UIDocument document = CreateInternal(options);
+        (GameObject gameObject, PanelRenderer renderer) = CreateInternal(options);
 
         root ??= Element.Root();
-        VisualElement documentRoot = CreateDocumentRoot(document, root);
-        _rootVisualElement.SetValue(document, documentRoot);
-        _addRootVisualElementToTree.Invoke(document, Array.Empty<object>());
-        SetupRootElement(root, document, options);
 
-        return document;
+        var component = gameObject.AddComponent<WindowComponent>()!;
+        component.Initialize(renderer, options, uxml: null, programmaticRoot: root);
+
+        gameObject.SetActive(true);
+        component.ResolveNow();
+
+        return renderer;
     }
 
     /// <summary>
-    /// Creates a new UIDocument from a UXML asset.
+    /// Creates a new window from a UXML asset.
     /// </summary>
     /// <param name="options">Options for creating the window.</param>
     /// <param name="uxml">UXML asset containing the UI.</param>
-    /// <returns>UIDocument with the UI defined in UXML.</returns>
-    public static UIDocument Create(WindowOptions options, VisualTreeAsset uxml)
+    /// <returns>The <see cref="PanelRenderer"/> driving the new window.</returns>
+    public static PanelRenderer Create(WindowOptions options, VisualTreeAsset uxml)
     {
-        UIDocument document = CreateInternal(options);
+        (GameObject gameObject, PanelRenderer renderer) = CreateInternal(options);
 
-        _sourceAsset.SetValue(document, uxml);
-        _recreateUi.Invoke(document, Array.Empty<object>());
+        // Assigning visualTreeAsset makes PanelRenderer clone the UXML into its root automatically on enable.
+        renderer.visualTreeAsset = uxml;
 
-        if (document.rootVisualElement.hierarchy.childCount <= 0)
-        {
-            return document;
-        }
+        var component = gameObject.AddComponent<WindowComponent>()!;
+        component.Initialize(renderer, options, uxml: uxml, programmaticRoot: null);
 
-        ConfigureDocumentRoot(document.rootVisualElement);
-        VisualElement? rootElement = ResolveWindowRoot(document.rootVisualElement);
-        SetupRootElement(rootElement, document, options);
+        gameObject.SetActive(true);
+        component.ResolveNow();
 
-        return document;
+        return renderer;
     }
 
-    private static VisualElement CreateDocumentRoot(UIDocument document, VisualElement root)
-    {
-        Type documentRootType = _rootVisualElement.FieldType;
-        if (documentRootType.IsInstanceOfType(root))
-        {
-            return root;
-        }
-
-        ConstructorInfo? documentConstructor = documentRootType.GetConstructor(
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-            null,
-            new[] { typeof(UIDocument), typeof(VisualTreeAsset) },
-            null
-        );
-
-        if (documentConstructor == null)
-        {
-            throw new MissingMethodException(
-                documentRootType.FullName,
-                ".ctor(UnityEngine.UIElements.UIDocument, UnityEngine.UIElements.VisualTreeAsset)"
-            );
-        }
-
-        var documentRoot = (VisualElement)documentConstructor.Invoke(new object?[] { document, null })!;
-        ConfigureDocumentRoot(documentRoot);
-        documentRoot.Add(root);
-        return documentRoot;
-    }
-
-    private static void ConfigureDocumentRoot(VisualElement documentRoot)
+    internal static void ConfigureDocumentRoot(VisualElement documentRoot)
     {
         documentRoot.style.alignItems = Align.FlexStart;
     }
 
-    private static VisualElement? ResolveWindowRoot(VisualElement documentRoot)
+    internal static VisualElement? ResolveWindowRoot(VisualElement documentRoot)
     {
         if (documentRoot.hierarchy.childCount <= 0)
         {
@@ -132,21 +88,25 @@ public static class Window
         container.style.height = new StyleLength(StyleKeyword.Auto);
     }
 
-    private static UIDocument CreateInternal(WindowOptions options)
+    private static (GameObject, PanelRenderer) CreateInternal(WindowOptions options)
     {
         var gameObject = new GameObject(options.WindowId ?? $"ui-{Guid.NewGuid()}");
         UnityObject.DontDestroyOnLoad(gameObject);
         gameObject.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
-        var document = gameObject.AddComponent<UIDocument>()!;
+        // Keep the GameObject inactive until the renderer, panel settings and companion component are all configured,
+        // so that exactly one fully-populated UI-reload callback fires when it is activated.
+        gameObject.SetActive(false);
 
+        var renderer = gameObject.AddComponent<PanelRenderer>()!;
+
+        // Each window owns a cloned PanelSettings so it can control its own z-order (its sortingOrder governs
+        // stacking among UITK panels and relative to uGUI canvases). PanelSettingsOwner destroys it on teardown.
         PanelSettings panelSettings = PanelFactory.CreateForWindow(options);
-        document.panelSettings = panelSettings;
+        renderer.panelSettings = panelSettings;
 
         var owner = gameObject.AddComponent<PanelSettingsOwner>()!;
         owner.Owned = panelSettings;
-
-        document.enabled = true;
 
         Transform? parent = options.Parent;
         if (parent == null && GameObject.Find(UIMainCanvasPath) is var uiMainCanvas)
@@ -155,21 +115,14 @@ public static class Window
             {
                 parent = uiMainCanvas.transform;
             }
-            else
-            {
-                // UitkForKsp2Plugin.Logger.LogWarning(
-                //     $"Could not assign default parent to new window with ID {options.WindowId}"
-                // );
-            }
         }
 
         gameObject.transform.parent = parent;
-        gameObject.SetActive(true);
 
-        return document;
+        return (gameObject, renderer);
     }
 
-    public static void SetupRootElement(VisualElement? root, UIDocument document, WindowOptions options)
+    internal static void SetupRootElement(VisualElement root, PanelRenderer renderer, WindowOptions options)
     {
         if (root == null)
         {
@@ -220,7 +173,8 @@ public static class Window
         if (options.DisableGameInputForTextFields)
         {
             root.Query<TextField>().ForEach(textField => textField.DisableGameInputOnFocus());
-            RegisterTextFieldBlurOnOutsidePointerDown(root, document.rootVisualElement);
+            VisualElement panelRoot = renderer.GetPanelRoot() ?? root;
+            RegisterTextFieldBlurOnOutsidePointerDown(root, panelRoot);
         }
 
         if (options.BlockGameInput)
@@ -230,12 +184,12 @@ public static class Window
 
         if (options.BringToFrontOnPointerDown)
         {
-            root.AddManipulator(new OrderManipulator(document.panelSettings!));
+            root.AddManipulator(new OrderManipulator(renderer));
         }
 
         root.schedule!.Execute(() =>
         {
-            PanelFactory.Apply(document.panelSettings!);
+            PanelFactory.Apply(renderer.panelSettings!);
         });
     }
 

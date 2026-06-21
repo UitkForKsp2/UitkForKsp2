@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,8 +7,10 @@ using UnityEngine.UIElements;
 namespace UitkForKsp2.API.Order;
 
 /// <summary>
-/// Provides functionality to manage and maintain the sorting order of PanelSettings
-/// instances, allowing them to be registered, brought to the front, and unregistered.
+/// Provides functionality to manage and maintain the sorting order of per-window <see cref="PanelSettings"/>
+/// instances (and Canvases), allowing them to be registered, brought to the front, and unregistered. Each window
+/// owns its PanelSettings, and that asset's <c>sortingOrder</c> is what governs z-order both among UITK panels and
+/// relative to uGUI canvases. The <see cref="PanelRenderer"/> overloads operate on the renderer's PanelSettings.
 /// </summary>
 public static class OrderManager
 {
@@ -31,6 +34,18 @@ public static class OrderManager
         }
 
         return _top++;
+    }
+
+    /// <summary>
+    /// Registers a <see cref="PanelRenderer"/> window to the order manager by its PanelSettings.
+    /// </summary>
+    /// <param name="renderer">The window renderer to register. If null, no action is taken.</param>
+    public static void Register(PanelRenderer renderer)
+    {
+        if (renderer != null)
+        {
+            Register(renderer.panelSettings);
+        }
     }
 
     /// <summary>
@@ -65,6 +80,21 @@ public static class OrderManager
     }
 
     /// <summary>
+    /// Brings a registered <see cref="PanelRenderer"/> window to the front by assigning its PanelSettings the
+    /// highest sorting order.
+    /// </summary>
+    /// <param name="renderer">
+    /// The window renderer to bring to the front. If null or not registered, no action is taken.
+    /// </param>
+    public static void BringToFront(PanelRenderer renderer)
+    {
+        if (renderer != null)
+        {
+            BringToFront(renderer.panelSettings);
+        }
+    }
+
+    /// <summary>
     /// Brings a registered PanelSettings instance to the front by assigning it the highest sorting order.
     /// </summary>
     /// <param name="panelSettings">
@@ -94,6 +124,20 @@ public static class OrderManager
         }
 
         canvas.sortingOrder = Next();
+    }
+
+    /// <summary>
+    /// Unregisters a <see cref="PanelRenderer"/> window from the order manager by its PanelSettings.
+    /// </summary>
+    /// <param name="renderer">
+    /// The window renderer to unregister. If null or not registered, no action is taken.
+    /// </param>
+    public static void Unregister(PanelRenderer renderer)
+    {
+        if (renderer != null)
+        {
+            Unregister(renderer.panelSettings);
+        }
     }
 
     /// <summary>

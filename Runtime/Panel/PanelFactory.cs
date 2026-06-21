@@ -26,6 +26,13 @@ internal static class PanelFactory
         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
     )!;
 
+    /// <summary>
+    /// Creates a per-window <see cref="PanelSettings"/> instance (a clone of the scaled or fixed template). Each
+    /// window owns its PanelSettings so it can set its own <c>sortingOrder</c>, which is what controls z-order both
+    /// among UITK panels and relative to uGUI canvases. The instance is destroyed by <see cref="PanelSettingsOwner"/>
+    /// when the window is destroyed, and tracked by <see cref="UitkForKsp2Plugin"/> so it is rescaled on resolution
+    /// changes.
+    /// </summary>
     public static PanelSettings CreateForWindow(WindowOptions options)
     {
         #if UNITY_EDITOR

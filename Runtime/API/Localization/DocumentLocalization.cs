@@ -2,22 +2,25 @@
 using System.Reflection;
 using ReduxLib.GameInterfaces;
 using UitkForKsp2;
+using UitkForKsp2.API;
 using UitkForKsp2.MVVM.Converters;
+using UitkForKsp2.Panel;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// <para>A component which automatically localizes all elements in a document. Only elements with a string property
+/// <para>A component which automatically localizes all elements in a window. Only elements with a string property
 /// "text" whose value is a localization key starting with '#' will be localized.</para>
 /// <para>The <c>LocalizationManager.OnLocalizeEvent</c> is handled to automatically update the localization of all
 /// registered elements when the game language is changed.</para>
 /// </summary>
 [PublicAPI]
 [DisallowMultipleComponent]
-[RequireComponent(typeof(UIDocument))]
 public class DocumentLocalization : MonoBehaviour
 {
     public const string UppercaseClass = "uppercase";
+
+    private PanelRenderer? _renderer;
 
     private readonly Dictionary<VisualElement, string> _elementDictionary = new();
     private static readonly MethodInfo CreateBindingRequestsMethod = typeof(VisualElement).GetMethod(
@@ -35,13 +38,23 @@ public class DocumentLocalization : MonoBehaviour
 
     private void Awake()
     {
-        var document = gameObject.GetComponentInParent<UIDocument>(includeInactive: true);
-        RegisterDocument(document);
+        if (_renderer == null && gameObject.GetComponentInParent<PanelRenderer>(includeInactive: true) is { } renderer)
+        {
+            RegisterRenderer(renderer);
+        }
     }
 
     private void OnEnable() => ILocalizer.Instance.OnLocalize += Localize;
 
     private void OnDisable() => ILocalizer.Instance.OnLocalize -= Localize;
+
+    private void OnDestroy()
+    {
+        if (_renderer != null && _renderer.GetComponent<WindowComponent>() is { } component)
+        {
+            component.RootResolved -= OnRootResolved;
+        }
+    }
 
     /// <summary>
     /// Register or update an element to be localized. The element must have a property named "text" of type string,
@@ -62,19 +75,71 @@ public class DocumentLocalization : MonoBehaviour
     }
 
     /// <summary>
-    /// Register all elements in the document to be localized. Only elements with a string property "text" whose value
-    /// is a localization key starting with '#' will be registered.
+    /// Register the window whose elements should be localized, and re-localize automatically whenever its UI is
+    /// rebuilt (live reload). Only elements with a string property "text" whose value is a localization key starting
+    /// with '#' are registered.
     /// </summary>
-    /// <param name="document">The document in which to register all localizable elements.</param>
-    public void RegisterDocument(UIDocument document)
+    /// <param name="renderer">The window renderer whose elements to localize.</param>
+    public void RegisterRenderer(PanelRenderer renderer)
     {
-        if (document == null)
+        if (renderer == null || _renderer == renderer)
         {
+            // Already registered to this renderer. EnableLocalization both adds the component (whose Awake
+            // registers) and calls this explicitly, so guard against re-running the registration twice.
             return;
         }
 
+        if (_renderer != null && _renderer.GetComponent<WindowComponent>() is { } previous)
+        {
+            previous.RootResolved -= OnRootResolved;
+        }
+
+        _renderer = renderer;
+
+        if (renderer.GetComponent<WindowComponent>() is { } component)
+        {
+            component.RootResolved -= OnRootResolved;
+            component.RootResolved += OnRootResolved;
+        }
+
+        if (renderer.GetPanelRoot() is { } panelRoot)
+        {
+            RegisterTree(panelRoot);
+        }
+    }
+
+    private void OnRootResolved(VisualElement windowRoot)
+    {
+        if (_renderer.GetPanelRoot() is { } panelRoot)
+        {
+            RegisterTree(panelRoot);
+        }
+    }
+
+    private void RegisterTree(VisualElement panelRoot)
+    {
+        WalkAndLocalize(panelRoot);
+
+        // Re-localize when the tree attaches to a panel. Some sub-elements are created lazily on attach (e.g.
+        // PlaceholderTextField builds its placeholder label only once it is attached), so a walk over a detached
+        // or hidden window misses them; this catches them when the window is shown.
+        panelRoot.UnregisterCallback<AttachToPanelEvent>(OnPanelRootAttached);
+        panelRoot.RegisterCallback<AttachToPanelEvent>(OnPanelRootAttached);
+    }
+
+    private void OnPanelRootAttached(AttachToPanelEvent evt)
+    {
+        // Defer a tick so the lazily-created children have been built by their own AttachToPanelEvent handlers.
+        if (evt.currentTarget is VisualElement panelRoot)
+        {
+            panelRoot.schedule.Execute(() => WalkAndLocalize(panelRoot));
+        }
+    }
+
+    private void WalkAndLocalize(VisualElement panelRoot)
+    {
         _elementDictionary.Clear();
-        RegisterElementsInternal(document.rootVisualElement);
+        RegisterElementsInternal(panelRoot);
         Localize();
     }
 
@@ -109,13 +174,15 @@ public class DocumentLocalization : MonoBehaviour
 
     private void RefreshConverterBindings()
     {
-        var document = gameObject.GetComponentInParent<UIDocument>(includeInactive: true);
-        if (document?.rootVisualElement == null)
+        // The converter binding refresh below uses CreateBindingRequests, which asserts unless the element is
+        // attached to a panel. When the window is hidden its PanelRenderer is disabled and detached, so skip it —
+        // direct text localization still applies, and Unity re-evaluates bindings when the panel re-attaches on show.
+        if (_renderer.GetPanelRoot() is not { panel: not null } panelRoot)
         {
             return;
         }
 
-        RefreshConverterBindingsInternal(document.rootVisualElement);
+        RefreshConverterBindingsInternal(panelRoot);
     }
 
     private static void RefreshConverterBindingsInternal(VisualElement element)

@@ -4,20 +4,20 @@ using UnityEngine.UIElements;
 namespace UitkForKsp2.API.Manipulator;
 
 /// <summary>
-/// Allows bringing a UITK panel to the front when clicked.
+/// Allows bringing a UITK window to the front when clicked.
 /// </summary>
 public class OrderManipulator : PointerManipulator
 {
-    private readonly PanelSettings _panel;
+    private readonly PanelRenderer _renderer;
 
     /// <summary>
-    /// Creates a new <see cref="OrderManipulator"/> instance for the given panel.
+    /// Creates a new <see cref="OrderManipulator"/> instance for the given window renderer.
     /// </summary>
-    /// <param name="panel">The panel to manage the order for.</param>
-    public OrderManipulator(PanelSettings panel)
+    /// <param name="renderer">The window renderer to manage the order for.</param>
+    public OrderManipulator(PanelRenderer renderer)
     {
-        _panel = panel;
-        OrderManager.Register(panel);
+        _renderer = renderer;
+        OrderManager.Register(renderer);
         activators!.Add(new ManipulatorActivationFilter { button = MouseButton.LeftMouse });
     }
 
@@ -39,7 +39,7 @@ public class OrderManipulator : PointerManipulator
         target!.UnregisterCallback<MouseDownEvent>(OnMouseDown);
     }
 
-    private void BringToFront() => OrderManager.BringToFront(_panel);
+    private void BringToFront() => OrderManager.BringToFront(_renderer);
 
     private void OnPointerDown(PointerDownEvent e)
     {
