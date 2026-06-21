@@ -18,6 +18,7 @@ public static class Extensions
 {
     internal static event Action<VisualElement>? ElementHidden;
     private static readonly ConditionalWeakTable<ScrollView, ScrollViewAutoScrollState> ScrollViewAutoScrollStates = new();
+    private static readonly ConditionalWeakTable<VisualElement, HideManipulator> HideManipulators = new();
 
     #region PanelRenderer (window) extensions
 
@@ -438,7 +439,16 @@ public static class Extensions
     /// <returns>The visual element with the hiding functionality enabled.</returns>
     public static T EnableHiding<T>(this T element) where T : VisualElement
     {
-        element.AddManipulator(new HideManipulator());
+        // Idempotent: a controller may re-run its setup on every enable (e.g. GameObject-toggled side widgets), so
+        // adding a fresh manipulator each time would stack them on the same element and leak hide-action callbacks.
+        if (element == null || HideManipulators.TryGetValue(element, out _))
+        {
+            return element;
+        }
+
+        HideManipulator manipulator = new();
+        HideManipulators.Add(element, manipulator);
+        element.AddManipulator(manipulator);
         return element;
     }
 

@@ -64,7 +64,7 @@ public class DocumentLocalization : MonoBehaviour
     public void RegisterElement(VisualElement element)
     {
         PropertyInfo? textProperty = element?.GetType().GetProperty("text");
-        if (textProperty?.GetValue(element) is not string key || string.IsNullOrEmpty(key) || key[0] != '#')
+        if (textProperty?.GetValue(element) is not string key || !IsLocalizationKey(key))
         {
             return;
         }
@@ -72,6 +72,34 @@ public class DocumentLocalization : MonoBehaviour
         string? trimmedKey = key.TrimStart('#');
         _elementDictionary[element] = trimmedKey;
         UpdateElementLocalization(element, trimmedKey);
+    }
+
+    /// <summary>
+    /// Localization keys start with '#' followed by a key path (e.g. <c>#Category/Key</c>). Strings like CSS hex
+    /// colors (<c>#000000</c>, <c>#RGB</c>, <c>#RRGGBBAA</c>) also start with '#' but must not be treated as keys.
+    /// </summary>
+    private static bool IsLocalizationKey(string key)
+    {
+        if (string.IsNullOrEmpty(key) || key[0] != '#')
+        {
+            return false;
+        }
+
+        string body = key[1..];
+        return body.Length is not (3 or 4 or 6 or 8) || !IsAllHex(body);
+    }
+
+    private static bool IsAllHex(string value)
+    {
+        foreach (char c in value)
+        {
+            if (c is (< '0' or > '9') and (< 'a' or > 'f') and (< 'A' or > 'F'))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -130,9 +158,32 @@ public class DocumentLocalization : MonoBehaviour
     private void OnPanelRootAttached(AttachToPanelEvent evt)
     {
         // Defer a tick so the lazily-created children have been built by their own AttachToPanelEvent handlers.
+        // Only register/localize elements that are new since the last walk (e.g. a freshly-built placeholder label),
+        // rather than clearing and re-localizing the whole tree on every show.
         if (evt.currentTarget is VisualElement panelRoot)
         {
-            panelRoot.schedule.Execute(() => WalkAndLocalize(panelRoot));
+            panelRoot.schedule.Execute(() => RegisterNewElementsInternal(panelRoot));
+        }
+    }
+
+    private void RegisterNewElementsInternal(VisualElement element)
+    {
+        if (element == null)
+        {
+            return;
+        }
+
+        // RegisterElement both adds the element and localizes it once; skip elements we already know so existing
+        // ones are not re-localized and the converter bindings are not refreshed for the whole tree on every show.
+        if (!_elementDictionary.ContainsKey(element))
+        {
+            RegisterElement(element);
+        }
+
+        VisualElement.Hierarchy hierarchy = element.hierarchy;
+        for (int i = 0; i < hierarchy.childCount; i++)
+        {
+            RegisterNewElementsInternal(hierarchy.ElementAt(i));
         }
     }
 
