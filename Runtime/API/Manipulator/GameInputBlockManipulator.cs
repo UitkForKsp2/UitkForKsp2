@@ -289,7 +289,13 @@ public class GameInputBlockManipulator : IManipulator
             return false;
         }
 
-        Vector2 panelPosition = RuntimePanelUtils.ScreenToPanel(panel, Input.mousePosition);
+        // Input.mousePosition has its origin at the bottom left while panel coordinates have theirs at the
+        // top left, and ScreenToPanel does not flip Y itself. Unity's own uGUI bridge flips it before handing
+        // the position to the panel, see PanelRaycaster in com.unity.ugui. Without the flip the cursor is
+        // tested against the window rectangle mirrored about the screen center, which blocks gameplay input
+        // over empty space and leaves it unblocked over the window itself.
+        Vector2 screenPosition = new(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+        Vector2 panelPosition = RuntimePanelUtils.ScreenToPanel(panel, screenPosition);
         if (!target.worldBound.Contains(panelPosition))
         {
             return false;
