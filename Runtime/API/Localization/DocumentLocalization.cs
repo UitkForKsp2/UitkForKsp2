@@ -187,9 +187,12 @@ public class DocumentLocalization : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Register every localizable element of a tree and localize it.
+    /// </summary>
+    /// <param name="panelRoot">Root of the tree to register.</param>
     private void WalkAndLocalize(VisualElement panelRoot)
     {
-        _elementDictionary.Clear();
         RegisterElementsInternal(panelRoot);
         Localize();
     }
