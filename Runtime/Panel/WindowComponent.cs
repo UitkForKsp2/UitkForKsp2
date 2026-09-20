@@ -120,6 +120,8 @@ internal sealed class WindowComponent : MonoBehaviour
             Window.SetupRootElement(windowRoot, _renderer, _options);
         }
 
+        windowRoot.ClampToPanelBoundsWhenReady();
+
         // Only notify on a genuinely new tree, so the synchronous resolve and the immediate deferred callback for the
         // same root don't double-fire, and a plain re-enable (content preserved) doesn't redundantly re-localize.
         if (isNewTree)

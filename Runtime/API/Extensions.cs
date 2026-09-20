@@ -19,6 +19,7 @@ public static class Extensions
     internal static event Action<VisualElement>? ElementHidden;
     private static readonly ConditionalWeakTable<ScrollView, ScrollViewAutoScrollState> ScrollViewAutoScrollStates = new();
     private static readonly ConditionalWeakTable<VisualElement, HideManipulator> HideManipulators = new();
+    private static readonly ConditionalWeakTable<VisualElement, PanelBoundsClampState> PanelBoundsClampStates = new();
 
     #region PanelRenderer (window) extensions
 
@@ -231,6 +232,8 @@ public static class Extensions
             SetupFromHierarchyMethod?.Invoke(renderer, null);
             AddRootToTreeMethod?.Invoke(renderer, null);
         }
+
+        renderer.OnWindowRoot(windowRoot => windowRoot.ClampToPanelBoundsWhenReady());
     }
 
     /// <summary>
@@ -281,6 +284,101 @@ public static class Extensions
     #endregion
 
     #region VisualElement extensions
+
+    internal static void ClampToPanelBoundsWhenReady(this VisualElement element)
+    {
+        if (element == null)
+        {
+            return;
+        }
+
+        PanelBoundsClampState state = PanelBoundsClampStates.GetOrCreateValue(element);
+        state.RestoreMaximumSize(element);
+        state.ResetLayoutTracking();
+        state.ScheduledItem?.Pause();
+        state.ScheduledItem = element.schedule.Execute(() => ClampToPanelBounds(element, state)).Every(1);
+    }
+
+    private static void ClampToPanelBounds(VisualElement element, PanelBoundsClampState state)
+    {
+        if (element.panel?.visualTree is not { } panelRoot || element.parent == null)
+        {
+            return;
+        }
+
+        Rect viewport = panelRoot.worldBound;
+        Rect bounds = element.worldBound;
+        if (!IsUsableRect(viewport) || !IsUsableRect(bounds))
+        {
+            return;
+        }
+
+        if (!state.HasStableBounds(bounds))
+        {
+            return;
+        }
+
+        bool changedMaximumSize = false;
+        if (bounds.width > viewport.width && !state.HasWidthOverride)
+        {
+            state.OriginalMaxWidth = element.style.maxWidth;
+            state.HasWidthOverride = true;
+            element.style.maxWidth = viewport.width;
+            changedMaximumSize = true;
+        }
+
+        if (bounds.height > viewport.height && !state.HasHeightOverride)
+        {
+            state.OriginalMaxHeight = element.style.maxHeight;
+            state.HasHeightOverride = true;
+            element.style.maxHeight = viewport.height;
+            changedMaximumSize = true;
+        }
+
+        if (changedMaximumSize)
+        {
+            state.ResetLayoutTracking();
+            return;
+        }
+
+        Vector2 correctedTopLeft = bounds.position;
+        correctedTopLeft.x = Mathf.Clamp(
+            correctedTopLeft.x,
+            viewport.xMin,
+            Mathf.Max(viewport.xMin, viewport.xMax - bounds.width)
+        );
+        correctedTopLeft.y = Mathf.Clamp(
+            correctedTopLeft.y,
+            viewport.yMin,
+            Mathf.Max(viewport.yMin, viewport.yMax - bounds.height)
+        );
+
+        if (correctedTopLeft != bounds.position)
+        {
+            Vector2 parentLocal = element.parent.WorldToLocal(correctedTopLeft);
+            element.style.position = Position.Absolute;
+            element.style.left = parentLocal.x;
+            element.style.top = parentLocal.y;
+            element.transform.position = Vector3.zero;
+        }
+
+        state.ScheduledItem?.Pause();
+    }
+
+    private static bool IsUsableRect(Rect rect)
+    {
+        return rect.width > 0f &&
+               rect.height > 0f &&
+               IsFinite(rect.xMin) &&
+               IsFinite(rect.yMin) &&
+               IsFinite(rect.xMax) &&
+               IsFinite(rect.yMax);
+    }
+
+    private static bool IsFinite(float value)
+    {
+        return !float.IsNaN(value) && !float.IsInfinity(value);
+    }
 
     private static MethodInfo _setMethod = typeof(VisualElement).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
 
@@ -599,6 +697,53 @@ public static class Extensions
         element.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
         element.RegisterCallback<PointerUpEvent>(evt => evt.StopPropagation());
         element.RegisterCallback<PointerMoveEvent>(evt => evt.StopPropagation());
+    }
+
+    private sealed class PanelBoundsClampState
+    {
+        internal IVisualElementScheduledItem? ScheduledItem;
+        internal bool HasWidthOverride;
+        internal bool HasHeightOverride;
+        internal StyleLength OriginalMaxWidth;
+        internal StyleLength OriginalMaxHeight;
+        private Rect _lastBounds;
+        private bool _hasLastBounds;
+        private int _stableLayoutPasses;
+
+        public bool HasStableBounds(Rect bounds)
+        {
+            if (!_hasLastBounds || bounds != _lastBounds)
+            {
+                _lastBounds = bounds;
+                _hasLastBounds = true;
+                _stableLayoutPasses = 0;
+                return false;
+            }
+
+            _stableLayoutPasses++;
+            return _stableLayoutPasses >= 2;
+        }
+
+        public void ResetLayoutTracking()
+        {
+            _hasLastBounds = false;
+            _stableLayoutPasses = 0;
+        }
+
+        public void RestoreMaximumSize(VisualElement element)
+        {
+            if (HasWidthOverride)
+            {
+                element.style.maxWidth = OriginalMaxWidth;
+                HasWidthOverride = false;
+            }
+
+            if (HasHeightOverride)
+            {
+                element.style.maxHeight = OriginalMaxHeight;
+                HasHeightOverride = false;
+            }
+        }
     }
 
     /// <summary>
