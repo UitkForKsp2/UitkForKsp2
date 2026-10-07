@@ -34,6 +34,14 @@ public class DocumentSoundManipulator : UnityEngine.UIElements.Manipulator
     private readonly string _sliderStopSound;
 
     private VisualElement _lastHoverTarget;
+
+    // The toggle the player last pressed, and the frame they pressed it on. A toggle's value also
+    // changes when code or a data binding sets it, such as when a window first fills its switches
+    // from saved settings, and that must stay silent. Only a change to the toggle that was just
+    // pressed is one the player made.
+    private VisualElement _pressedToggle;
+    private int _pressedFrame = -1;
+
     public DocumentSoundManipulator(
         string buttonClickSound = "Play_ui_extended_toggle_ON",
         string buttonClickSelectedSound = "Play_ui_extended_toggle_OFF",
@@ -63,6 +71,7 @@ public class DocumentSoundManipulator : UnityEngine.UIElements.Manipulator
         target.RegisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
         target.RegisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
         target.RegisterCallback<ChangeEvent<bool>>(OnToggleChanged, TrickleDown.TrickleDown);
+        target.RegisterCallback<NavigationSubmitEvent>(OnNavigationSubmit, TrickleDown.TrickleDown);
         target.RegisterCallback<PointerOverEvent>(OnPointerOver, TrickleDown.TrickleDown);
         target.RegisterCallback<PointerOutEvent>(OnPointerOut, TrickleDown.TrickleDown);
         target.RegisterCallback<MouseCaptureEvent>(OnMouseCapture, TrickleDown.TrickleDown);
@@ -75,6 +84,7 @@ public class DocumentSoundManipulator : UnityEngine.UIElements.Manipulator
         target.UnregisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
         target.UnregisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
         target.UnregisterCallback<ChangeEvent<bool>>(OnToggleChanged, TrickleDown.TrickleDown);
+        target.UnregisterCallback<NavigationSubmitEvent>(OnNavigationSubmit, TrickleDown.TrickleDown);
         target.UnregisterCallback<PointerOverEvent>(OnPointerOver, TrickleDown.TrickleDown);
         target.UnregisterCallback<PointerOutEvent>(OnPointerOut, TrickleDown.TrickleDown);
         target.UnregisterCallback<MouseCaptureEvent>(OnMouseCapture, TrickleDown.TrickleDown);
@@ -113,6 +123,7 @@ public class DocumentSoundManipulator : UnityEngine.UIElements.Manipulator
 
     private void OnPointerUp(PointerUpEvent evt)
     {
+        RememberPressedToggle(evt.target as VisualElement);
         if (evt.target is Toggle or RadioButton)
         {
             return;
@@ -138,10 +149,46 @@ public class DocumentSoundManipulator : UnityEngine.UIElements.Manipulator
     private void OnToggleChanged(ChangeEvent<bool> evt)
     {
         VisualElement element = ResolveToggleTarget(evt.target as VisualElement);
-        if (element != null)
+        if (element == null)
+        {
+            return;
+        }
+
+        bool pressed = IsPlayerChange(element, _pressedToggle, _pressedFrame, UnityEngine.Time.frameCount);
+        _pressedToggle = null;
+        if (pressed)
         {
             Play(_toggleClickSound, element);
         }
+    }
+
+    private void OnNavigationSubmit(NavigationSubmitEvent evt)
+    {
+        RememberPressedToggle(evt.target as VisualElement);
+    }
+
+    private void RememberPressedToggle(VisualElement element)
+    {
+        _pressedToggle = element == null ? null : ResolveToggleTarget(element);
+        _pressedFrame = UnityEngine.Time.frameCount;
+    }
+
+    /// <summary>
+    /// Returns whether a toggle's value changed because the player pressed it.
+    /// </summary>
+    /// <param name="changed">The toggle whose value changed.</param>
+    /// <param name="pressed">The toggle the player last pressed, or null.</param>
+    /// <param name="pressedFrame">The frame that press happened on.</param>
+    /// <param name="frame">The current frame.</param>
+    /// <returns>True if the change followed a press on the same toggle, this frame or the one before.</returns>
+    /// <remarks>
+    /// The change a press causes can be dispatched after the press itself has finished, and can land
+    /// on the next frame, so one frame of slack is allowed. Anything later, or on another toggle, was
+    /// set by code or a binding and makes no sound.
+    /// </remarks>
+    public static bool IsPlayerChange(VisualElement changed, VisualElement pressed, int pressedFrame, int frame)
+    {
+        return changed != null && ReferenceEquals(changed, pressed) && frame - pressedFrame <= 1 && frame >= pressedFrame;
     }
 
     private void OnPointerOver(PointerOverEvent evt)
